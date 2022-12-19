@@ -1,0 +1,2605 @@
+<?xml version="1.0" encoding="utf-8"?>
+<BlockDefinitions>
+    <Block Name="Sequence" Category="Control" SubCategory="" CanHaveChildren="true" NumberOfChildren="-1">
+        <Description>Sequence blocks will tick their children in order until one returns a FAILURE, at which point the node will return FAILURE.  If a child return RUNNING then the node will return RUNNING and execute that child first next tick.  If all children return SUCCESS the node will return SUCCESS.</Description>
+        <Comments>Generally alternate these with selector nodes</Comments>
+        <Parameters/>
+    </Block>
+    <Block Name="Selector" Category="Control" SubCategory="" CanHaveChildren="true" NumberOfChildren="-1">
+        <Description>Selector blocks will tick their children in order until one returns a SUCCESS, at which point the node will return SUCCESS.  If a child return RUNNING then the node will return RUNNING and execute that child first next tick.  If all children return FAILURE the node will return FAILURE.</Description>
+        <Comments>Generally alternate these with sequence nodes</Comments>
+        <Parameters/>
+    </Block>
+	<Block Name="CreateDynamicBTInstance" Category="Action\Behavior Tree" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Creates a dynamic BTInstance based on the name of the provided tree.</Description>
+        <Comments>For now this should generally be used for one-off tress that delete themselves since references outside of this function are difficult</Comments>
+        <Parameters>
+            <Parameter Name="TreeName" Type="String" Default="" VariableType="Value">
+                <Description>Name of the tree to instantiate</Description>
+            </Parameter>
+            <Parameter Name="Type" Type="BTInstanceType" Default="DELETE_SELF" VariableType="Value">
+                <Description>The type of the instance.  For now I strongly recommend only using DELETE_SELF.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="DebugAction" Category="Action\Debug" SubCategory="Debug" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Debug node used to return an explicit value and write a string to log.  In the case that RUNNING is selected the node will return RUNNING a number of times equal to runningLimit.</Description>
+        <Comments>Running limit is unused in non RUNNING types, and after the running limit has been reached the block will return SUCCESS</Comments>
+        <Parameters>
+            <Parameter Name="RunningLimit" Type="Int" Default="0" VariableType="Value">
+                <Description>How many times should we return RUNNING before returning SUCCESS?</Description>
+            </Parameter>
+            <Parameter Name="Result" Type="BehaveResult" Default="SUCCESS" VariableType="Value">
+                <Description>What the node should return when ticked</Description>
+            </Parameter>
+            <Parameter Name="String" Type="String" Default="Yo" VariableType="Value">
+                <Description>The string that should be outputted to log</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="MaskFailure" Category="Decorator" SubCategory="Control" CanHaveChildren="true" NumberOfChildren="1">
+        <Description>Decorator that masks FAILURE.</Description>
+        <Comments>Running still returns running</Comments>
+        <Parameters>
+        </Parameters>
+    </Block>
+    <Block Name="LoopNTimes" Category="Decorator" SubCategory="Control" CanHaveChildren="true" NumberOfChildren="1">
+        <Description>Decorator that allows user to specify the number of times the subtree will run.</Description>
+        <Comments>Need comment</Comments>
+        <Parameters>
+            <Parameter Name="RunningLimit" Type="Int" Default="1" VariableType="Value">
+                <Description>The number of times the sub tree is to be executed</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="IterateOverAllDecorator" Category="Decorator\Iterator" SubCategory="Control" CanHaveChildren="true" NumberOfChildren="1">
+        <Description>Decorator that will iterate through a collection, looping its children for each entry.</Description>
+        <Comments>Right now this only supports AttackableUnit collections.  This will always return SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="Collection" Type="AttackableUnitCollection" Default="" VariableType="Reference">
+                <Description>The collection that the iterator should loop over.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Output reference for each individual iteration of the node.  This should only be referenced by children!</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="IterateUntilFailureDecorator" Category="Decorator\Iterator" SubCategory="Control" CanHaveChildren="true" NumberOfChildren="1">
+        <Description>Decorator that will iterate through a collection, looping its children for each entry.  Iteration will stop when a child returns FAILURE.</Description>
+        <Comments>Right now this only supports AttackableUnit collections.  This will return SUCCESS if all children return SUCCESS and FAILURE if one child returns FAILURE.</Comments>
+        <Parameters>
+            <Parameter Name="Collection" Type="AttackableUnitCollection" Default="" VariableType="Reference">
+                <Description>The collection that the iterator should loop over.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Output reference for each individual iteration of the node.  This should only be referenced by children!</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="IterateUntilSuccessDecorator" Category="Decorator\Iterator" SubCategory="Control" CanHaveChildren="true" NumberOfChildren="1">
+        <Description>Decorator that will iterate through a collection, looping its children for each entry.  Iteration will stop when a child returns SUCCESS.</Description>
+        <Comments>Right now this only supports AttackableUnit collections.  This will return SUCCESS if a child returns SUCCESS and FAILURE if all children return FAILURE.</Comments>
+        <Parameters>
+            <Parameter Name="Collection" Type="AttackableUnitCollection" Default="" VariableType="Reference">
+                <Description>The collection that the iterator should loop over.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Output reference for each individual iteration of the node.  This should only be referenced by children!</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>	
+    <Block Name="DelayNSecondsBlocking" Category="Action\Behavior Tree" SubCategory="Control" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Return RUNNING for X seconds after first tick.</Description>
+        <Comments>This is a blocking delay and it uses the real timer not the game timer, so it is unaffected by pause.</Comments>
+        <Parameters>
+            <Parameter Name="DelayAmount" Type="Float" Default="0" VariableType="Reference,Value">
+                <Description>The amount of time to delay after first tick.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetBTInstanceStatus" Category="Action\Behavior Tree" SubCategory="Level" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Enable/Disable a quest by name</Description>
+        <Comments>This will fail if the quest does not exist</Comments>
+        <Parameters>
+            <Parameter Name="Enabled" Type="Bool" Default="True" VariableType="Value">
+                <Description>Should the quest be enabled or disabled?</Description>
+            </Parameter>
+            <Parameter Name="Name" Type="String" Default="" VariableType="Reference,Value">
+                <Description>The name of the quest to adjust</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetBarrackStatus" Category="Action\Game" SubCategory="Level" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Set all map barracks active/inactive</Description>
+        <Comments>This functionally is the same as the kill minions cheat</Comments>
+        <Parameters>
+            <Parameter Name="Enable" Type="Bool" Default="True" VariableType="Reference,Value">
+                <Description>The status of the barracks</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="ShowObjectiveText" Category="Action\User Interface\Objective Text" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Display objective text using the Tutorial1 flash element</Description>
+        <Comments>This should only accept localized strings</Comments>
+        <Parameters>
+            <Parameter Name="String" Type="String" Default="EMPTY STRING" VariableType="Reference,Value">
+                <Description>The localized string to display.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="HideObjectiveText" Category="Action\User Interface\Objective Text" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Hide objective text using the Tutorial1 flash element</Description>
+        <Comments>Will always return success even if no objective text is displayed</Comments>
+        <Parameters>
+        </Parameters>
+    </Block>
+    <Block Name="ShowAuxiliaryText" Category="Action\User Interface\Auxiliary Text" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Display auxiliary text using the Tutorial1 flash element</Description>
+        <Comments>This should only accept localized strings</Comments>
+        <Parameters>
+            <Parameter Name="String" Type="String" Default="EMPTY STRING" VariableType="Reference,Value">
+                <Description>The localized string to display.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="HideAuxiliaryText" Category="Action\User Interface\Auxiliary Text" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Hide auxiliary text using the Tutorial1 flash element</Description>
+        <Comments>Will always return success even if no auxiliary text is displayed</Comments>
+        <Parameters>
+        </Parameters>
+    </Block>
+    <Block Name="SetVarBool" Category="Action\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets OutputRef with the value of Input</Description>
+        <Comments>This version is for bool References</Comments>
+        <Parameters>
+            <Parameter Name="Input" Type="Bool" Default="True" VariableType="Reference,Value">
+                <Description>Source Reference</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Bool">
+                <Description>Destination Reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetVarAttackableUnit" Category="Action\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets OutputRef with the value of Input</Description>
+        <Comments>This version is for AttackableUnit References</Comments>
+        <Parameters>
+            <Parameter Name="Input" Type="AttackableUnit" Default="True" VariableType="Reference,Value">
+                <Description>Source Reference</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Destination Reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>	
+    <Block Name="SetVarInt" Category="Action\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets OutputRef with the value of Input</Description>
+        <Comments>This version is for int References</Comments>
+        <Parameters>
+            <Parameter Name="Input" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>Source Reference</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Destination Reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetVarDWORD" Category="Action\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Sets OutputRef with the value of Input</Description>
+      <Comments>This version is for int References</Comments>
+      <Parameters>
+        <Parameter Name="Input" Type="DWORD" Default="0" VariableType="Reference,Value">
+          <Description>Source Reference</Description>
+        </Parameter>
+        <OutParameter Name="Output" Type="DWORD">
+          <Description>Destination Reference</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="SetVarString" Category="Action\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets OutputRef with the value of Input</Description>
+        <Comments>This version is for string References</Comments>
+        <Parameters>
+            <Parameter Name="Input" Type="String" Default="DEFAULT STRING" VariableType="Reference,Value">
+                <Description>Source Reference</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="String">
+                <Description>Destination Reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetVarFloat" Category="Action\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets OutputRef with the value of Input</Description>
+        <Comments>This version is for float References</Comments>
+        <Parameters>
+            <Parameter Name="Input" Type="Float" Default="0" VariableType="Reference,Value">
+                <Description>Source Reference</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination Reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetVarVector" Category="Action\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Sets OutputRef with the value of Input</Description>
+      <Comments>This version is for Vector References.  If you want to make a vector out of 3 floats, use MakeVector.</Comments>
+      <Parameters>
+        <Parameter Name="Input" Type="Vector" Default="0;0;0" VariableType="Reference">
+          <Description>Source Reference</Description>
+        </Parameter>
+        <OutParameter Name="Output" Type="Vector">
+          <Description>Destination Reference</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+   <Block Name="EqualUnitTeam" Category="Test\System\Unit\Team" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+    <Comments>This version is for Unit team</Comments>
+    <Parameters>
+      <Parameter Name="LeftHandSide" Type="TeamEnum" Default="TEAM_UNKNOWN" VariableType="Reference">
+        <Description>LeftHandSide Reference of the comparison</Description>
+      </Parameter>
+      <Parameter Name="RightHandSide" Type="TeamEnum" Default="TEAM_UNKNOWN" VariableType="Reference,Value">
+        <Description>RightHandSide Reference of the comparison</Description>
+      </Parameter>
+    </Parameters>
+  </Block>
+  <Block Name="NotEqualUnitTeam" Category="Test\System\Unit\Team" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+    <Comments>This version is for Unit team</Comments>
+    <Parameters>
+      <Parameter Name="LeftHandSide" Type="TeamEnum" Default="TEAM_UNKNOWN" VariableType="Reference">
+        <Description>LeftHandSide Reference of the comparison</Description>
+      </Parameter>
+      <Parameter Name="RightHandSide" Type="TeamEnum" Default="TEAM_UNKNOWN" VariableType="Reference,Value">
+        <Description>RightHandSide Reference of the comparison</Description>
+      </Parameter>
+    </Parameters>
+  </Block>
+    <Block Name="EqualBool" Category="Test\Boolean" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for bool References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Bool" Default="True" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Bool" Default ="True" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="NotEqualBool" Category="Test\Boolean" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for bool References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Bool" Default="True" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Bool" Default ="True" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="EqualString" Category="Test\String" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for string References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="String" Default="True" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="String" Default ="True" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="NotEqualString" Category="Test\String" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for string References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="String" Default="True" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="String" Default ="True" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="EqualInt" Category="Test\Integer" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for int References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="NotEqualInt" Category="Test\Integer" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for int References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="LessInt" Category="Test\Integer" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is less than the RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for int References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="LessEqualInt" Category="Test\Integer" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is less than or equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for int References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="GreaterInt" Category="Test\Integer" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is greater than RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for int References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="GreaterEqualInt" Category="Test\Integer" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is greater than or equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for int References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="EqualFloat" Category="Test\Float" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for flooat References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="NotEqualFloat" Category="Test\Float" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for float References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="LessFloat" Category="Test\Float" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is less than the RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for float References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="LessEqualFloat" Category="Test\Float" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is less than or equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for float References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="GreaterFloat" Category="Test\Float" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is greater than RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for float References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="EqualUnit" Category="Test\System\Unit\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+      <Comments>This version is for Unit References</Comments>
+      <Parameters>
+        <Parameter Name="LeftHandSide" Type="AttackableUnit" Default="0" VariableType="Reference">
+          <Description>LeftHandSide Reference of the comparison</Description>
+        </Parameter>
+        <Parameter Name="RightHandSide" Type="AttackableUnit" Default ="0" VariableType="Reference">
+          <Description>RightHandSide Reference of the comparison</Description>
+        </Parameter>
+      </Parameters>
+    </Block>
+    <Block Name="NotEqualUnit" Category="Test\System\Unit\Reference" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+      <Comments>This version is for Unit References</Comments>
+      <Parameters>
+        <Parameter Name="LeftHandSide" Type="AttackableUnit" Default="0" VariableType="Reference">
+          <Description>LeftHandSide Reference of the comparison</Description>
+        </Parameter>
+        <Parameter Name="RightHandSide" Type="AttackableUnit" Default ="0" VariableType="Reference">
+          <Description>RightHandSide Reference of the comparison</Description>
+        </Parameter>
+      </Parameters>
+    </Block>
+    <Block Name="GreaterEqualFloat" Category="Test\Float" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is greater than or equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for float References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="AddInt" Category="Action\Math\Add" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Adds the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Ints.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="SubtractInt" Category="Action\Math\Subtract" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Subtracts the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Ints.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="MultiplyInt" Category="Action\Math\Multiply" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Multiplies the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Ints.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="DivideInt" Category="Action\Math\Divide" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Divides the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Ints.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="ModulusInt" Category="Action\Math\Modulus" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Divides the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Ints.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="MinInt" Category="Action\Math\Min" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Compares LeftHandSide to the RightHandSide and places the lesser value in Output</Description>
+        <Comments>This version is for Ints.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="MaxInt" Category="Action\Math\Max" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Compares LeftHandSide to the RightHandSide and places the greater value in Output</Description>
+        <Comments>This version is for Ints.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Int" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="AddFloat" Category="Action\Math\Add" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Adds the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Floats.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="SubtractFloat" Category="Action\Math\Subtract" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Subtracts the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Floats.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="MultiplyFloat" Category="Action\Math\Multiply" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Multiplies the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Floats.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="DivideFloat" Category="Action\Math\Divide" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Divides the LeftHandSide to the RightHandSide and places the result in Output</Description>
+        <Comments>This version is for Floats.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="MinFloat" Category="Action\Math\Min" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Compares LeftHandSide to the RightHandSide and places the lesser value in Output</Description>
+        <Comments>This version is for Floats.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="MaxFloat" Category="Action\Math\Max" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Compares LeftHandSide to the RightHandSide and places the greater value in Output</Description>
+        <Comments>This version is for Floats.  This will always return SUCCESS. </Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="Float" Default="0" VariableType="Reference,Value">
+                <Description>LeftHandSide Reference of the operation</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="Float" Default ="0" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the operation</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Output reference of the operation</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetTutorialPlayer" Category="Action\Unit" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets a handle to the player and puts it in OutputRef</Description>
+        <Comments>Only works in Tutorial, or other situation where there's only one player.  Works by getting the first player in the roster that has a legal client ID.</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Destination reference; holds a hero object handle</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetChampionCollection" Category="Action\Collection" SubCategory="Action\Unit" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns a handle to a collection containing all champions in the game.</Description>
+        <Comments>This is an unfiltered collection, so it contains champions who have disconnected or are played by bots.</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="Obj_AI_HeroCollection">
+                <Description>Destination reference; holds the collection of all champions in the game.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetTurretCollection" Category="Action\Collection" SubCategory="Unsorted" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns a handle to a collection containing all turrets alive in the game.</Description>
+        <Comments>This is an unfiltered collection, so it contains turrets on both teams.</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="Obj_AI_TurretCollection">
+                <Description>Destination reference; holds the collection of all champions in the game.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>		
+    <Block Name="GetTurret" Category="Action\Unit\Building" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets a handle to the turret in a specific lane</Description>
+        <Comments>I think this will return FAILURE if the turret is not alive, should confirm.</Comments>
+        <Parameters>
+            <Parameter Name="Team" Type="TeamEnum" Default="TEAM_ORDER" VariableType="Value">
+                <Description>Team of the turrets to be checked.</Description>
+            </Parameter>
+            <Parameter Name="Lane" Type="Int" Default="1" VariableType="Value">
+                <Description>Lane of the turret.  Check the level script for the enum.</Description>
+            </Parameter>
+            <Parameter Name="Position" Type="Int" Default="1" VariableType="Value">
+                <Description>Position of the turret.  Check the level script for the enum.</Description>
+            </Parameter>
+            <OutParameter Name="Turret" Type="AttackableUnit">
+                <Description>Destination Reference; holds a turret object handle</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetInhibitor" Category="Action\Unit\Building" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets a handle to the inhibitor in a specific lane</Description>
+        <Comments>I think this will return FAILURE if the inhibitor is not alive, should confirm.</Comments>
+        <Parameters>
+            <Parameter Name="Team" Type="TeamEnum" Default="TEAM_ORDER" VariableType="Value">
+                <Description>Team of the inhibitor to be checked.</Description>
+            </Parameter>
+            <Parameter Name="Lane" Type="Int" Default="1" VariableType="Value">
+                <Description>Lane of the inhibitor.  Check the level script for the enum.</Description>
+            </Parameter>
+            <OutParameter Name="Inhibitor" Type="AttackableUnit">
+                <Description>Destination Reference; holds an inhibitor object handle</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetNexus" Category="Action\Unit\Building" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets a handle to the nexus on a specific teamin a specific lane</Description>
+        <Comments>I think this will return FAILURE if the Nexus is not alive, should confirm.</Comments>
+        <Parameters>
+            <Parameter Name="Team" Type="TeamEnum" Default="TEAM_ORDER" VariableType="Value">
+                <Description>Team of the nexus to return.</Description>
+            </Parameter>
+            <OutParameter Name="Nexus" Type="AttackableUnit">
+                <Description>Destination Reference; holds a nexus object handle</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitPosition" Category="Action\Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the current position of a specific unit</Description>
+        <Comments>Always returns SUCCESS</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Vector">
+                <Description>Destination reference; contains the current position of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetGameTime" Category="Action\Game" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the current elapsed game time.  This will be affected by pausing, cheats, or other things.</Description>
+        <Comments>Always returns SUCCESS.</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference; contains the currently elapsed game time.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>	
+    <Block Name="GetTurretPosition" Category="Action\Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the lane position of a turret.</Description>
+        <Comments>This position is defined in the level script and is map specific.</Comments>
+        <Parameters>
+            <Parameter Name="Turret" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Turret to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Destination reference; contains the integer position of the turret.  This is defined in the level script.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>		
+    <Block Name="GetUnitMaxHealth" Category="Action\Stats\Defense" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the max health of a specific unit</Description>
+        <Comments>MAX health</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference; contains the max health of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>	
+    <Block Name="GetUnitCurrentHealth" Category="Action\Stats\Defense" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the current health of a specific unit</Description>
+        <Comments>CURRENT health</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference; contains the current health of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitCurrentPAR" Category="Action\Stats\PAR" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the current Primary Ability Resource of a specific unit</Description>
+        <Comments>CURRENT health</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="PrimaryAbilityResourceType" Type="PrimaryAbilityResourceType" Default="PAR_MANA" VariableType="Reference, Value">
+                <Description>Primary Ability Resource type.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference; contains the current Primary Ability Resource value of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitMaxPAR" Category="Action\Stats\PAR" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the maximum Primary Ability Resource of a specific unit</Description>
+        <Comments>MAX PAR</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="PrimaryAbilityResourceType" Type="PrimaryAbilityResourceType" Default="PAR_MANA" VariableType="Reference, Value">
+                <Description>Primary Ability Resource type.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference; contains the maximum Primary Ability Resource value of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitArmor" Category="Action\Stats\Defense" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the current armor of a specific unit</Description>
+        <Comments>CURRENT armor</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference; contains the current armor of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetCollectionCount" Category="Action\Collection" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the number of discrete elements contained within the collection.</Description>
+        <Comments>Always returns SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="Collection" Type="AttackableUnitCollection" Default="" VariableType="Reference">
+                <Description>Collection to count.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Destination reference; contains the number of elements in the collection.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitSkinName" Category="Action\Unit" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the current skin of a specific unit</Description>
+        <Comments>Since buildings don't hame skins, it will return the name of the building.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="String">
+                <Description>Destination reference; contains the skin name of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="ToggleUnitHighlight" Category="Action\User Interface\Highlight" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Turns on or off the highlight of a unit.</Description>
+        <Comments>Creates a unit highlight akin to what is used in the tutorial.  This highlight is by default blue.  Always returns SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="Enable" Type="Bool" Default="" VariableType="Value">
+                <Description>Should the Highlight be turned on or turned off?</Description>
+            </Parameter>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to be highlighted.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>	
+    <Block Name="PingMinimapUnit" Category="Action\User Interface\Minimap" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Pings a unit on the minimap.</Description>
+        <Comments>Which team receives the ping is determined by the PingingUnit.  Currently this block can not ping for both teams simultaneously.</Comments>
+        <Parameters>
+            <Parameter Name="PingingUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit originating the ping.  Important for team coloration and chat info.</Description>
+            </Parameter>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to be pinged.</Description>
+            </Parameter>
+          <Parameter Name="PlayAudio" Type="Bool" Default="True" VariableType="Value">
+            <Description>Play audio with ping?</Description>
+          </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="PingMinimapLocation" Category="Action\User Interface\Minimap" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Pings a location on the minimap.</Description>
+        <Comments>Which team receives the ping is determined by the PingingUnit.  Currently this block can not ping for both teams simultaneously.</Comments>
+        <Parameters>
+            <Parameter Name="PingingUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit originating the ping.  Important for team coloration and chat info.</Description>
+            </Parameter>
+            <Parameter Name="TargetPosition" Type="Vector" Default="0;0;0;" VariableType="Reference">
+                <Description>Location to be pinged.</Description>
+            </Parameter>
+          <Parameter Name="PlayAudio" Type="Bool" Default="True" VariableType="Value">
+            <Description>Play audio with ping?</Description>
+          </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="ActivateQuest" Category="Action\User Interface\Quest Tracker" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Create a new quest and display it in the HUD</Description>
+        <Comments>This should only accept localized strings</Comments>
+        <Parameters>
+            <Parameter Name="String" Type="String" Default="EMPTY STRING" VariableType="Reference,Value">
+                <Description>The localized string to display.</Description>
+            </Parameter>
+            <Parameter Name="Player" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>The player whose quest you want to activate</Description>
+            </Parameter>
+            <Parameter Name="QuestType" Type="QuestType" Default="PRIMARY_QUEST" VariableType="Value">
+                <Description>Quest type; which quest tracker you want the quest to be added to</Description>
+            </Parameter>
+            <Parameter Name="HandleRollOver" Type="Bool" Default="false" VariableType="Value" Optional="True">
+                <Description>OPTIONAL. Should we handle the mousing rolling over and rolling out from this quest?</Description>
+            </Parameter>
+            <Parameter Name="Tooltip" Type="String" Default="" VariableType="Reference,Value" Optional="True">
+                <Description>Optional: The tooltip to display on rollover of the quest.</Description>
+            </Parameter>
+            <OutParameter Name="QuestId" Type="Int">
+                <Description>Gives a unique identifier to refer back to this quest</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="CompleteQuest" Category="Action\User Interface\Quest Tracker" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Plays a quest completion animation and then removes it from the HUD</Description>
+        <Comments>Used on quest ids returned by the ActivateQuest node</Comments>
+        <Parameters>
+            <Parameter Name="QuestId" Type="Int" Default="" VariableType="Reference">
+                <Description>Unique identfier used to refer to the quest; returned by ActivateQuest</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="RemoveQuest" Category="Action\User Interface\Quest Tracker" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Removes quest from the HUD immediately</Description>
+        <Comments>Used on quest ids returned by the ActivateQuest node; there is no ceremony involved in quest removal</Comments>
+        <Parameters>
+            <Parameter Name="QuestId" Type="Int" Default="" VariableType="Reference">
+                <Description>Unique identfier used to refer to the quest; returned by ActivateQuest</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+     <Block Name="TestQuestRolledOver" Category="Test\System\User Interface" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test to see if the quest has the mouse rolled over it</Description>
+        <Comments>This quest must have been activated with HandleRollOver=true in ActivateQuest</Comments>
+        <Parameters>
+        <Parameter Name="QuestId" Type="Int" Default="" VariableType="Reference">
+                <Description>Which Quest should we check?</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the quest has the mouse over it; if False, returns SUCCESS if unit does not have the mouse over it, or if the quest doesnt exist, or if the quest doesnt have HandleRollOver=true</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestQuestClicked" Category="Test\System\User Interface" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test to see if the quest is being clicked right now with the mouse down over it.</Description>
+        <Comments>Tests to see if the quest is being clicked right now, or if the mouse is not clicking it right now.</Comments>
+        <Parameters>
+        <Parameter Name="QuestId" Type="Int" Default="" VariableType="Reference">
+                <Description>Which Quest should we check?</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the quest has been clicked by the mouse right now; if False, returns SUCCESS if the quest is not being clicked, or if the quest doesnt exist.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="ActivateTip" Category="Action\User Interface\Tips" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Create a new Tip and display it in the TipTracker</Description>
+    <Comments>This should only accept localized strings</Comments>
+    <Parameters>
+      <Parameter Name="Player" Type="AttackableUnit" Default="" VariableType="Reference">
+        <Description>The player whose tip you want to activate.</Description>
+      </Parameter>
+      <Parameter Name="TipName" Type="String" Default="EMPTY STRING" VariableType="Reference,Value">
+        <Description>The localized string for the Tip Name.</Description>
+      </Parameter>
+      <Parameter Name="TipCategory" Type="String" Default="EMPTY STRING" VariableType="Reference,Value">
+        <Description>The localized string for the Tip Category.</Description>
+      </Parameter>
+      <OutParameter Name="TipId" Type="Int">
+        <Description>Gives a unique identifier to refer back to this Tip.</Description>
+      </OutParameter>
+    </Parameters>
+  </Block>
+  <Block Name="RemoveTip" Category="Action\User Interface\Tips" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Removes Tip from the Tip Tracker immediately</Description>
+    <Comments>Used on Tip Ids returned by the ActivateTip node; there is no ceremony involved in Tip removal</Comments>
+    <Parameters>
+      <Parameter Name="TipId" Type="Int" Default="" VariableType="Reference">
+        <Description>Unique identfier used to refer to the Tip; returned by ActivateTip</Description>
+      </Parameter>
+    </Parameters>
+  </Block>
+  <Block Name="EnableTipEvents" Category="Action\User Interface\Tips" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Enables mouse events in the Tip Tracker</Description>
+    <Comments></Comments>
+    <Parameters>
+      <Parameter Name="Player" Type="AttackableUnit" Default="" VariableType="Reference">
+        <Description>The player whose Tip Tracker you want to enable</Description>
+      </Parameter>
+    </Parameters>
+  </Block>
+  <Block Name="DisableTipEvents" Category="Action\User Interface\Tips" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Disables mouse events in the Tip Tracker</Description>
+    <Comments></Comments>
+    <Parameters>
+      <Parameter Name="Player" Type="AttackableUnit" Default="" VariableType="Reference">
+        <Description>The player whose Tip Tracker you want to disable</Description>
+      </Parameter>
+    </Parameters>
+  </Block>
+  <Block Name="TestTipClicked" Category="Test\System\User Interface" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Tests to see if a Tip in the Tip Tracker or a Tip Dialogue has been clicked by the user</Description>
+    <Comments>Used on Tip Ids returned by the ActivateTip and ActivateTipDialogue nodes. Use ReturnSuccessIf to control the output.  This will return as if the Tip has NOT been clicked if the Tip Id is invalid.</Comments>
+    <Parameters>
+      <Parameter Name="TipId" Type="Int" Default="" VariableType="Reference">
+        <Description>Unique identfier used to refer to the Tip; returned by ActivateTip or ActivateTipDialogue</Description>
+      </Parameter>
+      <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+        <Description>If True, returns SUCCESS if the Tip has been clicked; if False, returns SUCCESS if the Tip has NOT been clicked.</Description>
+      </Parameter>
+    </Parameters>
+  </Block>
+  <Block Name="ActivateTipDialogue" Category="Action\User Interface\Tips" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Create a new Tip Dialogue and display it in the HUD</Description>
+    <Comments>This should only accept localized strings</Comments>
+    <Parameters>
+      <Parameter Name="Player" Type="AttackableUnit" Default="" VariableType="Reference">
+        <Description>The player whose tip you want to activate.</Description>
+      </Parameter>
+      <Parameter Name="TipName" Type="String" Default="EMPTY STRING" VariableType="Reference,Value">
+        <Description>The localized string for the Tip Name.</Description>
+      </Parameter>
+      <Parameter Name="TipBody" Type="String" Default="EMPTY STRING" VariableType="Reference,Value">
+        <Description>The localized string for the Tip Body.</Description>
+      </Parameter>
+       <Parameter Name="TipImage" Type="String" Default="" VariableType="Value" Optional="True">
+        <Description>Optional. The path+filename of the image to display in the tap dialog.</Description>
+      </Parameter>
+      <OutParameter Name="TipId" Type="Int">
+        <Description>Gives a unique identifier to refer back to this Tip Dialogue.</Description>
+      </OutParameter>
+    </Parameters>
+  </Block>
+  <Block Name="EnableTipDialogueEvents" Category="Action\User Interface\Tips" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Enables mouse events in the Tip Dialogue</Description>
+    <Comments></Comments>
+    <Parameters>
+      <Parameter Name="Player" Type="AttackableUnit" Default="" VariableType="Reference">
+        <Description>The player whose Tip Dialogue you want to enable</Description>
+      </Parameter>
+    </Parameters>
+  </Block>
+  <Block Name="DisableTipDialogueEvents" Category="Action\User Interface\Tips" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Disables mouse events in the Tip Dialogue</Description>
+    <Comments></Comments>
+    <Parameters>
+      <Parameter Name="Player" Type="AttackableUnit" Default="" VariableType="Reference">
+        <Description>The player whose Tip Dialogue you want to disable</Description>
+      </Parameter>
+    </Parameters>
+  </Block>
+  <Block Name="MakeVector" Category="Action\Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Creates a vector from three static components</Description>
+        <Comments>If you want to copy a Vector, use SetVarVector.</Comments>
+        <Parameters>
+            <Parameter Name="X" Type="Float" Default="0" VariableType="Value">
+                <Description>X component</Description>
+            </Parameter>
+            <Parameter Name="Y" Type="Float" Default="0" VariableType="Value">
+                <Description>Y component</Description>
+            </Parameter>
+            <Parameter Name="Z" Type="Float" Default="0" VariableType="Value">
+                <Description>Z component</Description>
+            </Parameter>
+            <OutParameter Name="Vector" Type="Vector">
+                <Description>OutputVector</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>    
+    <Block Name="ToggleUIHighlight" Category="Action\User Interface\Highlight" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Turn on or off a UI highlight for a specific UI Element</Description>
+        <Comments>Set the enabled flag to control whether this node turns the element on or off</Comments>
+        <Parameters>            
+            <Parameter Name="UIElement" Type="UIElement" Default="UI_MINIMAP" VariableType="Value">
+                <Description>UIElement; which element on the minimap do you want to highlight</Description>
+            </Parameter>
+            <Parameter Name="Enabled" Type="Bool" Default="True" VariableType="Value">
+                <Description>If true, turns on the UI Highlight, if false then turns off the UI Highlight</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="RegisterScoreboardOpened" Category="Action\User Interface\Scoreboard" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Keeps track whether a player has opened his scoreboard.</Description>
+        <Comments>Ticking this registers with the event system; disabling the tree unregisters the callback and clears the count</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Handle of the attacking unit</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Bool">
+                <Description>Destination Reference; holds whether the scoreboard has been opened since the tree was enabled.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="RegisterMinionKillCounter" Category="Action\Stats\KDA" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Keeps track of the number of minions (not neutrals) not on the attacker's team killed by an attacker</Description>
+        <Comments>Ticking this registers with the event system; disabling the tree unregisters the callback and clears the count</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Handle of the attacking unit</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Destination Reference; holds the number of units killed by the attacker</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+	  <Block Name="GetChampionKills" Category="Action\Stats\KDA" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns an int containing the number of kills the champion has.</Description>
+        <Comments>Always returns SUCCESS.  TODO: Convert this into Hero only</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Handle of the champion to poll</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Destination Reference; holds the number of champions killed by the attacker</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetChampionDeaths" Category="Action\Stats\KDA" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Returns an int containing the number of deaths the champion has.</Description>
+      <Comments>Always returns SUCCESS.  TODO: Convert this into Hero only</Comments>
+      <Parameters>
+        <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Handle of the champion to poll</Description>
+        </Parameter>
+        <OutParameter Name="Output" Type="Int">
+          <Description>Destination Reference; holds the number of times the champion has been killed.</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="GetChampionAssists" Category="Action\Stats\KDA" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Returns an int containing the number of assists the champion has.</Description>
+      <Comments>Always returns SUCCESS.  TODO: Convert this into Hero only</Comments>
+      <Parameters>
+        <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Handle of the champion to poll</Description>
+        </Parameter>
+        <OutParameter Name="Output" Type="Int">
+          <Description>Destination Reference; holds the number of assists the champion has earned.</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+	<Block Name="GiveChampionGold" Category="Action\Stats\Advancement" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Gives target champion a variable amount of gold.</Description>
+      <Comments>Always returns SUCCESS.  TODO: Convert this into Hero only</Comments>
+      <Parameters>
+        <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Handle of the champion to give gold to.</Description>
+        </Parameter>
+		<Parameter Name="GoldAmount" Type="Float" Default="" VariableType="Value,Reference">
+          <Description>Amount of gold to give the champion.</Description>
+        </Parameter>
+      </Parameters>
+    </Block>
+	<Block Name="StopUnitMovement" Category="Action\Issue Order" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Orders a unit to stop its movement.</Description>
+      <Comments>Always returns SUCCESS.  How this block will interract with forced move orders (say from a skill) is currently untested.</Comments>
+      <Parameters>
+        <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Handle of the champion to order.</Description>
+        </Parameter>
+      </Parameters>
+    </Block>
+	<Block Name="TestChampionHasItem" Category="Test\System\Unit\Status" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test if a hero has a specific item.</Description>
+        <Comments>Use ReturnSuccessIf to control the output.  This will return FAILURE if any parameters are incorrect.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Handle of the unit whose inventory you want to check.</Description>
+            </Parameter>
+			<Parameter Name="ItemID" Type="Int" Default="0" VariableType="Value">
+                <Description>Numerical ID of the item to look for.</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit has the item; if False, returns SUCCESS if unit does not.</Description>
+            </Parameter>			
+        </Parameters>
+    </Block>	
+    <Block Name="SetGamePauseState" Category="Action\Game" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Pause or unpause the game.</Description>
+        <Comments>Be careful using this!  It is not fully protected for use in a production environment!</Comments>
+        <Parameters>
+            <Parameter Name="Pause" Type="Bool" Default="True" VariableType="Value">
+                <Description>Pause or unpause the game.</Description>
+            </Parameter>			
+        </Parameters>
+    </Block>	
+    <Block Name="PanCameraFromCurrentPositionToPoint" Category="Action\Camera" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Pan the camera from its current position to a target point.</Description>
+        <Comments>Once the pan starts this node will return RUNNING until the pan completes.  After the pan completes the node will always return SUCCESS. This node locks camera movement while panning, and returns camera movement state to what it was before the pan started.  Be careful if you change camera movement locking state while panning, because it will not stick.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>The unit whose camera is being manipulated.</Description>
+            </Parameter>
+			<Parameter Name="TargetPosition" Type="Vector" Default="0;0;0" VariableType="Value, Reference">
+                <Description>3D Point containing the target camera position.</Description>
+            </Parameter>
+            <Parameter Name="Time" Type="Float" Default="1" VariableType="Value">
+                <Description>The amount of time the pan should take; this will scale the pan speed. </Description>
+            </Parameter>			
+        </Parameters>
+    </Block>	
+    <Block Name="GetNumberOfInventorySlotsFilled" Category="Action\Stats\Advancement" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the number of item slots filled for a particular champion.</Description>
+        <Comments>Always returns SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Handle of the unit whose inventory you want to check.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>The number of items in the target's inventory.</Description>
+            </OutParameter>			
+        </Parameters>
+    </Block>		
+    <Block Name="GetUnitLevel" Category="Action\Stats\Advancement" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the level of the target unit.</Description>
+        <Comments>Always returns SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Handle of the unit whose level you want to check.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>The level of the target unit.</Description>
+            </OutParameter>			
+        </Parameters>
+    </Block>		
+    <Block Name="GetUnitXP" Category="Action\Stats\Advancement" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Returns the current XP total of the target champion.</Description>
+    <Comments>Always returns SUCCESS.  Returns 0 if unit is not champion.</Comments>
+    <Parameters>
+      <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+        <Description>Handle of the unit whose XP total you want to get.</Description>
+      </Parameter>
+      <OutParameter Name="Output" Type="Float">
+        <Description>The current XP of the target unit.</Description>
+      </OutParameter>
+    </Parameters>
+  </Block>
+  <Block Name="DistanceBetweenObjectAndPoint" Category="Action\Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the distance between the Unit and the Point</Description>
+        <Comments>Distance is measured from the edge of the unit's bounding box</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Handle of the unit</Description>
+            </Parameter>
+            <Parameter Name="Point" Type="Vector" Default="0;0;0;" VariableType="Reference">
+                <Description>Point</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination Reference; holds the distance from the unit to the point</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitsInTargetArea" Category="Action\Collection" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns a collection of units in the target area.</Description>
+        <Comments>Always returns SUCCESS.  Uses the reference unit for enemy/ally checks; must be present!</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Handle of the unit that serves as the reference for team flags.</Description>
+            </Parameter>
+            <Parameter Name="TargetLocation" Type="Vector" Default="0;0;0;" VariableType="Reference">
+                <Description>Center of the test</Description>
+            </Parameter>
+            <Parameter Name="Radius" Type="Float" Default="0" VariableType="Value, Reference">
+                <Description>Radius of the unit test</Description>
+            </Parameter>
+            <Parameter Name="SpellFlags" Type="SpellFlags" Default="AlwaysSelf" VariableType="Value">
+                <Description>Associated spell flags for target filtering of the unit gathering check.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="AttackableUnitCollection">
+                <Description>Destination Reference; holds a collection of units discovered</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitCondition" Category="Test\System\Unit\Status" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test to see if unit is alive</Description>
+        <Comments>Unit is not alive if it does not exist; use ReturnSuccessIf to invert the test</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to be tested</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit is alive; if False, returns SUCCESS if unit is dead or does not exist</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitIsInvulnerable" Category="Test\System\Unit\Status" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test to see if unit is invulnerable</Description>
+        <Comments>Unit is not invulnerable if it does not exist; use ReturnSuccessIf to invert the test</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to be tested</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit is invulnerable; if False, returns SUCCESS if unit is not invulnerable or does not exist</Description>
+            </Parameter>
+        </Parameters>
+    </Block>	
+    <Block Name="TestUnitInBrush" Category="Test\System\Unit\Location" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test to see if unit is in brush</Description>
+        <Comments>Unit is not in brush if it does not exist; use ReturnSuccessIf to invert the test</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to be tested</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit is in brush; if False, returns SUCCESS if unit is not in brush or does not exist</Description>
+            </Parameter>
+        </Parameters>
+    </Block>	
+    <Block Name="TestUnitHasBuff" Category="Test\System\Unit\Status" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test to see if unit has a specific buff</Description>
+        <Comments>Unit does not have buff if it does not exist; use ReturnSuccessIf to invert the test</Comments>
+        <Parameters>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to be tested</Description>
+            </Parameter>
+            <Parameter Name="CasterUnit" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+                <Description>OPTIONAL.  Additional filter to check if buff was cast by a specific unit</Description>
+            </Parameter>
+            <Parameter Name="BuffName" Type="String" Default="" VariableType="Value">
+                <Description>Name of buff to be tested</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit has buff; if False, returns SUCCESS if unit does not have buff or does not exist</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitVisibility" Category="Test\System\Unit\Status" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test to see if a one unit has visibility of another unit</Description>
+        <Comments>If either unit does not exist, then they are not visible; use ReturnSuccessIf to invert the test</Comments>
+        <Parameters>
+            <Parameter Name="Viewer" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Can this unit see the other?</Description>
+            </Parameter>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Is this unit visible to the viewer unit?</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the target is visible to the viewer; if False, returns SUCCESS if unit is not visible to the viewer or does not exist.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="ToggleUserInput" Category="Action\User Interface\Input" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Disabled or Enables all user input</Description>
+        <Comments>Disables or Enables all user input, for all users.</Comments>
+        <Parameters>       
+          <Parameter Name="Enabled" Type="Bool" Default="True" VariableType="Value">
+                <Description>If False disables all input for all users. If True, enables it.</Description>
+           </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="ToggleFogOfWarTexture" Category="Action\Vision" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Disabled or Enables the texture for fog of war for all users.</Description>
+        <Comments>This will not reveal any units in the fog of war; perception bubbles are necessary for that.</Comments>
+        <Parameters>       
+          <Parameter Name="Enabled" Type="Bool" Default="True" VariableType="Value">
+                <Description>If False disables the texture for all users for all users. If True, enables it.</Description>
+           </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="PlayVOAudioEvent" Category="Action\Audio" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Plays a localized VO event</Description>
+        <Comments>Event is a 2D one-shot audio event.  A bad event name fails without complaint.  This node always returns SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="EventID" Type="String" Default="" VariableType="Value">
+                <Description>FMOD event ID</Description>
+            </Parameter>
+            <Parameter Name="FolderName" Type="String" Default="" VariableType="Value">
+                <Description>Folder the FMOD event is in in the Dialogue folder of the VO sound bank</Description>
+            </Parameter>
+        <Parameter Name="FireAndForget" Type="Bool" Default="True" VariableType="Value">
+            <Description>If true, plays sound as fire-and-forget and the node will return SUCCESS immediately.  If false, node will return RUNNING until the client tells the server that the VO is finished.</Description>
+          </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitAttackRange" Category="Action\Stats\Offense" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the attack range for unit</Description>
+        <Comments>Returns FAILURE if the unit is not valid</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float" >
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetNeutralSpawnEnabled" Category="Action\Game" SubCategory="Tutorial" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Disables or Enables initial neutral minion spawn.</Description>
+      <Comments>Once neutral minion spawning has begun, this node no longer has any effect.</Comments>
+      <Parameters>
+        <Parameter Name="Enabled" Type="Bool" Default="True" VariableType="Value">
+          <Description>If True, enables neutral minion spawning; if False, delays neutral minion spawning.</Description>
+        </Parameter>
+      </Parameters>
+    </Block>
+    <Block Name="GetUnitGold" Category="Action\Stats\Advancement" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Returns the amount of gold the unit has</Description>
+      <Comments>Returns FAILURE if the unit is not valid</Comments>
+      <Parameters>
+        <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Unit to poll.</Description>
+        </Parameter>
+        <OutParameter Name="Output" Type="Float" >
+          <Description>Destination reference.</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="GetUnitSkillPoints" Category="Action\Stats\Advancement" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Returns unit unspent skill points</Description>
+      <Comments>Returns FAILURE if unit is invalid</Comments>
+      <Parameters>
+        <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Unit to poll.</Description>
+        </Parameter>
+        <OutParameter Name="Output" Type="Int">
+          <Description>Destination reference.</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="AddUnitPerceptionBubble" Category="Action\Vision\Perception Bubble" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Adds a unit Perception Bubble</Description>
+      <Comments>Returns a BubbleID which you can use to remove the perception bubble</Comments>
+      <Parameters>
+        <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Unit to attach the Perception Bubble to.</Description>
+        </Parameter>
+        <Parameter Name="Radius" Type="Float" Default="0.0" VariableType="Reference,Value">
+          <Description>Radius of Perception Bubble. If set to 0, the bubble visibility radius matches the visibility radius of the target unit.</Description>
+        </Parameter>
+        <Parameter Name="Duration" Type="Float" Default="0.0" VariableType="Reference,Value">
+          <Description>Duration of Perception Bubble in seconds.  Bubbles can be removed earlier by using the RemovePerceptionBubble node.</Description>
+        </Parameter>
+        <Parameter Name="Team" Type="TeamEnum" Default="TEAM_ORDER" VariableType="Reference,Value">
+          <Description>Team ID that has visibility of this bubble.</Description>
+        </Parameter>
+        <Parameter Name="RevealStealth" Type="Bool" Default="False" VariableType="Value">
+          <Description>If this is true then the bubble will reveal stealth for anything inside of that bubble.</Description>
+        </Parameter>
+        <Parameter Name="SpecificUnitsClientOnly" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. If specified a client specific message will be sent only to this client about this bubble.  Only that client will have that visiblity.</Description>
+        </Parameter>
+        <Parameter Name="RevealSpecificUnitOnly" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. If set then only a units that have the RevealSpecificUnit state on are seeable by this bubble.</Description>
+        </Parameter>
+        <OutParameter Name="BubbleID" Type="DWORD">
+          <Description>Unique identfier used to refer to the Perception Bubble</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="AddPositionPerceptionBubble" Category="Action\Vision\Perception Bubble" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Adds a position Perception Bubble</Description>
+      <Comments>Returns a BubbleID which you can use to remove the perception bubble</Comments>
+      <Parameters>
+        <Parameter Name="Position" Type="Vector" Default="0;0;0" VariableType="Reference">
+          <Description>Position of the Perception Bubble.</Description>
+        </Parameter>
+        <Parameter Name="Radius" Type="Float" Default="0.0" VariableType="Reference,Value">
+          <Description>Radius of Perception Bubble. If set to 0, the bubble visibility radius matches the visibility radius of the target unit.</Description>
+        </Parameter>
+        <Parameter Name="Duration" Type="Float" Default="0.0" VariableType="Reference,Value">
+          <Description>Duration of Perception Bubble in seconds.  Bubbles can be removed earlier by using the RemovePerceptionBubble node.</Description>
+        </Parameter>
+        <Parameter Name="Team" Type="TeamEnum" Default="TEAM_ORDER" VariableType="Reference,Value">
+          <Description>Team ID that has visibility of this bubble.</Description>
+        </Parameter>
+        <Parameter Name="RevealStealth" Type="Bool" Default="False" VariableType="Value">
+          <Description>If this is true then the bubble will reveal stealth for anything inside of that bubble.</Description>
+        </Parameter>
+        <Parameter Name="SpecificUnitsClientOnly" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. If specified a client specific message will be sent only to this client about this bubble.  Only that client will have that visiblity.</Description>
+        </Parameter>
+        <Parameter Name="RevealSpecificUnitOnly" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. If set then only a units that have the RevealSpecificUnit state on are seeable by this bubble.</Description>
+        </Parameter>
+        <OutParameter Name="BubbleID" Type="DWORD">
+          <Description>Unique identfier used to refer to the Perception Bubble</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="RemovePerceptionBubble" Category="Action\Vision\Perception Bubble" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Removes Perception Bubble</Description>
+      <Comments>Used on Bubble IDs returned by the AddUnitPerceptionBubble and AddPositionPerceptionBubble</Comments>
+      <Parameters>
+        <Parameter Name="BubbleID" Type="DWORD" Default="" VariableType="Reference">
+          <Description>Unique identfier used to refer to the Perception Bubble; returned by AddPerceptionBubble nodes</Description>
+        </Parameter>
+      </Parameters>
+    </Block>
+    <Block Name="CreateUnitParticle" Category="Action\Particle" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Adds a unit particle effect</Description>
+      <Comments>Returns an EffectID which you can use to remove the perception bubble</Comments>
+      <Parameters>
+        <Parameter Name="BindObject" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Unit to attach the particle effect to.</Description>
+        </Parameter>
+        <Parameter Name="BoneName" Type="String" Default="" VariableType="Value" Optional="True">
+          <Description>OPTIONAL. Name of the bone to attach the particle effect to.</Description>
+        </Parameter>
+        <Parameter Name="EffectName" Type="String" Default="" VariableType="Reference,Value">
+          <Description>File name of the particle effect file to use.</Description>
+        </Parameter>
+        <Parameter Name="TargetObject" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. Unit to attach the far end of a beam particle to.  Use either TargetObject or TargetPosition; if you have both, TargetObject wins.</Description>
+        </Parameter>
+        <Parameter Name="TargetBoneName" Type="String" Default="" VariableType="Reference,Value" Optional="True">
+          <Description>OPTIONAL. Name of the bone to attach the far end of a beam particle to.  Used in conjunction with TargetObject.</Description>
+        </Parameter>
+        <Parameter Name="TargetPosition" Type="Vector" Default="0;0;0" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. A fixed position for the far end of a beam particle.  Use either TargetObject or TargetPosition; if you have both, TargetObject wins.</Description>
+        </Parameter>
+        <Parameter Name="OrientTowards" Type="Vector" Default="0;0;0" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. Particle effect will orient to face this point.</Description>
+        </Parameter>
+        <Parameter Name="SpecificUnitOnly" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. If used, only sends this particle to this unit.  Otherwise, all units will see the particle.</Description>
+        </Parameter>
+        <Parameter Name="SpecificTeamOnly" Type="TeamEnum" Default="TEAM_UNKNOWN" VariableType="Reference,Value" Optional="True">
+          <Description>OPTIONAL.  If used, only this team will see the particle.  Otherwise, all teams will see the particle.</Description>
+        </Parameter>
+        <Parameter Name="FOWVisibilityRadius" Type="Float" Default="0.0" VariableType="Reference,Value">
+          <Description>Used with FOWTeam to determine particle visibility in the FoW.  The particle will be visible if a unit has visibility into the area defined by this radius and the center of the particle.</Description>
+        </Parameter>
+        <Parameter Name="FOWTeam" Type="TeamEnum" Default="TEAM_UNKNOWN" VariableType="Reference,Value" Optional="True">
+          <Description>OPTIONAL.  If the viewing unit is on the same team as set by this variable, that unit will see this particle even if it's in the Fog of War.  Only used if FOWVisibilityRadius is non-zero.</Description>
+        </Parameter>
+        <Parameter Name="SendIfOnScreenOrDiscard" Type="Bool" Default="False" VariableType="Value">
+          <Description>If true, will only try to send the particle if a unit can see it when the particle spawns.  Use for one-shot particles; saves a lot of bandwidth, so use as often as possible.</Description>
+        </Parameter>
+        <OutParameter Name="EffectID" Type="DWORD">
+          <Description>Unique identfier used to refer to the particle effect; used to remove particle.</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="CreatePositionParticle" Category="Action\Particle" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Adds a unit particle effect</Description>
+      <Comments>Returns an EffectID which you can use to remove the perception bubble</Comments>
+      <Parameters>
+        <Parameter Name="Position" Type="Vector" Default="0;0;0" VariableType="Reference">
+          <Description>Position of the particle effect.</Description>
+        </Parameter>
+        <Parameter Name="EffectName" Type="String" Default="" VariableType="Reference,Value">
+          <Description>File name of the particle effect file to use.</Description>
+        </Parameter>
+        <Parameter Name="TargetObject" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. Unit to attach the far end of a beam particle to.  Use either TargetObject or TargetPosition; if you have both, TargetObject wins.</Description>
+        </Parameter>
+        <Parameter Name="TargetBoneName" Type="String" Default="" VariableType="Reference,Value" Optional="True">
+          <Description>OPTIONAL. Name of the bone to attach the far end of a beam particle to.  Used in conjunction with TargetObject.</Description>
+        </Parameter>
+        <Parameter Name="TargetPosition" Type="Vector" Default="0;0;0" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. A fixed position for the far end of a beam particle.  Use either TargetObject or TargetPosition; if you have both, TargetObject wins.</Description>
+        </Parameter>
+        <Parameter Name="OrientTowards" Type="Vector" Default="0;0;0" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. Particle effect will orient to face this point.</Description>
+        </Parameter>
+        <Parameter Name="SpecificUnitOnly" Type="AttackableUnit" Default="" VariableType="Reference" Optional="True">
+          <Description>OPTIONAL. If used, only sends this particle to this unit.  Otherwise, all units will see the particle.</Description>
+        </Parameter>
+        <Parameter Name="SpecificTeamOnly" Type="TeamEnum" Default="TEAM_UNKNOWN" VariableType="Reference,Value" Optional="True">
+          <Description>OPTIONAL.  If used, only this team will see the particle.  Otherwise, all teams will see the particle.</Description>
+        </Parameter>
+        <Parameter Name="FOWVisibilityRadius" Type="Float" Default="0.0" VariableType="Reference,Value">
+          <Description>Used with FOWTeam to determine particle visibility in the FoW.  The particle will be visible if a unit has visibility into the area defined by this radius and the center of the particle.</Description>
+        </Parameter>
+        <Parameter Name="FOWTeam" Type="TeamEnum" Default="TEAM_UNKNOWN" VariableType="Reference,Value" Optional="True">
+          <Description>OPTIONAL.  If the viewing unit is on the same team as set by this variable, that unit will see this particle even if it's in the Fog of War.  Only used if FOWVisibilityRadius is non-zero.</Description>
+        </Parameter>
+        <Parameter Name="SendIfOnScreenOrDiscard" Type="Bool" Default="False" VariableType="Value">
+          <Description>If true, will only try to send the particle if a unit can see it when the particle spawns.  Use for one-shot particles; saves a lot of bandwidth, so use as often as possible.</Description>
+        </Parameter>
+        <OutParameter Name="EffectID" Type="DWORD">
+          <Description>Unique identfier used to refer to the particle effect; used to remove particle.</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="RemoveParticle" Category="Action\Particle" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Removes Particle</Description>
+      <Comments>Used on Effect IDs returned by the CreateUnitParticle and CreatePositionParticle</Comments>
+      <Parameters>
+        <Parameter Name="EffectID" Type="DWORD" Default="" VariableType="Reference">
+          <Description>Unique identfier used to refer to the particle effect; returned by CreateParticle nodes</Description>
+        </Parameter>
+      </Parameters>
+    </Block>
+    <Block Name="GetUnitTeam" Category="Action\Unit" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+      <Description>Returns unit Team ID</Description>
+      <Comments>Returns FAILURE if unit is invalid</Comments>
+      <Parameters>
+        <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+          <Description>Unit to poll.</Description>
+        </Parameter>
+        <OutParameter Name="Output" Type="TeamEnum">
+          <Description>Destination reference.</Description>
+        </OutParameter>
+      </Parameters>
+    </Block>
+    <Block Name="SetStateDisableAmbientGold" Category="Action\Game" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets unit state DisableAmbientGold.  If disabled, unit does not get ambient gold gain (but still gets gold/5 from runes).</Description>
+        <Comments>Returns FAILURE if the unit is not valid.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Sets state of this unit.</Description>
+            </Parameter>
+            <Parameter Name="Disabled" Type="Bool" Default="False" VariableType="Value">
+                <Description>If true, ambient gold gain is disabled.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetUnitLevelCap" Category="Action\Stats\Advancement" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets unit level cap.  Level cap 0 means no cap.  Otherwise unit will earn experience up to one XP less than the level cap.</Description>
+        <Comments>Returns FAILURE if the unit is not valid.  If unit is already higher than the cap, it will earn 0 XP.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Sets level cap of this unit.</Description>
+            </Parameter>
+            <Parameter Name="LevelCap" Type="Int" Default="0" VariableType="Reference,Value">
+                <Description>If 0, no level cap; otherwise unit cannot get higher than this level.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="LockAllPlayerCameras" Category="Action\Camera" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Locks all player cameras to their champions.</Description>
+        <Comments>Always returns SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="Lock" Type="Bool" Default="True" VariableType="Value">
+                <Description>If true, locks all player cameras to their champions.  If false, unlocks all player cameras from their champions.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestPlayerCameraLocked" Category="Test\System\User Interface" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test to see if Player has camera locking enabled (camera locked to hero).</Description>
+        <Comments>Use ReturnSuccessIf to control the output.  This will return FAILURE if any parameters are incorrect.</Comments>
+        <Parameters>
+            <Parameter Name="Player" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Player to test.</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the the player has camera locking enabled; if False, returns SUCCESS if player does not have camera locking enabled, or if the player does not exist.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="SubTree" Category="Control" SubCategory="Debug" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>A subtree. collapse</Description>
+        <Comments>Subtree</Comments>
+        <Parameters>
+            <Parameter Name="TreeName" Type="String" Default="" VariableType="Value">
+                <Description> can not be empty </Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="Procedure2To2" Category="Control" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>A Procedure call</Description>
+        <Comments>Procedure</Comments>
+        <Parameters>
+            <Parameter Name="PocedureName" Type="String" Default="" VariableType="Value">
+                <Description> can not be empty </Description>
+            </Parameter>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="ChatMessage" Type="String" Default="Bot Talking Here" VariableType="Reference,Value">
+                <Description>Chat string</Description>
+            </Parameter>
+            <OutParameter Name="Output1" Type="String">
+                <Description>Destination reference contains float value.</Description>
+            </OutParameter>
+            <OutParameter Name="Output2" Type="UnitType">
+                <Description>Destination reference contains UnitType value.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestGameStarted" Category="Test\System\Game" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test if game started</Description>
+        <Comments>Tests if game started. True if game started. False if not</Comments>
+        <Parameters>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitUnderAttack" Category="Test\System\AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Tests if the specified unit is under attack</Description>
+        <Comments>Tests if the specified unit is under attack. May gather enemies of given unit to figure out if under attack</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit is under attack; if False, returns SUCCESS if unit is not under attack</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitType" Category="Action\Unit\Type" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the type of a specific unit</Description>
+        <Comments>Unit type</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="UnitType">
+                <Description>Destination reference contains the type of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitCreatureType" Category="Action\Unit\Type" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the creature type of a specific unit</Description>
+        <Comments>Unit creature type</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="CreatureType">
+                <Description>Destination reference contains the creature type of the unit.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestCanCastSpell" Category="Test\System\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Tests if the specified unit can use the specified spell</Description>
+        <Comments>Uses specified spellbook and specified spell to figure out if unit can cast spell</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit can use spell</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="CastUnitSpell" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Cast specified Spell</Description>
+        <Comments>Spell cast</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetUnitSpellIgnoreVisibity" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Set ignore visibility for a specific spell</Description>
+        <Comments>Set ignore visibility for a specific spell</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <Parameter Name="IgnoreVisibility" Type="Bool" Default="False" VariableType="Value">
+                <Description>Ignore visibility ?</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetUnitAISpellTargetLocation" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Set specified Spell target position</Description>
+        <Comments>Set specified Spell target position</Comments>
+        <Parameters>
+            <Parameter Name="TargetLocation" Type="Vector" Default="0;0;0;" VariableType="Reference">
+                <Description>Location to be targeted.</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="SetUnitAISpellTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Set specified Spell target</Description>
+        <Comments>Set specified Spell target</Comments>
+        <Parameters>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Target Input.</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="ClearUnitAISpellTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Clears specified Spell target</Description>
+        <Comments>Clears specified Spell target</Comments>
+        <Parameters>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="TestUnitAISpellTargetValid" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Test validity of specified Spell target</Description>
+        <Comments>Test validity of specified Spell target</Comments>
+        <Parameters>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+			<Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit spell target is valid</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetSpellSlotCooldown" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets the cooldown value for the spell in a given slot</Description>
+        <Comments>Cooldown for spell in given slot</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference contains cooldown</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetSpellSlotCooldown" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets the cooldown value for the spell in a given slot</Description>
+        <Comments>Cooldown for spell in given slot</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <Parameter Name="Cooldown" Type="Float" Default="1" VariableType="Value">
+                <Description>Slot cooldown</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitPARType" Category="Action\Stats\PAR" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the PAR type for specified unit</Description>
+        <Comments>PAR Type</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="PrimaryAbilityResourceType">
+                <Description>Destination reference.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitSpellCost" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the cost for spell specified slot</Description>
+        <Comments>Spell cost</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitSpellCastRange" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the cast range for spell specified slot</Description>
+        <Comments>Spell cast range</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitSpellLevel" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the level for spell specified slot</Description>
+        <Comments>Spell level</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Int">
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+	<Block Name="LevelUpUnitSpell" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Levels up a specified spell</Description>
+        <Comments>Levels up a specified spell</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitCanLevelUpSpell" Category="Test\System\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Tests if the specified unit can level up the specified spell</Description>
+        <Comments>Uses specified spellbook and specified spell to figure out if unit can level up spell</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit can use spell</Description>
+            </Parameter>
+        </Parameters>
+   </Block>
+    <Block Name="GetUnitAISelf" Category="AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets a handle to the the unit running the behavior tree in OutputRef</Description>
+        <Comments>Gets a handle to the the unit running the behavior tree</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Destination reference; holds a AI object handle</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitAIFirstTime" Category="AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit run logic for first time</Description>
+        <Comments>Unit run logic for first time</Comments>
+        <Parameters>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if first time</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetUnitAIAssistTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets unit to assist</Description>
+        <Comments>This version is for AttackableUnit References</Comments>
+        <Parameters>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference,Value">
+                <Description>Target unit</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="SetUnitAIAttackTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets unit to target</Description>
+        <Comments>This version is for AttackableUnit References</Comments>
+        <Parameters>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference,Value">
+                <Description>Source Reference</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitAIAssistTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets unit being assisted</Description>
+        <Comments>This version is for AttackableUnit References</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="GetUnitAIAttackTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Gets unit being targeted</Description>
+        <Comments>This version is for AttackableUnit References</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="IssueMoveOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Move Order</Description>
+        <Comments>Move</Comments>
+        <Parameters />
+    </Block>
+	<Block Name="IssueMoveToUnitOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Move Order</Description>
+        <Comments>Move</Comments>
+        <Parameters>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Target Unit.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="IssueMoveToPositionOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Move Order</Description>
+        <Comments>Move</Comments>
+        <Parameters>
+			<Parameter Name="Location" Type="Vector" Default="0;0;0" VariableType="Reference">
+                <Description>Position to move to</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="IssueChaseOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Chase Order</Description>
+        <Comments>Chase</Comments>
+        <Parameters />
+    </Block>
+    <Block Name="IssueAttackOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Attack Order</Description>
+        <Comments>Attack</Comments>
+        <Parameters />
+    </Block>
+    <Block Name="IssueWanderOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Wander order</Description>
+        <Comments>Wander</Comments>
+        <Parameters />
+    </Block>
+    <Block Name="IssueAIEmoteOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Emote Order</Description>
+        <Comments>Emote</Comments>
+        <Parameters>
+            <Parameter Name="EmoteIndex" Type="UnsignedInt" Default="0" VariableType="Reference,Value">
+                <Description>Emote ID</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="IssueGloabalEmoteOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Emote Order</Description>
+        <Comments>Emote</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <Parameter Name="EmoteIndex" Type="UnsignedInt" Default="0" VariableType="Reference,Value">
+                <Description>Emote ID</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="IssueAIChatOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Chat Order</Description>
+        <Comments>AI caht</Comments>
+        <Parameters>
+            <Parameter Name="ChatMessage" Type="String" Default="Bot Chat" VariableType="Reference,Value">
+                <Description>Chat message</Description>
+            </Parameter>
+            <Parameter Name="ChatRcvr" Type="String" Default="/all" VariableType="Reference,Value">
+                <Description>Chat receiver</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="IssueImmediateChatOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Chat Order</Description>
+        <Comments>AI caht</Comments>
+        <Parameters>
+            <Parameter Name="ChatMessage" Type="String" Default="Bot Chat" VariableType="Reference,Value">
+                <Description>Chat message</Description>
+            </Parameter>
+            <Parameter Name="ChatRcvr" Type="String" Default="/all" VariableType="Reference,Value">
+                <Description>Chat receiver</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="IssueAIDisableTaskOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue disable task</Description>
+        <Comments>AI task</Comments>
+        <Parameters />
+    </Block>
+    <Block Name="IssueAIEnableTaskOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue enable task</Description>
+        <Comments>AI task</Comments>
+        <Parameters />
+    </Block>
+    <Block Name="ClearUnitAIAttackTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Clear AI Attack target</Description>
+        <Comments>Clear AI attack target</Comments>
+        <Parameters />
+    </Block>
+  <Block Name="ClearUnitAIAssistTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+    <Description>Clear AI assist target</Description>
+    <Comments>Clear AI assist target</Comments>
+    <Parameters />
+  </Block>
+    <Block Name="IssueTeleportToBaseOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Teleport To base</Description>
+        <Comments>Used for Teleporting home</Comments>
+        <Parameters />
+    </Block>
+    <Block Name="GetUnitAIAttackers" Category="AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the number of discrete attackers.</Description>
+        <Comments>Always returns SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="AttackableUnitCollection">
+                <Description>Destination reference; contains collection of attacking units.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="EqualPARType" Category="Test\System\PAR" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for PAR References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="PrimaryAbilityResourceType" Default="PAR_MANA" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="PrimaryAbilityResourceType" Default="PAR_MANA" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="NotEqualPARType" Category="Test\System\PAR" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for PAR References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="PrimaryAbilityResourceType" Default="PAR_MANA" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="PrimaryAbilityResourceType" Default="PAR_MANA" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="EqualUnitType" Category="Test\System\Unit\Type" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for Unit type References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="UnitType" Default="UNKNOWN_UNIT" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="UnitType" Default="UNKNOWN_UNIT" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="NotEqualUnitType" Category="Test\System\Unit\Type" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for Unit type References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="UnitType" Default="UNKNOWN_UNIT" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="UnitType" Default="UNKNOWN_UNIT" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="EqualCreatureType" Category="Test\System\Unit\Type" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for Creature References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="CreatureType" Default="UNKNOWN_CREATURE" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="CreatureType" Default="UNKNOWN_CREATURE" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="NotEqualCreatureType" Category="Test\System\Unit\Type" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for Creature References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="CreatureType" Default="UNKNOWN_CREATURE" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="CreatureType" Default="UNKNOWN_CREATURE" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="EqualSpellbookType" Category="Test\System\Spellbook" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for Creature References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="NotEqualSpellbookType" Category="Test\System\Spellbook" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not</Description>
+        <Comments>This version is for Creature References</Comments>
+        <Parameters>
+            <Parameter Name="LeftHandSide" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Reference">
+                <Description>LeftHandSide Reference of the comparison</Description>
+            </Parameter>
+            <Parameter Name="RightHandSide" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Reference,Value">
+                <Description>RightHandSide Reference of the comparison</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="TestUnitAICanBuyRecommendedItem" Category="AI\Item Purchase" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit can buy next recommended item</Description>
+        <Comments>Unit can buy next recommended item</Comments>
+        <Parameters>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit at spell location</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="UnitAIBuyRecommendedItem" Category="AI\Item Purchase" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Buy next recommended item</Description>
+        <Comments>Buy next recommended item</Comments>
+        <Parameters />
+    </Block>
+	<Block Name="TestUnitAICanBuyItem" Category="AI\Item Purchase" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit can buy item</Description>
+        <Comments>Unit can buy  item</Comments>
+        <Parameters>
+			<Parameter Name="ItemID" Type="UnsignedInt" Default="0" VariableType="Reference,Value">
+                <Description>Item to buy.</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit can buy item</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="UnitAIBuyItem" Category="AI\Item Purchase" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Buy item</Description>
+        <Comments>Buy item</Comments>
+        <Parameters>
+            <Parameter Name="ItemID" Type="UnsignedInt" Default="0" VariableType="Reference,Value">
+                <Description>Item to buy.</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="ComputeUnitAISpellPosition" Category="AI\Spell Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Computes a position for spell cast</Description>
+        <Comments>Computes a position for spell cast</Comments>
+        <Parameters>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>target unit</Description>
+            </Parameter>
+            <Parameter Name="ReferenceUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Reference unit</Description>
+            </Parameter>
+            <Parameter Name="Range" Type="Float" Default="" VariableType="Reference, Value">
+                <Description>Spell range</Description>
+            </Parameter>
+            <Parameter Name="UnitSide" Type="Bool" Default="True" VariableType="Value">
+                <Description>Which side of target are we going to (in between our out)</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="GetUnitAISpellPosition" Category="AI\Spell Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Retrieves a position for spell cast</Description>
+        <Comments>Retrieves a position for spell cast</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="Vector">
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+	<Block Name="ClearUnitAISpellPosition" Category="AI\Spell Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Clears position for spell cast</Description>
+        <Comments>Clears position for spell cast</Comments>
+        <Parameters />
+    </Block>
+	<Block Name="TestUnitAISpellPositionValid" Category="AI\Spell Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit precomputed cast location valid </Description>
+        <Comments>Unit precomputed cast location valid</Comments>
+        <Parameters>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit cast location is valid</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitAtLocation" Category="Test\System\Unit\Location" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit at precomputed spell cast location</Description>
+        <Comments>Unit at precomputed spell location</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+			<Parameter Name="Location" Type="Vector" Default="0;0;0" VariableType="Reference">
+				<Description>Source Reference</Description>
+			</Parameter>
+            <Parameter Name="Error" Type="Float" Default="200" VariableType="Value">
+                <Description>Accepted error</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit at spell location</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitAIIsInSafeRange" Category="Test\System\AI" SubCategory="Debug" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit in safe range</Description>
+        <Comments>Unit in safe Range</Comments>
+        <Parameters>
+            <Parameter Name="Range" Type="Float" Default="600" VariableType="Value">
+                <Description>Unit in safe Range</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit can use spell</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="ComputeUnitAISafePosition" Category="AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Computes a safe position for AI unit</Description>
+        <Comments>Computes a safe position for AI unit</Comments>
+        <Parameters>
+            <Parameter Name="Range" Type="Float" Default="" VariableType="Reference, Value">
+                <Description>safe range</Description>
+            </Parameter>
+            <Parameter Name="UseDefender" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, use defenders in search</Description>
+            </Parameter>
+            <Parameter Name="UseEnemy" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, use enemies to guide in search</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="GetUnitAISafePosition" Category="AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Retrieves a safe position for AI unit</Description>
+        <Comments>Retrieves a safe position for AI unit</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="Vector">
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+	<Block Name="ClearUnitAISafePosition" Category="AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Clears position for safe</Description>
+        <Comments>Clears position for safe</Comments>
+        <Parameters />
+    </Block>
+	<Block Name="TestUnitAISafePositionValid" Category="Test\System\AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit precomputed safe location valid </Description>
+        <Comments>Unit precomputed safelocation valid</Comments>
+        <Parameters>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit cast location is valid</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="GetUnitAIBasePosition" Category="AI" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the base location of a given unit</Description>
+        <Comments>Return SUCCES if we can find the base</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Vector">
+                <Description>Destination reference;.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+	<Block Name="GetUnitSpellRadius" Category="Action\Spells" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns the radius AOE of spell in a given slot</Description>
+        <Comments>Always returns SUCCESS.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll.</Description>
+            </Parameter>
+			 <Parameter Name="Spellbook" Type="SpellbookTypeEnum" Default="SPELLBOOK_UNKNOWN" VariableType="Value">
+                <Description>Spellbook</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>Spell slot.</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference;.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+	<Block Name="GetDistanceBetweenUnits" Category="Action\Position" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns distance between 2 units</Description>
+        <Comments>takes into account their BB</Comments>
+        <Parameters>
+            <Parameter Name="SourceUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Source unit</Description>
+            </Parameter>
+			<Parameter Name="DestinationUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Destination unit</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="Float">
+                <Description>Destination reference;.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="TestUnitAIAttackTargetInRange" Category="Test\System\AI" SubCategory="Debug" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit target is in range</Description>
+        <Comments>Unit target is in range</Comments>
+        <Parameters>
+            <Parameter Name="Error" Type="Float" Default="0" VariableType="Value">
+                <Description>Accepted error for unit location</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit has target in range</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="TestUnitAIAttackTargetValid" Category="AI\Targeting" SubCategory="Debug" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit has valid target</Description>
+        <Comments>Unit has valid target, use before getting attack target.</Comments>
+        <Parameters>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit has valid target</Description>
+            </Parameter>
+        </Parameters>
+  </Block>
+  <Block Name="TestUnitIsVisible" Category="AI\Targeting" SubCategory="Debug" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit can see target</Description>
+        <Comments>Unit can see target</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Viewer Unit</Description>
+            </Parameter>
+			<Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Target  Unit</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit can see target</Description>
+            </Parameter>
+        </Parameters>
+  </Block>
+  <Block Name="SetUnitAIItemTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Sets item target</Description>
+        <Comments>This version is for AttackableUnit References</Comments>
+        <Parameters>
+            <Parameter Name="TargetUnit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Target</Description>
+            </Parameter>
+            <Parameter Name="ItemID" Type="Int" Default="0" VariableType="Value">
+                <Description>Item ID</Description>
+            </Parameter>
+        </Parameters>
+   </Block>
+   <Block Name="ClearUnitAIItemTarget" Category="AI\Targeting" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Clears item target</Description>
+        <Comments>Clears item target</Comments>
+        <Parameters />
+   </Block>
+   <Block Name="TestUnitAICanUseItem" Category="AI\Item" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Unit can use item</Description>
+        <Comments>Unit can use item</Comments>
+        <Parameters>
+            <Parameter Name="ItemID" Type="Int" Default="0" VariableType="Value">
+                <Description>Item ID</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit can use item</Description>
+            </Parameter>
+        </Parameters>
+  </Block>
+  <Block Name="IssueUseItemOrder" Category="AI\Issue Orders" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Issue Use item Order</Description>
+        <Comments>Use item</Comments>
+        <Parameters>
+			<Parameter Name="ItemID" Type="Int" Default="0" VariableType="Value">
+                <Description>Item ID</Description>
+            </Parameter>
+        </Parameters>
+   </Block>
+   <Block Name="TestUnitSpellToggledOn" Category="AI\Item" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Tests if specified slot has spell toggled ON</Description>
+        <Comments>Tests if specified slot has spell toggled ON</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll</Description>
+            </Parameter>
+            <Parameter Name="SlotIndex" Type="Int" Default="" VariableType="Value">
+                <Description>spell slot ID</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the spell is toggled ON</Description>
+            </Parameter>
+        </Parameters>
+  </Block>
+  <Block Name="TestUnitIsChanneling" Category="AI\Item" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Tests if unit is channeling</Description>
+        <Comments>Tests if unit is channeling</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to poll</Description>
+            </Parameter>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if unit is channeling</Description>
+            </Parameter>
+        </Parameters>
+  </Block>
+  	<Block Name="GetUnitBuffCaster" Category="Action\Unit" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns unit that casted a buff on input unit</Description>
+        <Comments>Returns unit that casted a buff on input unit</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Source unit</Description>
+            </Parameter>
+			<Parameter Name="BuffName" Type="String" Default="" VariableType="Reference,Value">
+                <Description>Buff name</Description>
+            </Parameter>
+            <OutParameter Name="Output" Type="AttackableUnit">
+                <Description>Destination reference;.</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+	<Block Name="TestUnitAIHasTask" Category="AI\Task" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>AI Unit has an assigned task</Description>
+        <Comments>AI Unit has an assigned task</Comments>
+        <Parameters>
+            <Parameter Name="ReturnSuccessIf" Type="Bool" Default="True" VariableType="Value">
+                <Description>If True, returns SUCCESS if the unit is assigned a task</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+	<Block Name="GetUnitAITaskPosition" Category="AI\Task" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Returns position computed by a task assigned to the unit</Description>
+        <Comments>Returns position computed by a task assigned to the unit</Comments>
+        <Parameters>
+            <OutParameter Name="Output" Type="Vector">
+                <Description>Destination reference</Description>
+            </OutParameter>
+        </Parameters>
+    </Block>
+    <Block Name="IncPermanentFlatArmorMod" Category="Action\Stats\Defense" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Permanently modifies a target unit's armor.</Description>
+        <Comments>This modifies the permanent CharInter, so be sure to pair it with a decrement of equal value later.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to modify.</Description>
+            </Parameter>
+            <Parameter Name="Delta" Type="Float" Default="" VariableType="Value,Reference">
+                <Description>Delta</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="IncPermanentFlatMagicResistanceMod" Category="Action\Stats\Defense" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Permanently modifies a target unit's magic resistance.</Description>
+        <Comments>This modifies the permanent CharInter, so be sure to pair it with a decrement of equal value later.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to modify.</Description>
+            </Parameter>
+            <Parameter Name="Delta" Type="Float" Default="" VariableType="Value,Reference">
+                <Description>Delta</Description>
+            </Parameter>
+        </Parameters>
+    </Block>	
+    <Block Name="IncPermanentFlatMaxHealthMod" Category="Action\Stats\Defense" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Permanently modifies a target unit's max health.  This will heal the target.</Description>
+        <Comments>This modifies the permanent CharInter, so be sure to pair it with a decrement of equal value later.  Further, this later needs to be converted to a non-healing implementation; it is using the healing approach until Kuo fixes a bug.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to modify.</Description>
+            </Parameter>
+            <Parameter Name="Delta" Type="Float" Default="" VariableType="Value,Reference">
+                <Description>Delta</Description>
+            </Parameter>
+        </Parameters>
+    </Block>
+    <Block Name="IncPermanentFlatAttackDamageMod" Category="Action\Stats\Offense" SubCategory="" CanHaveChildren="false" NumberOfChildren="-1">
+        <Description>Permanently modifies a target unit's attack damage.</Description>
+        <Comments>This modifies the permanent CharInter, so be sure to pair it with a decrement of equal value later.</Comments>
+        <Parameters>
+            <Parameter Name="Unit" Type="AttackableUnit" Default="" VariableType="Reference">
+                <Description>Unit to modify.</Description>
+            </Parameter>
+            <Parameter Name="Delta" Type="Float" Default="" VariableType="Value,Reference">
+                <Description>Delta</Description>
+            </Parameter>
+        </Parameters>
+    </Block>	
+</BlockDefinitions>
+
