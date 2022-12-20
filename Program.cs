@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 var currentDir = Directory.GetCurrentDirectory();
+///*
+{
 var file = XElement.Load(Path.Combine(currentDir, "SBL.xml"));
 Debug.Assert(file.Name == "BlockDefinitions");
 var ret = "";
@@ -15,7 +17,9 @@ foreach(var block in file.Elements("Block"))
     var numberOfChildren = int.Parse(block.Attribute("NumberOfChildren").Value);
     var description = block.Element("Description").Value;
     var comments = block.Element("Comments").Value;
-    var _params = block.Element("Parameters").Elements().Select(param => BlockDefinitionParam.Parse(param)).ToList();
+    var parametersElement = block.Element("Parameters");
+    var inpParams = parametersElement.Elements("Parameter").Select(param => BlockDefinitionParam.Parse(param)).ToList();
+    var outParams = parametersElement.Elements("OutParameter").Select(param => BlockDefinitionParam.Parse(param)).ToList();
 
     ret += $"/// <summary>\n";
     ret += $"/// {description}\n";
@@ -23,29 +27,26 @@ foreach(var block in file.Elements("Block"))
     ret += $"/// <remarks>\n";
     ret += $"/// {comments}\n";
     ret += $"/// </remarks>\n";
-    foreach(var param in _params)
+    foreach(var param in inpParams)
     {
         ret += $"/// <param name=\"{param.Name}\">{param.Description}</param>\n";
     }
-    _params = _params.FindAll(param => param.Out).Concat(_params.FindAll(param => !param.Out)).ToList();
     ret += $"public extern static Task<bool> {name}(" +
-        string.Join(", ", _params.Select(param => param.ToCSharp())) +
+        string.Join(", ", inpParams.Select(param => param.ToCSharp())) +
     ");\n";
-    /*
-    ret += "{\n";
-    ret += "return true;".Indent();
-    ret += "\n}";
-    ret += "\n";
-    */
 }
 ret = "using static SBL;\npublic static class SBL\n" + "{\n" + ret.Indent() + "\n}";
 Console.WriteLine(ret);
+}
+//*/
 
 ///*
-file = XElement.Load(Path.Combine(currentDir, "GarenBT.xml"));
+{
+var file = XElement.Load(Path.Combine(currentDir, "GarenBT.xml"));
 Debug.Assert(file.Name == "BehaviorTrees");
 var BT = BehaviorTrees.Parse(file);
 Console.WriteLine(BT.ToCSharp());
+}
 //*/
 
 
@@ -152,20 +153,21 @@ class BehaviorTreeNode
     public string? Type;
     public string? Name;
     public List<BehaviorTreeNodeParameter> Parameters = new();
+    public List<BehaviorTreeNodeParameter> OutParameters = new();
     public List<BehaviorTreeNode> Children = new();
 
     public static BehaviorTreeNode Parse(XElement node)
     {
+        var parametersElement = node.Element("Parameters");
         return new BehaviorTreeNode()
         {
             Type = node.Attribute("Type")?.Value,
             Name = node.Attribute("Name")?.Value,
-            Parameters = node.Element("Parameters")?.Elements().Select(
-                node =>
-                {
-                    Debug.Assert(node.Name == "Parameter" || node.Name == "OutParameter");
-                    return BehaviorTreeNodeParameter.Parse(node);
-                }
+            Parameters = parametersElement?.Elements("Parameter").Select(
+                node => BehaviorTreeNodeParameter.Parse(node)
+            ).ToList() ?? new(),
+            OutParameters = parametersElement?.Elements("OutParameter").Select(
+                node => BehaviorTreeNodeParameter.Parse(node)
             ).ToList() ?? new(),
             Children = node.Element("Children")?.Elements("Node").Select(
                 node => Parse(node)
@@ -191,13 +193,88 @@ class BehaviorTreeNode
         else if(Type == "MaskFailure")
         {
             Debug.Assert(Children.Count == 1);
-            return "(true, " + Children[0].ToCSharp() + ")";
+            return "(" + Children[0].ToCSharp() + ", true)";
         }
         else
         {
-            return $"await {Type}(" +
-                string.Join(", ", Parameters.Select(param => param.ToCSharp())) +
-            ")";
+            var ret = "";
+            bool invert = false;
+            var filtered = Parameters.FindAll(param =>
+            {
+                var ret = param.Name == "ReturnSuccessIf";
+                invert = invert || ret && param.Value == "false";
+                return !ret;
+            });
+            if
+            (
+                Type is "SetVarBool" or "SetVarAttackableUnit" or "SetVarInt" or "SetVarDWORD" or "SetVarString" or "SetVarFloat" or "SetVarVector"
+            )
+            {
+                var isStr = Type.Contains("String");
+                var input = filtered.Find(param => param.Name == "Input")!.ToCSharp(false, isStr);
+                ret = input;
+            }
+            else if
+            (
+                Type is "EqualUnitTeam" or "NotEqualUnitTeam"
+                    or "EqualBool" or "NotEqualBool"
+                    or "EqualString" or "NotEqualString"
+                    
+                    or "EqualInt" or "NotEqualInt" or "LessInt" or "LessEqualInt" or "GreaterInt" or "GreaterEqualInt"
+                    or "AddInt" or "SubtractInt" or "MultiplyInt" or "DivideInt" or "ModulusInt"
+                    
+                    or "EqualFloat" or "NotEqualFloat" or "LessFloat" or "LessEqualFloat" or "GreaterFloat" or "GreaterEqualFloat"
+                    or "AddFloat" or "SubtractFloat" or "MultiplyFloat" or "DivideFloat"
+
+                    or "EqualUnit" or "NotEqualUnit"
+            )
+            {
+                var isStr = Type.Contains("String");
+                var left = filtered.Find(param => param.Name == "LeftHandSide")!.ToCSharp(false, isStr);
+                var right = filtered.Find(param => param.Name == "RightHandSide")!.ToCSharp(false, isStr);
+                var op = "";
+
+                if(Type.StartsWith("Add")) op += "+";
+                else if(Type.StartsWith("Subtract")) op += "-";
+                else if(Type.StartsWith("Multiply")) op += "*";
+                else if(Type.StartsWith("Divide")) op += "/";
+                else if(Type.StartsWith("Modulus")) op += "%";
+                else
+                {
+                    var eq = Type.Contains("Equal");
+                    if(Type.StartsWith("NotEqual")) op += "!";
+                    else if(Type.Contains("Less")) op += "<";
+                    else if(Type.Contains("Greater")) op += ">";
+                    else if(eq) op += "=";
+                    if(eq) op += "=";
+                }
+                ret = $"{left} {op} {right}";
+            }
+            else
+            {
+                ret = $"await {Type}(" +
+                    string.Join(", ", filtered.Select(param => param.ToCSharp(true, true))) +
+                ")";
+            }
+            if(invert)
+            {
+                ret = $"!{ret}";
+            }
+            if(OutParameters.Count == 1)
+            {
+                var param = OutParameters[0];
+                return $"({param.Scope}.{param.Value} = {ret}, true)";
+            }
+            else if(OutParameters.Count > 1)
+            {
+                return "(" +
+                    string.Join(", ", OutParameters.Select(param => $"{param.Scope}.{param.Value}")) +
+                ") = {ret}, true)";
+            }
+            else
+            {
+                return ret;
+            }
         }
     }
 }
@@ -224,7 +301,7 @@ class BehaviorTreeNodeParameter
         };
     }
 
-    public string ToCSharp()
+    public string ToCSharp(bool includeName, bool isString)
     {
         string ret;
         if(Out)
@@ -237,8 +314,14 @@ class BehaviorTreeNodeParameter
         }
         else
         {
-            ret = '"' + Value + '"';
+            if(isString)
+                ret = '"' + Value + '"';
+            else
+                ret = Value;
         }
-        return $"{Name}: " + ret;
+        if(includeName)
+            return $"{Name}: " + ret;
+        else
+            return ret;
     }
 }
