@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 var currentDir = Directory.GetCurrentDirectory();
-///*
+/*
 {
 var file = XElement.Load(Path.Combine(currentDir, "SBL.xml"));
 Debug.Assert(file.Name == "BlockDefinitions");
@@ -205,7 +205,6 @@ class BehaviorTreeNode
                 invert = invert || ret && param.Value == "false";
                 return !ret;
             });
-            bool alwaysSuccessful = false;
             if
             (
                 Type is "SetVarBool" or "SetVarAttackableUnit" or "SetVarInt" or "SetVarDWORD" or "SetVarString" or "SetVarFloat" or "SetVarVector"
@@ -214,7 +213,9 @@ class BehaviorTreeNode
                 var isStr = Type.Contains("String");
                 var input = filtered.Find(param => param.Name == "Input")!.ToCSharp(false, isStr);
                 ret = input;
-                alwaysSuccessful = true;
+                
+                var param = OutParameters[0];
+                return $"({param.Scope}.{param.Value} = {ret}, true)";
             }
             else if
             (
@@ -248,43 +249,24 @@ class BehaviorTreeNode
                     if(eq) op += "=";
                 }
                 ret = $"{left} {op} {right}";
-                alwaysSuccessful = true;
-            }
-            else
-            {
-                if(!alwaysSuccessful)
-                {
-                    filtered = filtered.Concat(OutParameters).ToList();
-                }
-                ret = $"await {Type}(" +
-                    string.Join(", ", filtered.Select(param => param.ToCSharp(true, true))) +
-                ")";
-            }
-            if(invert)
-            {
-                Debug.Assert(OutParameters.Count <= 1);
-                ret = $"!{ret}";
-            }
-            if(alwaysSuccessful)
-            {
-                if(OutParameters.Count == 1)
+                
+                if(OutParameters.Count >= 1)
                 {
                     var param = OutParameters[0];
                     return $"({param.Scope}.{param.Value} = {ret}, true)";
                 }
-                else if(OutParameters.Count > 1)
-                {
-                    return "(" +
-                        string.Join(", ", OutParameters.Select(param => $"{param.Scope}.{param.Value}")) +
-                    ") = {ret}, true)";
-                }
                 else
-                {
                     return ret;
-                }
             }
             else
             {
+                ret = $"await {Type}(" +
+                    string.Join(", ", filtered.Concat(OutParameters).Select(param => param.ToCSharp(true, true))) +
+                ")";
+                if(invert)
+                {
+                    ret = $"!{ret}";
+                }
                 return ret;
             }
         }
