@@ -3,18 +3,16 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 var currentDir = Directory.GetCurrentDirectory();
-{
-    var file = XElement.Load(Path.Combine(currentDir, "SBL.xml"));
-    Debug.Assert(file.Name == "BlockDefinitions");
-    var BD = new BlockDefinitions(file);
-    Console.WriteLine(BD.ToCSharp());
-}
-{
-    var file = XElement.Load(Path.Combine(currentDir, "GarenBT.xml"));
-    Debug.Assert(file.Name == "BehaviorTrees");
-    var BT = new BehaviorTrees(file);
-    Console.WriteLine(BT.ToCSharp());
-}
+
+var file = XElement.Load(Path.Combine(currentDir, "SBL.xml"));
+Debug.Assert(file.Name == "BlockDefinitions");
+var BD = new BlockDefinitions(file);
+Console.WriteLine(BD.ToCSharp());
+
+    file = XElement.Load(Path.Combine(currentDir, "GarenBT.xml"));
+Debug.Assert(file.Name == "BehaviorTrees");
+var BT = new BehaviorTrees(BD, file);
+Console.WriteLine(BT.ToCSharp());
 
 class BlockDefinitions
 {
@@ -29,9 +27,12 @@ class BlockDefinitions
     {
         return
         "using static SBL;\n" +
+        "using System.Numerics;\n" +
         "public static class SBL\n" +
         "{\n" +
-            (string.Join("\n", Definitions.Select(
+            (string.Join("\n", Definitions.FindAll(
+                block => !BehaviorTreeNode.Replacable.All.Contains(block.Name)
+            ).Select(
                 block => block.ToCSharp()
             ))).Indent() +
         "\n}";
@@ -49,6 +50,7 @@ class BlockDefinition
     public string? Comments;
     public List<BlockDefinitionParam> Parameters = new();
     public List<BlockDefinitionParam> OutParameters = new();
+    bool IsAsync => BehaviorTreeNode.AsyncBlockNames.Contains(Name);
     public BlockDefinition(XElement block)
     {        
         Name = block.Attribute("Name")?.Value;
@@ -82,12 +84,17 @@ class BlockDefinition
             ret += $"/// {Comments}\n";
             ret += $"/// </remarks>\n";
         }
-        foreach(var param in Parameters)
+        var filteredParameters = Parameters.FindAll(
+            param => param.Name != "ReturnSuccessIf"
+        );
+        foreach(var param in filteredParameters)
         {
             ret += $"/// <param name=\"{param.Name}\">{param.Description}</param>\n";
         }
-        ret += $"public extern static Task<bool> {Name}(" +
-            string.Join(", ", Parameters.Select(param => param.ToCSharp())) +
+        ret += $"public extern static {(IsAsync ? "Task<bool>" : "bool")} {Name}(" +
+            string.Join(", ", OutParameters.Concat(filteredParameters).Select(
+                param => param.ToCSharp()
+            )) +
         ");";
         return ret;
     }
@@ -125,6 +132,10 @@ class BlockDefinitionParam
         {
             _type = "int";
         }
+        else if(_type == "UnsignedInt")
+        {
+            _type = "uint";
+        }
         else if(_type == "Float")
         {
             _type = "float";
@@ -137,8 +148,32 @@ class BlockDefinitionParam
         else if(_type == "Vector")
         {
             _type = "Vector3";
+            if(_def != null)
+            {
+                var opts = StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
+                var t = _def.Split(';', opts);
+                _def = (t[0] == "0" && t[1] == "0" && t[2] == "0") ?
+                    "Vector3.Zero" :
+                    $"new Vector3({t[0]}f, {t[1]}f, {t[2]}f)";
+            }
         }
-        return Out ? $"out {_type} {_name}" : $"{_type} {_name} = {_def}";
+        else if(_type == "AttackableUnitCollection")
+        {
+            _type = "IEnumerable<AttackableUnit>";
+        }
+        else if(_type == "Obj_AI_HeroCollection")
+        {
+            _type = "IEnumerable<Champion>";
+        }
+        else if(_type == "Obj_AI_TurretCollection")
+        {
+            _type = "IEnumerable<Turret>";
+        }
+        else if(_type == "TeamEnum")
+        {
+            _type = "TeamID";
+        }
+        return Out ? $"out {_type} {_name}" : ($"{_type} {_name}" + ((_def != "") ? $" = {_def}" : ""));
     }
 }
 
@@ -153,10 +188,10 @@ public static class StringExtensions
 class BehaviorTrees
 {
     public List<BehaviorTree> Trees = new();
-    public BehaviorTrees(XElement file)
+    public BehaviorTrees(BlockDefinitions BDs, XElement file)
     {
         Trees = file.Elements("BehaviorTree").Select(
-            node => new BehaviorTree(this, node)
+            node => new BehaviorTree(BDs, this, node)
         ).ToList();
     }
 
@@ -172,13 +207,13 @@ class BehaviorTree
     public BehaviorTreeNode? Root;
     bool? isAsync = null;
     public bool IsAsync => isAsync ?? (bool)(isAsync = Root.IsAsync);
-    public BehaviorTree(BehaviorTrees BTs, XElement node)
+    public BehaviorTree(BlockDefinitions BDs, BehaviorTrees BTs, XElement node)
     {
         Name = node.Attribute("Name")?.Value;
 
         var rootElement = node.Element("Node");
         if(rootElement != null)
-            Root = new BehaviorTreeNode(BTs, rootElement);
+            Root = new BehaviorTreeNode(BDs, BTs, rootElement);
     }
     public string? ToCSharp()
     {
@@ -196,15 +231,22 @@ class BehaviorTreeNode
     public List<BehaviorTreeNodeParameter> OutParameters = new();
     public List<BehaviorTreeNode> Children = new();
     bool? isAsync = null;
+    public static string[] AsyncBlockNames =
+    {
+        "DebugAction", "DelayNSecondsBlocking", "PanCameraFromCurrentPositionToPoint", "PlayVOAudioEvent"
+    };
     public bool IsAsync =>
         isAsync ?? (bool)(isAsync = 
-            Type is "DebugAction" or "DelayNSecondsBlocking" or "PanCameraFromCurrentPositionToPoint" or "PlayVOAudioEvent" ||
+            AsyncBlockNames.Contains(Type) ||
             (TrySubTree(out var subTreeIsAsync, out _) && subTreeIsAsync) ||
             Children.Find(child => child.IsAsync) != null);
     public WeakReference<BehaviorTrees> BehaviorTrees;
-    public BehaviorTreeNode(BehaviorTrees BTs, XElement node)
+    public WeakReference<BlockDefinitions> BlockDefinitions;
+    public BehaviorTreeNode(BlockDefinitions BDs, BehaviorTrees BTs, XElement node)
     {
         BehaviorTrees = new(BTs);
+        BlockDefinitions = new(BDs);
+
         Type = node.Attribute("Type")?.Value;
         Name = node.Attribute("Name")?.Value;
         
@@ -217,12 +259,12 @@ class BehaviorTreeNode
         ).ToList() ?? new();
 
         Children = node.Element("Children")?.Elements("Node").Select(
-            node => new BehaviorTreeNode(BTs, node)
+            node => new BehaviorTreeNode(BDs, BTs, node)
         ).ToList() ?? new();
     }
     bool TrySubTree(out bool async, out string name)
     {
-        if(Type == "SubTree")
+        if(Type == Replacable.SubTree)
         {
             var treeName = Parameters.Find(param => param.Name == "TreeName").Value!;
             BehaviorTrees.TryGetTarget(out var behaviorTrees);
@@ -240,13 +282,54 @@ class BehaviorTreeNode
             return false;
         }
     }
+    public static ReplacableClass Replacable = new();
+    public class ReplacableClass
+    {
+        public string Sequence = "Sequence";
+        public string Selector = "Selector";
+        public string SubTree = "SubTree";
+        public string MaskFailure = "MaskFailure";
+        public string[] Setters =
+        {
+            "SetVarBool",
+            "SetVarAttackableUnit",
+            "SetVarInt",
+            "SetVarDWORD",
+            "SetVarString",
+            "SetVarFloat",
+            "SetVarVector"
+        };
+        public string[] Comparers =
+        {
+            "EqualInt", "NotEqualInt", "LessInt", "LessEqualInt", "GreaterInt", "GreaterEqualInt",
+            "AddInt", "SubtractInt", "MultiplyInt", "DivideInt", "ModulusInt",
+            "EqualFloat", "NotEqualFloat", "LessFloat", "LessEqualFloat", "GreaterFloat", "GreaterEqualFloat",
+            "AddFloat", "SubtractFloat", "MultiplyFloat", "DivideFloat",
+            "EqualUnit", "NotEqualUnit",
+            "EqualPARType", "NotEqualPARType",
+            "EqualUnitType", "NotEqualUnitType",
+            "EqualCreatureType", "NotEqualCreatureType",
+            "EqualSpellbookType", "NotEqualSpellbookType",
+            "EqualUnitTeam", "NotEqualUnitTeam",
+            "EqualBool", "NotEqualBool",
+            "EqualString", "NotEqualString",
+
+        };
+        public List<string> All = new();
+        public ReplacableClass()
+        {
+            All.AddRange(new string[]{ Sequence, Selector, SubTree, MaskFailure });
+            All.AddRange(Setters);
+            All.AddRange(Comparers);
+        }
+    }
     public string ToCSharp()
     {
-        if(Type == "Sequence")
+        if(Type == Replacable.Sequence)
         {
             return "(\n" + string.Join(" &&\n", Children.Select(node => node.ToCSharp())).Indent() + "\n)";
         }
-        else if(Type == "Selector")
+        else if(Type == Replacable.Selector)
         {
             return "(\n" + string.Join(" ||\n", Children.Select(node => node.ToCSharp())).Indent() + "\n)";
         }
@@ -257,47 +340,30 @@ class BehaviorTreeNode
             ret += treeName + "()";
             return ret;
         }
-        else if(Type == "MaskFailure")
+        else if(Type == Replacable.MaskFailure)
         {
             Debug.Assert(Children.Count == 1);
             return "(" + Children[0].ToCSharp() + ", true)";
         }
         else
         {
-            bool invert = false;
-            var filtered = Parameters.FindAll(param =>
-            {
-                var ret = param.Name == "ReturnSuccessIf";
-                invert = invert || ret && param.Value == "false";
-                return !ret;
-            });
-            if
-            (
-                Type is "SetVarBool" or "SetVarAttackableUnit" or "SetVarInt" or "SetVarDWORD" or "SetVarString" or "SetVarFloat" or "SetVarVector"
-            )
+            bool invert = Parameters.Find(
+                param => param.Name == "ReturnSuccessIf" && param.Value == "false"
+            ) != null;
+            if(Replacable.Setters.Contains(Type))
             {
                 var isStr = Type.Contains("String");
-                var input = filtered.Find(param => param.Name == "Input")!.ToCSharp(false, isStr);
+                var input = Parameters.Find(param => param.Name == "Input")!.ToCSharp(false, isStr);
                 var ret = input;
                 
                 var param = OutParameters[0];
                 return $"({param.Scope}.{param.Value} = {ret}, true)";
             }
-            else if
-            (
-                Type is "EqualUnitTeam" or "NotEqualUnitTeam"
-                    or "EqualBool" or "NotEqualBool"
-                    or "EqualString" or "NotEqualString"
-                    or "EqualInt" or "NotEqualInt" or "LessInt" or "LessEqualInt" or "GreaterInt" or "GreaterEqualInt"
-                    or "AddInt" or "SubtractInt" or "MultiplyInt" or "DivideInt" or "ModulusInt"
-                    or "EqualFloat" or "NotEqualFloat" or "LessFloat" or "LessEqualFloat" or "GreaterFloat" or "GreaterEqualFloat"
-                    or "AddFloat" or "SubtractFloat" or "MultiplyFloat" or "DivideFloat"
-                    or "EqualUnit" or "NotEqualUnit"
-            )
+            else if(Replacable.Comparers.Contains(Type))
             {
                 var isStr = Type.Contains("String");
-                var left = filtered.Find(param => param.Name == "LeftHandSide")!.ToCSharp(false, isStr);
-                var right = filtered.Find(param => param.Name == "RightHandSide")!.ToCSharp(false, isStr);
+                var left = Parameters.Find(param => param.Name == "LeftHandSide")!.ToCSharp(false, isStr);
+                var right = Parameters.Find(param => param.Name == "RightHandSide")!.ToCSharp(false, isStr);
                 var op = "";
 
                 if(Type.StartsWith("Add")) op += "+";
@@ -326,11 +392,37 @@ class BehaviorTreeNode
             }
             else
             {
+                BlockDefinitions.TryGetTarget(out var blockDefinitions);
+                Debug.Assert(blockDefinitions != null);
+                var bd = blockDefinitions.Definitions.Find(block => block.Name == Type);
+                Debug.Assert(bd != null);
+
+                bool includeParameterNames = true;
+                List<(BehaviorTreeNodeParameter, bool)> allParametersSorted = new();
+                var allParametersA = bd.OutParameters.Concat(bd.Parameters).ToList();
+                var allParametersB = OutParameters.Concat(Parameters).ToList();
+                if(allParametersA.Count == allParametersB.Count)
+                {
+                    includeParameterNames = false;
+                    foreach(var paramA in allParametersA)
+                    {
+                        var corresp = allParametersB.Find(paramB => paramB.Name == paramA.Name);
+                        if(corresp == null)
+                        {
+                            includeParameterNames = true;
+                        }
+                        else if(corresp.Name != "ReturnSuccessIf")
+                        {
+                            allParametersSorted.Add((corresp, paramA.Type == "String"));
+                        }
+                    }
+                }
+
                 var ret = "";
                 if(invert) ret += "!";
                 if(IsAsync) ret += "await ";
                 ret += Type + "(" +
-                    string.Join(", ", filtered.Concat(OutParameters).Select(param => param.ToCSharp(true, true))) +
+                    string.Join(", ", allParametersSorted.Select((tuple) => tuple.Item1.ToCSharp(includeParameterNames, tuple.Item2))) +
                 ")";
                 return ret;
             }
