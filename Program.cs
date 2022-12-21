@@ -3,52 +3,95 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 var currentDir = Directory.GetCurrentDirectory();
-/*
 {
-var file = XElement.Load(Path.Combine(currentDir, "SBL.xml"));
-Debug.Assert(file.Name == "BlockDefinitions");
-var ret = "";
-foreach(var block in file.Elements("Block"))
+    var file = XElement.Load(Path.Combine(currentDir, "SBL.xml"));
+    Debug.Assert(file.Name == "BlockDefinitions");
+    var BD = new BlockDefinitions(file);
+    Console.WriteLine(BD.ToCSharp());
+}
 {
-    var name = block.Attribute("Name").Value;
-    var category = block.Attribute("Category").Value;
-    var subCategory = block.Attribute("SubCategory").Value;
-    var canHaveChildren = bool.Parse(block.Attribute("CanHaveChildren").Value);
-    var numberOfChildren = int.Parse(block.Attribute("NumberOfChildren").Value);
-    var description = block.Element("Description").Value;
-    var comments = block.Element("Comments").Value;
-    var parametersElement = block.Element("Parameters");
-    var inpParams = parametersElement.Elements("Parameter").Select(param => BlockDefinitionParam.Parse(param)).ToList();
-    var outParams = parametersElement.Elements("OutParameter").Select(param => BlockDefinitionParam.Parse(param)).ToList();
+    var file = XElement.Load(Path.Combine(currentDir, "GarenBT.xml"));
+    Debug.Assert(file.Name == "BehaviorTrees");
+    var BT = new BehaviorTrees(file);
+    Console.WriteLine(BT.ToCSharp());
+}
 
-    ret += $"/// <summary>\n";
-    ret += $"/// {description}\n";
-    ret += $"/// </summary>\n";
-    ret += $"/// <remarks>\n";
-    ret += $"/// {comments}\n";
-    ret += $"/// </remarks>\n";
-    foreach(var param in inpParams)
+class BlockDefinitions
+{
+    public List<BlockDefinition> Definitions = new();
+    public BlockDefinitions(XElement file)
     {
-        ret += $"/// <param name=\"{param.Name}\">{param.Description}</param>\n";
+        Definitions = file.Elements("Block").Select(
+            block => new BlockDefinition(block)
+        ).ToList();
     }
-    ret += $"public extern static Task<bool> {name}(" +
-        string.Join(", ", inpParams.Select(param => param.ToCSharp())) +
-    ");\n";
+    public string ToCSharp()
+    {
+        return
+        "using static SBL;\n" +
+        "public static class SBL\n" +
+        "{\n" +
+            (string.Join("\n", Definitions.Select(
+                block => block.ToCSharp()
+            ))).Indent() +
+        "\n}";
+    }
 }
-ret = "using static SBL;\npublic static class SBL\n" + "{\n" + ret.Indent() + "\n}";
-Console.WriteLine(ret);
-}
-//*/
 
-///*
+class BlockDefinition
 {
-var file = XElement.Load(Path.Combine(currentDir, "GarenBT.xml"));
-Debug.Assert(file.Name == "BehaviorTrees");
-var BT = BehaviorTrees.Parse(file);
-Console.WriteLine(BT.ToCSharp());
-}
-//*/
+    public string? Name;
+    public string? Category;
+    public string? SubCategory = "";
+    public bool CanHaveChildren = false;
+    public int NumberOfChildren = -1;
+    public string? Description;
+    public string? Comments;
+    public List<BlockDefinitionParam> Parameters = new();
+    public List<BlockDefinitionParam> OutParameters = new();
+    public BlockDefinition(XElement block)
+    {        
+        Name = block.Attribute("Name")?.Value;
+        Category = block.Attribute("Category")?.Value;
+        SubCategory = block.Attribute("SubCategory")?.Value;
+        CanHaveChildren = bool.Parse(block.Attribute("CanHaveChildren").Value);
+        NumberOfChildren = int.Parse(block.Attribute("NumberOfChildren").Value);
+        Description = block.Element("Description")?.Value;
+        Comments = block.Element("Comments")?.Value;
 
+        var parametersElement = block.Element("Parameters");
+        Parameters = parametersElement?.Elements("Parameter").Select(
+            param => new BlockDefinitionParam(param)
+        ).ToList() ?? new();
+        OutParameters = parametersElement?.Elements("OutParameter").Select(
+            param => new BlockDefinitionParam(param)
+        ).ToList() ?? new();
+    }
+
+    public string ToCSharp()
+    {
+        var ret = "";
+        ret += $"/// <summary>\n";
+        ret += $"/// {Description}\n";
+        ret += $"/// </summary>\n";
+        if(
+            Description?.ToLower().Replace(" ", "") !=
+            Comments?.ToLower().Replace(" ", "")
+        ){
+            ret += $"/// <remarks>\n";
+            ret += $"/// {Comments}\n";
+            ret += $"/// </remarks>\n";
+        }
+        foreach(var param in Parameters)
+        {
+            ret += $"/// <param name=\"{param.Name}\">{param.Description}</param>\n";
+        }
+        ret += $"public extern static Task<bool> {Name}(" +
+            string.Join(", ", Parameters.Select(param => param.ToCSharp())) +
+        ");";
+        return ret;
+    }
+}
 
 class BlockDefinitionParam
 {
@@ -58,17 +101,14 @@ class BlockDefinitionParam
     public string? Default = "";
     public string? VariableType;
     public string? Description;
-    public static BlockDefinitionParam Parse(XElement node)
+    public BlockDefinitionParam(XElement node)
     {
-        return new BlockDefinitionParam()
-        {
-            Out = node.Name == "OutParameter",
-            Name = node.Attribute("Name")?.Value,
-            Type = node.Attribute("Type")?.Value,
-            Default = node.Attribute("Default")?.Value,
-            VariableType = node.Attribute("VariableType")?.Value,
-            Description = node.Element("Description")?.Value,
-        };
+        Out = node.Name == "OutParameter";
+        Name = node.Attribute("Name")?.Value;
+        Type = node.Attribute("Type")?.Value;
+        Default = node.Attribute("Default")?.Value;
+        VariableType = node.Attribute("VariableType")?.Value;
+        Description = node.Element("Description")?.Value;
     }
 
     public string ToCSharp()
@@ -113,12 +153,11 @@ public static class StringExtensions
 class BehaviorTrees
 {
     public List<BehaviorTree> Trees = new();
-    public static BehaviorTrees Parse(XElement file)
+    public BehaviorTrees(XElement file)
     {
-        return new BehaviorTrees()
-        {
-            Trees = file.Elements("BehaviorTree").Select(node => BehaviorTree.Parse(node)).ToList()
-        };
+        Trees = file.Elements("BehaviorTree").Select(
+            node => new BehaviorTree(this, node)
+        ).ToList();
     }
 
     public string ToCSharp()
@@ -131,20 +170,21 @@ class BehaviorTree
 {
     public string? Name;
     public BehaviorTreeNode? Root;
-
-    public static BehaviorTree Parse(XElement node)
+    bool? isAsync = null;
+    public bool IsAsync => isAsync ?? (bool)(isAsync = Root.IsAsync);
+    public BehaviorTree(BehaviorTrees BTs, XElement node)
     {
-        var root = node.Element("Node");
-        return new BehaviorTree()
-        {
-            Name = node.Attribute("Name")?.Value,
-            Root = (root != null) ? BehaviorTreeNode.Parse(root) : null,
-        };
-    }
+        Name = node.Attribute("Name")?.Value;
 
+        var rootElement = node.Element("Node");
+        if(rootElement != null)
+            Root = new BehaviorTreeNode(BTs, rootElement);
+    }
     public string? ToCSharp()
     {
-        return $"async Task<bool> {Name}()\n" + "{\n" + ("return\n" + Root.ToCSharp() + ";").Indent() + "\n}";
+        return $"{(IsAsync ? "async Task<bool>" : "bool")} {Name}()\n" + "{\n" +
+            ("return\n" + Root.ToCSharp() + ";").Indent() +
+        "\n}";
     }
 }
 
@@ -155,26 +195,51 @@ class BehaviorTreeNode
     public List<BehaviorTreeNodeParameter> Parameters = new();
     public List<BehaviorTreeNodeParameter> OutParameters = new();
     public List<BehaviorTreeNode> Children = new();
-
-    public static BehaviorTreeNode Parse(XElement node)
+    bool? isAsync = null;
+    public bool IsAsync =>
+        isAsync ?? (bool)(isAsync = 
+            Type is "DebugAction" or "DelayNSecondsBlocking" or "PanCameraFromCurrentPositionToPoint" or "PlayVOAudioEvent" ||
+            (TrySubTree(out var subTreeIsAsync, out _) && subTreeIsAsync) ||
+            Children.Find(child => child.IsAsync) != null);
+    public WeakReference<BehaviorTrees> BehaviorTrees;
+    public BehaviorTreeNode(BehaviorTrees BTs, XElement node)
     {
+        BehaviorTrees = new(BTs);
+        Type = node.Attribute("Type")?.Value;
+        Name = node.Attribute("Name")?.Value;
+        
         var parametersElement = node.Element("Parameters");
-        return new BehaviorTreeNode()
-        {
-            Type = node.Attribute("Type")?.Value,
-            Name = node.Attribute("Name")?.Value,
-            Parameters = parametersElement?.Elements("Parameter").Select(
-                node => BehaviorTreeNodeParameter.Parse(node)
-            ).ToList() ?? new(),
-            OutParameters = parametersElement?.Elements("OutParameter").Select(
-                node => BehaviorTreeNodeParameter.Parse(node)
-            ).ToList() ?? new(),
-            Children = node.Element("Children")?.Elements("Node").Select(
-                node => Parse(node)
-            ).ToList() ?? new(),
-        };
-    }
+        Parameters = parametersElement?.Elements("Parameter").Select(
+            node => new BehaviorTreeNodeParameter(node)
+        ).ToList() ?? new();
+        OutParameters = parametersElement?.Elements("OutParameter").Select(
+            node => new BehaviorTreeNodeParameter(node)
+        ).ToList() ?? new();
 
+        Children = node.Element("Children")?.Elements("Node").Select(
+            node => new BehaviorTreeNode(BTs, node)
+        ).ToList() ?? new();
+    }
+    bool TrySubTree(out bool async, out string name)
+    {
+        if(Type == "SubTree")
+        {
+            var treeName = Parameters.Find(param => param.Name == "TreeName").Value!;
+            BehaviorTrees.TryGetTarget(out var behaviorTrees);
+            Debug.Assert(behaviorTrees != null);
+            var bt = behaviorTrees.Trees.Find(tree => tree.Name == treeName);
+            Debug.Assert(bt != null);
+            async = bt.IsAsync;
+            name = treeName;
+            return true;
+        }
+        else
+        {
+            async = false;
+            name = "";
+            return false;
+        }
+    }
     public string ToCSharp()
     {
         if(Type == "Sequence")
@@ -183,12 +248,14 @@ class BehaviorTreeNode
         }
         else if(Type == "Selector")
         {
-            return "(\n" + string.Join("\n||\n", Children.Select(node => node.ToCSharp())).Indent() + "\n)";
+            return "(\n" + string.Join(" ||\n", Children.Select(node => node.ToCSharp())).Indent() + "\n)";
         }
-        else if(Type == "SubTree")
+        else if(TrySubTree(out var isAsync, out var treeName))
         {
-            var treeName = Parameters.Find(param => param.Name == "TreeName").Value;
-            return $"await {treeName}()";
+            var ret = "";
+            if(isAsync) ret += "await ";
+            ret += treeName + "()";
+            return ret;
         }
         else if(Type == "MaskFailure")
         {
@@ -197,7 +264,6 @@ class BehaviorTreeNode
         }
         else
         {
-            var ret = "";
             bool invert = false;
             var filtered = Parameters.FindAll(param =>
             {
@@ -212,7 +278,7 @@ class BehaviorTreeNode
             {
                 var isStr = Type.Contains("String");
                 var input = filtered.Find(param => param.Name == "Input")!.ToCSharp(false, isStr);
-                ret = input;
+                var ret = input;
                 
                 var param = OutParameters[0];
                 return $"({param.Scope}.{param.Value} = {ret}, true)";
@@ -248,7 +314,7 @@ class BehaviorTreeNode
                     else if(eq) op += "=";
                     if(eq) op += "=";
                 }
-                ret = $"{left} {op} {right}";
+                var ret = $"{left} {op} {right}";
                 
                 if(OutParameters.Count >= 1)
                 {
@@ -260,13 +326,12 @@ class BehaviorTreeNode
             }
             else
             {
-                ret = $"await {Type}(" +
+                var ret = "";
+                if(invert) ret += "!";
+                if(IsAsync) ret += "await ";
+                ret += Type + "(" +
                     string.Join(", ", filtered.Concat(OutParameters).Select(param => param.ToCSharp(true, true))) +
                 ")";
-                if(invert)
-                {
-                    ret = $"!{ret}";
-                }
                 return ret;
             }
         }
@@ -282,17 +347,14 @@ class BehaviorTreeNodeParameter
     public string? VariableType; // "Value" | "Reference"
     public string? ReferenceType; // "AttackableUnit" | "AttackableUnitCollection" | "UnitType" | "TeamEnum" | "Bool" | "Int" | "Float" | "Vector"
 
-    public static BehaviorTreeNodeParameter Parse(XElement node)
+    public BehaviorTreeNodeParameter(XElement node)
     {
-        return new BehaviorTreeNodeParameter()
-        {
-            Out = node.Name == "OutParameter",
-            Name = node.Attribute("Name")?.Value,
-            Value = node.Attribute("Value")?.Value,
-            Scope = node.Attribute("Scope")?.Value,
-            VariableType = node.Attribute("VariableType")?.Value,
-            ReferenceType = node.Attribute("ReferenceType")?.Value,
-        };
+        Out = node.Name == "OutParameter";
+        Name = node.Attribute("Name")?.Value;
+        Value = node.Attribute("Value")?.Value;
+        Scope = node.Attribute("Scope")?.Value;
+        VariableType = node.Attribute("VariableType")?.Value;
+        ReferenceType = node.Attribute("ReferenceType")?.Value;
     }
 
     public string ToCSharp(bool includeName, bool isString)
