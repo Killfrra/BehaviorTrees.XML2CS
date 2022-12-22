@@ -25,24 +25,24 @@ class UnnamedBehaviourTree
     Vector3 AssistPosition;
     AttackableUnit PreviousTarget;
     
-    async Task<bool> GarenBehavior()
+    bool GarenBehavior()
     {
         
         return
         (
             GarenInit() &&
             (
-                await GarenAtBaseHealAndBuy() ||
-                await GarenLevelUp() ||
-                await GarenGameNotStarted() ||
+                GarenAtBaseHealAndBuy() ||
+                GarenLevelUp() ||
+                GarenGameNotStarted() ||
                 ReduceDamageTaken() ||
-                await GarenHighThreatManagement() ||
-                await GarenReturnToBase() ||
-                await GarenKillChampion() ||
-                await GarenLowThreatManagement() ||
+                GarenHighThreatManagement() ||
+                GarenReturnToBase() ||
+                GarenKillChampion() ||
+                GarenLowThreatManagement() ||
                 GarenHeal() ||
-                await GarenAttack() ||
-                await GarenPushLane()
+                GarenAttack() ||
+                GarenPushLane()
             )
         );
     }
@@ -178,7 +178,7 @@ class UnnamedBehaviourTree
         );
     }
     
-    async Task<bool> GarenAtBaseHealAndBuy()
+    bool GarenAtBaseHealAndBuy()
     {
         Vector3 BaseLocation;
         float Distance;
@@ -194,12 +194,12 @@ class UnnamedBehaviourTree
             SetVarBool(out this.TeleportHome, false) &&
             (
                 (
-                    await DebugAction(0, SUCCESS, "Start ----- Heal -----") &&
+                    DebugAction("Start ----- Heal -----") &&
                     GetUnitMaxHealth(out MaxHealth, this.Self) &&
                     GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
                     DivideFloat(out Health_Ratio, CurrentHealth, MaxHealth) &&
                     Health_Ratio < 0.95f &&
-                    await DebugAction(0, SUCCESS, "Success ----- Heal -----")
+                    DebugAction("Success ----- Heal -----")
                 ) ||
                 (
                     (
@@ -336,11 +336,11 @@ class UnnamedBehaviourTree
                     )
                 )
             ) &&
-            await DebugAction(0, SUCCESS, "++++ At Base Heal & Buy +++")
+            DebugAction("++++ At Base Heal & Buy +++")
         );
     }
     
-    async Task<bool> GarenLevelUp()
+    bool GarenLevelUp()
     {
         int SkillPoints;
         int Ability0Level;
@@ -357,7 +357,7 @@ class UnnamedBehaviourTree
                 (
                     TestUnitCanLevelUpSpell(this.Self, 3) &&
                     LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 3) &&
-                    await DebugAction(0, SUCCESS, "levelup 3")
+                    DebugAction("levelup 3")
                 ) ||
                 (
                     TestUnitCanLevelUpSpell(this.Self, 1) &&
@@ -374,53 +374,53 @@ class UnnamedBehaviourTree
                         )
                     ) &&
                     LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
-                    await DebugAction(0, SUCCESS, "levelup 0")
+                    DebugAction("levelup 0")
                 ) ||
                 (
                     (
                         TestUnitCanLevelUpSpell(this.Self, 2) &&
                         Ability2Level <= Ability0Level &&
                         LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 2) &&
-                        await DebugAction(0, SUCCESS, "levelup 0")
+                        DebugAction("levelup 0")
                     ) ||
                     (
                         TestUnitCanLevelUpSpell(this.Self, 0) &&
                         LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0) &&
-                        await DebugAction(0, SUCCESS, "levelup 0")
+                        DebugAction("levelup 0")
                     )
                 ) ||
                 (
                     TestUnitCanLevelUpSpell(this.Self, 1) &&
                     LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
-                    await DebugAction(0, SUCCESS, "levelup 0")
+                    DebugAction("levelup 0")
                 )
             ) &&
-            await DebugAction(0, SUCCESS, "++++ Level up ++++")
+            DebugAction("++++ Level up ++++")
         );
     }
     
-    async Task<bool> GarenGameNotStarted()
+    bool GarenGameNotStarted()
     {
         
         return
         (
             !TestGameStarted() &&
-            await DebugAction(0, SUCCESS, "+++ Game Not Started +++")
+            DebugAction("+++ Game Not Started +++")
         );
     }
     
-    async Task<bool> GarenAttack()
+    bool GarenAttack()
     {
         
         return
         (
-            await GarenAcquireTarget() &&
-            await GarenAttackTarget() &&
-            await DebugAction(0, SUCCESS, "++++ Attack ++++")
+            GarenAcquireTarget() &&
+            GarenAttackTarget() &&
+            DebugAction("++++ Attack ++++")
         );
     }
     
-    async Task<bool> GarenAcquireTarget()
+    bool GarenAcquireTarget()
     {
         IEnumerable<AttackableUnit> FriendlyUnits;
         AttackableUnit unit;
@@ -436,10 +436,10 @@ class UnnamedBehaviourTree
                 TestUnitIsVisible(this.Self, this.AggroTarget) &&
                 GarenDeaggroChecker() &&
                 this.LostAggro == false &&
-                await DebugAction(0, SUCCESS, "+++ Use Previous Target +++")
+                DebugAction("+++ Use Previous Target +++")
             ) ||
             (
-                await DebugAction(0, SUCCESS, "EnableOrDisableAllyAggro") &&
+                DebugAction("EnableOrDisableAllyAggro") &&
                 SetVarFloat(out this.CurrentClosestDistance, 800) &&
                 GetUnitsInTargetArea(out FriendlyUnits, this.Self, this.SelfPosition, 800, AffectFriends|AffectHeroes|AlwaysSelf) &&
                 SetVarBool(out this.ValueChanged, false) &&
@@ -454,10 +454,10 @@ class UnnamedBehaviourTree
                     SetVarVector(out this.AssistPosition, this.SelfPosition)
                 )) &&
                 this.ValueChanged == true &&
-                await DebugAction(0, SUCCESS, "+++ Acquired Ally under attack +++")
+                DebugAction("+++ Acquired Ally under attack +++")
             ) ||
             (
-                await DebugAction(0, SUCCESS, "??? EnableDisableAcquire New Target ???") &&
+                DebugAction("??? EnableDisableAcquire New Target ???") &&
                 SetVarFloat(out this.CurrentClosestDistance, 800) &&
                 GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectBuildings|AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
                 (
@@ -485,12 +485,12 @@ class UnnamedBehaviourTree
                 SetUnitAIAssistTarget(this.Self) &&
                 SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
                 SetVarVector(out this.AssistPosition, this.SelfPosition) &&
-                await DebugAction(0, SUCCESS, "+++ AcquiredNewTarget +++")
+                DebugAction("+++ AcquiredNewTarget +++")
             )
         );
     }
     
-    async Task<bool> GarenAttackTarget()
+    bool GarenAttackTarget()
     {
         AttackableUnit Target;
         TeamID SelfTeam;
@@ -518,7 +518,7 @@ class UnnamedBehaviourTree
                             this.StrengthRatioOverTime > 2 &&
                             GarenCanCastAbility2() &&
                             SetUnitAIAttackTarget(this.Self) &&
-                            await GarenCastAbility2()
+                            GarenCastAbility2()
                         ) ||
                         (
                             GarenCanCastAbility0() &&
@@ -538,17 +538,17 @@ class UnnamedBehaviourTree
                         ) ||
                         (
                             GarenCanCastAbility2() &&
-                            await GarenCastAbility2()
+                            GarenCastAbility2()
                         )
                     )
                 ) ||
                 GarenAutoAttackTarget()
             ) &&
-            await DebugAction(0, SUCCESS, "++ Attack Success ++")
+            DebugAction("++ Attack Success ++")
         );
     }
     
-    async Task<bool> GarenReturnToBase()
+    bool GarenReturnToBase()
     {
         Vector3 BaseLocation;
         float Distance;
@@ -580,7 +580,7 @@ class UnnamedBehaviourTree
                     )
                 ) ||
                 (
-                    await DebugAction(0, FAILURE, "EmptyNode: HighGold")
+                    !DebugAction("EmptyNode: HighGold")
                 )
             ) &&
             (
@@ -604,7 +604,7 @@ class UnnamedBehaviourTree
                             ) &&
                             IssueTeleportToBaseOrder() &&
                             ClearUnitAISpellPosition() &&
-                            await DebugAction(0, SUCCESS, "Yo")
+                            DebugAction("Yo")
                         ) ||
                         (
                             (
@@ -616,7 +616,7 @@ class UnnamedBehaviourTree
                             ) &&
                             GetUnitAISpellPosition(out TeleportPosition) &&
                             IssueMoveToPositionOrder(TeleportPosition) &&
-                            await DebugAction(0, SUCCESS, "Yo")
+                            DebugAction("Yo")
                         )
                     )
                 ) ||
@@ -625,11 +625,11 @@ class UnnamedBehaviourTree
                     IssueMoveToPositionOrder(BaseLocation)
                 )
             ) &&
-            await DebugAction(0, SUCCESS, "+++ Teleport Home +++")
+            DebugAction("+++ Teleport Home +++")
         );
     }
     
-    async Task<bool> GarenHighThreatManagement()
+    bool GarenHighThreatManagement()
     {
         bool SuperHighThreat;
         float MaxHealth;
@@ -646,7 +646,7 @@ class UnnamedBehaviourTree
                     GetUnitCurrentHealth(out Health, this.Self) &&
                     DivideFloat(out Health_Ratio, Health, MaxHealth) &&
                     Health_Ratio <= 0.25f &&
-                    await DebugAction(0, SUCCESS, "+++ LowHealthUnderAttack +++") &&
+                    DebugAction("+++ LowHealthUnderAttack +++") &&
                     SetVarBool(out SuperHighThreat, true)
                 ) ||
                 (
@@ -662,10 +662,10 @@ class UnnamedBehaviourTree
                             Damage_Ratio > 0.02f
                         )
                     ) &&
-                    await DebugAction(0, SUCCESS, "+++ BurstDamage +++")
+                    DebugAction("+++ BurstDamage +++")
                 )
             ) &&
-            await DebugAction(0, SUCCESS, "+++ High Threat +++") &&
+            DebugAction("+++ High Threat +++") &&
             ClearUnitAIAttackTarget() &&
             (
                 (
@@ -680,13 +680,13 @@ class UnnamedBehaviourTree
                     SetUnitAIAttackTarget(this.Self) &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
                 ) ||
-                await GarenMicroRetreat()
+                GarenMicroRetreat()
             ) &&
-            await DebugAction(0, SUCCESS, "+++ High Threat +++")
+            DebugAction("+++ High Threat +++")
         );
     }
     
-    async Task<bool> GarenLowThreatManagement()
+    bool GarenLowThreatManagement()
     {
         
         return
@@ -706,15 +706,15 @@ class UnnamedBehaviourTree
                 ) ||
                 (
                     ClearUnitAISafePosition() &&
-                    await DebugAction(0, FAILURE, "DoNotRemoveForcedFail")
+                    !DebugAction("DoNotRemoveForcedFail")
                 )
             ) &&
-            await GarenMicroRetreat() &&
-            await DebugAction(0, SUCCESS, "++++ Low Threat +++")
+            GarenMicroRetreat() &&
+            DebugAction("++++ Low Threat +++")
         );
     }
     
-    async Task<bool> GarenKillChampion()
+    bool GarenKillChampion()
     {
         float CurrentLowestHealthRatio;
         AttackableUnit unit;
@@ -747,7 +747,7 @@ class UnnamedBehaviourTree
                     SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
                     SetVarVector(out this.AssistPosition, this.SelfPosition) &&
                     SetVarBool(out Aggressive, false) &&
-                    await DebugAction(0, SUCCESS, "PassiveKillChampion")
+                    DebugAction("PassiveKillChampion")
                 ) ||
                 (
                     this.StrengthRatioOverTime < 5.1f &&
@@ -774,7 +774,7 @@ class UnnamedBehaviourTree
                     SetVarVector(out this.AssistPosition, this.SelfPosition) &&
                     SetVarBool(out Aggressive, true) &&
                     SetVarBool(out this.AggressiveKillMode, true) &&
-                    await DebugAction(0, SUCCESS, "+++ AggressiveMode +++")
+                    DebugAction("+++ AggressiveMode +++")
                 )
             ) &&
             (
@@ -785,22 +785,22 @@ class UnnamedBehaviourTree
                 (
                     Aggressive == true &&
                     GarenCanCastAbility3() &&
-                    await GarenCastAbility3() &&
-                    await DebugAction(0, SUCCESS, "+++ Use Ultiamte +++")
+                    GarenCastAbility3() &&
+                    DebugAction("+++ Use Ultiamte +++")
                 ) ||
                 (
                     !TestUnitHasBuff(this.Self, null, "GarenBladestorm") &&
                     GarenCanCastAbility2() &&
-                    await GarenCastAbility2()
+                    GarenCastAbility2()
                 ) ||
                 GarenAutoAttackTarget() ||
-                await DebugAction(0, SUCCESS, "+++ Attack Champion+++")
+                DebugAction("+++ Attack Champion+++")
             ) &&
-            await DebugAction(0, SUCCESS, "++++ Success: Kill  +++")
+            DebugAction("++++ Success: Kill  +++")
         );
     }
     
-    async Task<bool> GarenLastHitMinion()
+    bool GarenLastHitMinion()
     {
         float CurrentLowestHealthRatio;
         AttackableUnit unit;
@@ -830,11 +830,11 @@ class UnnamedBehaviourTree
                 SetVarAttackableUnit(out Target, this.CurrentClosestTarget)
             ) &&
             GarenAutoAttackTarget() &&
-            await DebugAction(0, SUCCESS, "+++++++ Last Hit ++++++++")
+            DebugAction("+++++++ Last Hit ++++++++")
         );
     }
     
-    async Task<bool> GarenMicroRetreat()
+    bool GarenMicroRetreat()
     {
         Vector3 SafePosition;
         float Distance;
@@ -848,11 +848,11 @@ class UnnamedBehaviourTree
                         DistanceBetweenObjectAndPoint(out Distance, this.Self, SafePosition) &&
                         Distance < 50 &&
                         ComputeUnitAISafePosition(800, false, false) &&
-                        await DebugAction(0, SUCCESS, "------- At location computed new position --------------")
+                        DebugAction("------- At location computed new position --------------")
                     ) ||
                     (
                         IssueMoveToPositionOrder(SafePosition) &&
-                        await DebugAction(0, SUCCESS, "------------ Success: Move to safe position ----------")
+                        DebugAction("------------ Success: Move to safe position ----------")
                     )
                 )
             ) ||
@@ -928,72 +928,72 @@ class UnnamedBehaviourTree
         );
     }
     
-    async Task<bool> GarenCastAbility0()
+    bool GarenCastAbility0()
     {
         float Range;
         AttackableUnit Target;
         float Distance;
         return
         (
-            await DebugAction(0, SUCCESS, "CastSubTree") &&
+            DebugAction("CastSubTree") &&
             GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 0) &&
             GetUnitAIAttackTarget(out Target) &&
             (
                 (
-                    await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
+                    DebugAction("Pareparing to cast ability 1") &&
                     GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                    await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
+                    DebugAction("GoingToRangeCheck") &&
                     Distance <= Range &&
-                    await DebugAction(0, SUCCESS, "Range Check Succses") &&
+                    DebugAction("Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0) &&
-                    await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
+                    DebugAction("Ability 1 Success ----------------")
                 ) ||
                 (
-                    await DebugAction(0, SUCCESS, "MoveIntoRangeSequence------------------") &&
+                    DebugAction("MoveIntoRangeSequence------------------") &&
                     IssueMoveToUnitOrder(Target) &&
-                    await DebugAction(0, SUCCESS, "Moving To Cast")
+                    DebugAction("Moving To Cast")
                 )
             )
         );
     }
     
-    async Task<bool> GarenCastAbility1()
+    bool GarenCastAbility1()
     {
         float Range;
         AttackableUnit Target;
         float Distance;
         return
         (
-            await DebugAction(0, SUCCESS, "CastSubTree") &&
+            DebugAction("CastSubTree") &&
             GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 1) &&
             GetUnitAIAttackTarget(out Target) &&
             (
                 (
-                    await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
+                    DebugAction("Pareparing to cast ability 1") &&
                     GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                    await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
+                    DebugAction("GoingToRangeCheck") &&
                     Distance <= Range &&
-                    await DebugAction(0, SUCCESS, "Range Check Succses") &&
+                    DebugAction("Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
-                    await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
+                    DebugAction("Ability 1 Success ----------------")
                 ) ||
                 (
-                    await DebugAction(0, SUCCESS, "MoveIntoRangeSequence------------------") &&
+                    DebugAction("MoveIntoRangeSequence------------------") &&
                     IssueMoveToUnitOrder(Target) &&
-                    await DebugAction(0, SUCCESS, "Moving To Cast")
+                    DebugAction("Moving To Cast")
                 )
             )
         );
     }
     
-    async Task<bool> GarenCastAbility2()
+    bool GarenCastAbility2()
     {
         AttackableUnit Target;
         float Range;
         float Distance;
         return
         (
-            await DebugAction(0, SUCCESS, "CastSubTree") &&
+            DebugAction("CastSubTree") &&
             GetUnitAIAttackTarget(out Target) &&
             (
                 (
@@ -1005,18 +1005,18 @@ class UnnamedBehaviourTree
                     SetVarFloat(out Range, 200) &&
                     (
                         (
-                            await DebugAction(0, SUCCESS, "Pareparing to cast ability 2") &&
+                            DebugAction("Pareparing to cast ability 2") &&
                             GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                            await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
+                            DebugAction("GoingToRangeCheck") &&
                             Distance <= Range &&
-                            await DebugAction(0, SUCCESS, "Range Check Succses") &&
+                            DebugAction("Range Check Succses") &&
                             CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 2) &&
-                            await DebugAction(0, SUCCESS, "Ability 2 Success ----------------")
+                            DebugAction("Ability 2 Success ----------------")
                         ) ||
                         (
-                            await DebugAction(0, SUCCESS, "MoveIntoRangeSequence------------------") &&
+                            DebugAction("MoveIntoRangeSequence------------------") &&
                             IssueMoveToUnitOrder(Target) &&
-                            await DebugAction(0, SUCCESS, "Moving To Cast")
+                            DebugAction("Moving To Cast")
                         )
                     )
                 )
@@ -1024,47 +1024,47 @@ class UnnamedBehaviourTree
         );
     }
     
-    async Task<bool> GarenCastAbility3()
+    bool GarenCastAbility3()
     {
         float Range;
         AttackableUnit Target;
         float Distance;
         return
         (
-            await DebugAction(0, SUCCESS, "CastSubTree") &&
+            DebugAction("CastSubTree") &&
             GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 3) &&
             GetUnitAIAttackTarget(out Target) &&
             (
                 (
-                    await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
+                    DebugAction("Pareparing to cast ability 1") &&
                     GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                    await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
+                    DebugAction("GoingToRangeCheck") &&
                     Distance <= Range &&
-                    await DebugAction(0, SUCCESS, "Range Check Succses") &&
+                    DebugAction("Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 3) &&
-                    await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
+                    DebugAction("Ability 1 Success ----------------")
                 ) ||
                 (
-                    await DebugAction(0, SUCCESS, "MoveIntoRangeSequence------------------") &&
+                    DebugAction("MoveIntoRangeSequence------------------") &&
                     IssueMoveToUnitOrder(Target) &&
-                    await DebugAction(0, SUCCESS, "Moving To Cast")
+                    DebugAction("Moving To Cast")
                 )
             )
         );
     }
     
-    async Task<bool> GarenPushLane()
+    bool GarenPushLane()
     {
         
         return
         (
             ClearUnitAIAttackTarget() &&
             IssueMoveOrder() &&
-            await DebugAction(0, SUCCESS, "+++ Move To Lane +++")
+            DebugAction("+++ Move To Lane +++")
         );
     }
     
-    async Task<bool> GarenMisc()
+    bool GarenMisc()
     {
         TeamID SelfTeam;
         TeamID UnitTeam;
@@ -1076,7 +1076,7 @@ class UnnamedBehaviourTree
         return
         (
             (
-                await DebugAction(0, FAILURE, "??? EnableOrDisablePreviousTarget ???") &&
+                !DebugAction("??? EnableOrDisablePreviousTarget ???") &&
                 TestUnitAIAttackTargetValid() &&
                 SetVarBool(out this.LostAggro, false) &&
                 GetUnitAIAttackTarget(out this.PreviousTarget) &&
@@ -1092,10 +1092,10 @@ class UnnamedBehaviourTree
                             Distance >= this.DeaggroDistance &&
                             ClearUnitAIAttackTarget() &&
                             SetVarBool(out this.LostAggro, true) &&
-                            await DebugAction(0, SUCCESS, "+++ Lost Aggro +++")
+                            DebugAction("+++ Lost Aggro +++")
                         ) || true) &&
                         Distance < this.DeaggroDistance &&
-                        await DebugAction(0, SUCCESS, "+++ In Aggro Range, Use Previous")
+                        DebugAction("+++ In Aggro Range, Use Previous")
                     ) ||
                     (
                         this.Self != Assist &&
@@ -1105,17 +1105,17 @@ class UnnamedBehaviourTree
                             Distance >= 1000 &&
                             ClearUnitAIAttackTarget() &&
                             SetVarBool(out this.LostAggro, true) &&
-                            await DebugAction(0, SUCCESS, "------- Losing aggro from assist ----------")
+                            DebugAction("------- Losing aggro from assist ----------")
                         ) || true) &&
                         Distance < 1000 &&
-                        await DebugAction(0, SUCCESS, "============= Use Previous Target: Still close to assist -----------")
+                        DebugAction("============= Use Previous Target: Still close to assist -----------")
                     )
                 ) &&
                 SetVarBool(out this.LostAggro, false) &&
-                await DebugAction(0, SUCCESS, "++ Use Previous Target ++")
+                DebugAction("++ Use Previous Target ++")
             ) &&
             (
-                await DebugAction(0, SUCCESS, "??? EnableDisableAcquire New Target ???") &&
+                DebugAction("??? EnableDisableAcquire New Target ???") &&
                 SetVarFloat(out this.CurrentClosestDistance, 800) &&
                 GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
                 (
@@ -1141,7 +1141,7 @@ class UnnamedBehaviourTree
                 SetUnitAIAssistTarget(this.Self) &&
                 SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
                 SetVarVector(out this.AssistPosition, this.SelfPosition) &&
-                await DebugAction(0, SUCCESS, "+++ AcquiredNewTarget +++")
+                DebugAction("+++ AcquiredNewTarget +++")
             )
         );
     }

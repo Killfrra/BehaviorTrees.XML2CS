@@ -16,6 +16,8 @@ var res = BT.ToCSharp();
 // Temporary fixes until the translator has learned to do it right
 res = Regex.Replace(res, @"\b(Affect\w+),(?! )", "$1|");
 res = Regex.Replace(res, @"\b(\d+\.\d+)\b", "$1f");
+res = res.Replace("DebugAction(0, SUCCESS, ",  "DebugAction(");
+res = res.Replace("DebugAction(0, FAILURE, ", "!DebugAction(");
 File.WriteAllText("GarenBT.cs", res);
 
 class BlockDefinitions
@@ -112,10 +114,14 @@ class BlockDefinition
                     $">? Child{i} = null")
             );
         }
-        ret += $"public static {(isAsync ? "Task<bool>" : "bool")} {Name}(" +
+        ret += $"public static {(isAsync ? "async Task<bool>" : "bool")} {Name}(" +
             string.Join(", ", paramStrings) +
         ")\n" + "{\n" +
-            "throw new NotImplementedException();".Indent() +
+            (string.Join("\n",
+                OutParameters.Select(
+                    param => $"{param.Name} = default;"
+                ).Concat(new string[]{ "return false;" })
+            )).Indent() +
         "\n}";
         return ret;
     }
@@ -346,7 +352,8 @@ class BehaviorTreeNode
     bool? isAsync = null;
     public static string[] AsyncBlockNames =
     {
-        "DebugAction", "DelayNSecondsBlocking", "PanCameraFromCurrentPositionToPoint", "PlayVOAudioEvent"
+        //"DebugAction",
+        "DelayNSecondsBlocking", "PanCameraFromCurrentPositionToPoint", "PlayVOAudioEvent"
     };
     public bool IsAsync =>
         isAsync ?? (bool)(isAsync = 

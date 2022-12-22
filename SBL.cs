@@ -11,20 +11,16 @@ public static class SBL
     /// <param name="Type">The type of the instance.  For now I strongly recommend only using DELETE_SELF.</param>
     public static bool CreateDynamicBTInstance(string TreeName, BTInstanceType Type)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
-    /// Debug node used to return an explicit value and write a string to log.  In the case that RUNNING is selected the node will return RUNNING a number of times equal to runningLimit.
+    /// Debug node used to return an explicit value and write a string to log.
     /// </summary>
-    /// <remarks>
-    /// Running limit is unused in non RUNNING types, and after the running limit has been reached the block will return SUCCESS
-    /// </remarks>
-    /// <param name="RunningLimit">How many times should we return RUNNING before returning SUCCESS?</param>
-    /// <param name="Result">What the node should return when ticked</param>
     /// <param name="String">The string that should be outputted to log</param>
-    public static Task<bool> DebugAction(int RunningLimit, BehaveResult Result, string String)
+    public static bool DebugAction(string String)
     {
-        throw new NotImplementedException();
+        Console.WriteLine(String);
+        return true;
     }
     /// <summary>
     /// Decorator that allows user to specify the number of times the subtree will run.
@@ -33,9 +29,9 @@ public static class SBL
     /// Need comment
     /// </remarks>
     /// <param name="RunningLimit">The number of times the sub tree is to be executed</param>
-    public static Task<bool> LoopNTimes(int RunningLimit, Func<Task<bool>>? Child0 = null)
+    public static async Task<bool> LoopNTimes(int RunningLimit, Func<Task<bool>>? Child0 = null)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Return RUNNING for X seconds after first tick.
@@ -44,9 +40,9 @@ public static class SBL
     /// This is a blocking delay and it uses the real timer not the game timer, so it is unaffected by pause.
     /// </remarks>
     /// <param name="DelayAmount">The amount of time to delay after first tick.</param>
-    public static Task<bool> DelayNSecondsBlocking(float DelayAmount)
+    public static async Task<bool> DelayNSecondsBlocking(float DelayAmount)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Enable/Disable a quest by name
@@ -58,7 +54,7 @@ public static class SBL
     /// <param name="Name">The name of the quest to adjust</param>
     public static bool SetBTInstanceStatus(bool Enabled, string Name)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Set all map barracks active/inactive
@@ -69,7 +65,7 @@ public static class SBL
     /// <param name="Enable">The status of the barracks</param>
     public static bool SetBarrackStatus(bool Enable)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Display objective text using the Tutorial1 flash element
@@ -80,7 +76,7 @@ public static class SBL
     /// <param name="String">The localized string to display.</param>
     public static bool ShowObjectiveText(string String)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Hide objective text using the Tutorial1 flash element
@@ -90,7 +86,7 @@ public static class SBL
     /// </remarks>
     public static bool HideObjectiveText()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Display auxiliary text using the Tutorial1 flash element
@@ -101,7 +97,7 @@ public static class SBL
     /// <param name="String">The localized string to display.</param>
     public static bool ShowAuxiliaryText(string String)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Hide auxiliary text using the Tutorial1 flash element
@@ -111,7 +107,7 @@ public static class SBL
     /// </remarks>
     public static bool HideAuxiliaryText()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Sets OutputRef with the value of Input
@@ -123,7 +119,8 @@ public static class SBL
     /// <param name="Input">Source Reference</param>
     public static bool SetVarBool(out bool Output, bool Input)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Sets OutputRef with the value of Input
@@ -135,7 +132,8 @@ public static class SBL
     /// <param name="Input">Source Reference</param>
     public static bool SetVarAttackableUnit(out AttackableUnit Output, AttackableUnit Input)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Sets OutputRef with the value of Input
@@ -147,7 +145,8 @@ public static class SBL
     /// <param name="Input">Source Reference</param>
     public static bool SetVarInt(out int Output, int Input)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Sets OutputRef with the value of Input
@@ -159,7 +158,8 @@ public static class SBL
     /// <param name="Input">Source Reference</param>
     public static bool SetVarDWORD(out uint Output, uint Input)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Sets OutputRef with the value of Input
@@ -171,7 +171,8 @@ public static class SBL
     /// <param name="Input">Source Reference</param>
     public static bool SetVarString(out string Output, string Input)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Sets OutputRef with the value of Input
@@ -183,7 +184,8 @@ public static class SBL
     /// <param name="Input">Source Reference</param>
     public static bool SetVarFloat(out float Output, float Input)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Sets OutputRef with the value of Input
@@ -195,7 +197,8 @@ public static class SBL
     /// <param name="Input">Source Reference</param>
     public static bool SetVarVector(out Vector3 Output, Vector3 Input)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Adds the LeftHandSide to the RightHandSide and places the result in Output
@@ -208,7 +211,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool AddInt(out int Output, int LeftHandSide, int RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Subtracts the LeftHandSide to the RightHandSide and places the result in Output
@@ -221,7 +225,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool SubtractInt(out int Output, int LeftHandSide, int RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Multiplies the LeftHandSide to the RightHandSide and places the result in Output
@@ -234,7 +239,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool MultiplyInt(out int Output, int LeftHandSide, int RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Divides the LeftHandSide to the RightHandSide and places the result in Output
@@ -247,7 +253,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool DivideInt(out int Output, int LeftHandSide, int RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Divides the LeftHandSide to the RightHandSide and places the result in Output
@@ -260,7 +267,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool ModulusInt(out int Output, int LeftHandSide, int RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the lesser value in Output
@@ -273,7 +281,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool MinInt(out int Output, int LeftHandSide, int RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the greater value in Output
@@ -286,7 +295,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool MaxInt(out int Output, int LeftHandSide, int RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Adds the LeftHandSide to the RightHandSide and places the result in Output
@@ -299,7 +309,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool AddFloat(out float Output, float LeftHandSide, float RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Subtracts the LeftHandSide to the RightHandSide and places the result in Output
@@ -312,7 +323,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool SubtractFloat(out float Output, float LeftHandSide, float RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Multiplies the LeftHandSide to the RightHandSide and places the result in Output
@@ -325,7 +337,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool MultiplyFloat(out float Output, float LeftHandSide, float RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Divides the LeftHandSide to the RightHandSide and places the result in Output
@@ -338,7 +351,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool DivideFloat(out float Output, float LeftHandSide, float RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the lesser value in Output
@@ -351,7 +365,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool MinFloat(out float Output, float LeftHandSide, float RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the greater value in Output
@@ -364,7 +379,8 @@ public static class SBL
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public static bool MaxFloat(out float Output, float LeftHandSide, float RightHandSide)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Gets a handle to the player and puts it in OutputRef
@@ -375,7 +391,8 @@ public static class SBL
     /// <param name="Output">Destination reference; holds a hero object handle</param>
     public static bool GetTutorialPlayer(out AttackableUnit Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns a handle to a collection containing all champions in the game.
@@ -386,7 +403,8 @@ public static class SBL
     /// <param name="Output">Destination reference; holds the collection of all champions in the game.</param>
     public static bool GetChampionCollection(out IEnumerable<Champion> Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns a handle to a collection containing all turrets alive in the game.
@@ -397,7 +415,8 @@ public static class SBL
     /// <param name="Output">Destination reference; holds the collection of all champions in the game.</param>
     public static bool GetTurretCollection(out IEnumerable<Turret> Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Gets a handle to the turret in a specific lane
@@ -411,7 +430,8 @@ public static class SBL
     /// <param name="Position">Position of the turret.  Check the level script for the enum.</param>
     public static bool GetTurret(out AttackableUnit Turret, TeamID Team, int Lane, int Position)
     {
-        throw new NotImplementedException();
+        Turret = default;
+        return false;
     }
     /// <summary>
     /// Gets a handle to the inhibitor in a specific lane
@@ -424,7 +444,8 @@ public static class SBL
     /// <param name="Lane">Lane of the inhibitor.  Check the level script for the enum.</param>
     public static bool GetInhibitor(out AttackableUnit Inhibitor, TeamID Team, int Lane)
     {
-        throw new NotImplementedException();
+        Inhibitor = default;
+        return false;
     }
     /// <summary>
     /// Gets a handle to the nexus on a specific teamin a specific lane
@@ -436,7 +457,8 @@ public static class SBL
     /// <param name="Team">Team of the nexus to return.</param>
     public static bool GetNexus(out AttackableUnit Nexus, TeamID Team)
     {
-        throw new NotImplementedException();
+        Nexus = default;
+        return false;
     }
     /// <summary>
     /// Returns the current position of a specific unit
@@ -448,7 +470,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitPosition(out Vector3 Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the current elapsed game time.  This will be affected by pausing, cheats, or other things.
@@ -459,7 +482,8 @@ public static class SBL
     /// <param name="Output">Destination reference; contains the currently elapsed game time.</param>
     public static bool GetGameTime(out float Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the lane position of a turret.
@@ -471,7 +495,8 @@ public static class SBL
     /// <param name="Turret">Turret to poll.</param>
     public static bool GetTurretPosition(out int Output, AttackableUnit Turret)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the max health of a specific unit
@@ -483,7 +508,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitMaxHealth(out float Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the current health of a specific unit
@@ -495,7 +521,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitCurrentHealth(out float Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the current Primary Ability Resource of a specific unit
@@ -508,7 +535,8 @@ public static class SBL
     /// <param name="PrimaryAbilityResourceType">Primary Ability Resource type.</param>
     public static bool GetUnitCurrentPAR(out float Output, AttackableUnit Unit, PrimaryAbilityResourceType PrimaryAbilityResourceType)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the maximum Primary Ability Resource of a specific unit
@@ -521,7 +549,8 @@ public static class SBL
     /// <param name="PrimaryAbilityResourceType">Primary Ability Resource type.</param>
     public static bool GetUnitMaxPAR(out float Output, AttackableUnit Unit, PrimaryAbilityResourceType PrimaryAbilityResourceType)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the current armor of a specific unit
@@ -533,7 +562,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitArmor(out float Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the number of discrete elements contained within the collection.
@@ -545,7 +575,8 @@ public static class SBL
     /// <param name="Collection">Collection to count.</param>
     public static bool GetCollectionCount(out int Output, IEnumerable<AttackableUnit> Collection)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the current skin of a specific unit
@@ -557,7 +588,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitSkinName(out string Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Turns on or off the highlight of a unit.
@@ -569,7 +601,7 @@ public static class SBL
     /// <param name="TargetUnit">Unit to be highlighted.</param>
     public static bool ToggleUnitHighlight(bool Enable, AttackableUnit TargetUnit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Pings a unit on the minimap.
@@ -582,7 +614,7 @@ public static class SBL
     /// <param name="PlayAudio">Play audio with ping?</param>
     public static bool PingMinimapUnit(AttackableUnit PingingUnit, AttackableUnit TargetUnit, bool PlayAudio)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Pings a location on the minimap.
@@ -595,7 +627,7 @@ public static class SBL
     /// <param name="PlayAudio">Play audio with ping?</param>
     public static bool PingMinimapLocation(AttackableUnit PingingUnit, Vector3 TargetPosition, bool PlayAudio)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Create a new quest and display it in the HUD
@@ -611,7 +643,8 @@ public static class SBL
     /// <param name="Tooltip">Optional: The tooltip to display on rollover of the quest.</param>
     public static bool ActivateQuest(out int QuestId, string String, AttackableUnit Player, QuestType QuestType, bool HandleRollOver, string Tooltip)
     {
-        throw new NotImplementedException();
+        QuestId = default;
+        return false;
     }
     /// <summary>
     /// Plays a quest completion animation and then removes it from the HUD
@@ -622,7 +655,7 @@ public static class SBL
     /// <param name="QuestId">Unique identfier used to refer to the quest; returned by ActivateQuest</param>
     public static bool CompleteQuest(int QuestId)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Removes quest from the HUD immediately
@@ -633,7 +666,7 @@ public static class SBL
     /// <param name="QuestId">Unique identfier used to refer to the quest; returned by ActivateQuest</param>
     public static bool RemoveQuest(int QuestId)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test to see if the quest has the mouse rolled over it
@@ -644,7 +677,7 @@ public static class SBL
     /// <param name="QuestId">Which Quest should we check?</param>
     public static bool TestQuestRolledOver(int QuestId)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test to see if the quest is being clicked right now with the mouse down over it.
@@ -655,7 +688,7 @@ public static class SBL
     /// <param name="QuestId">Which Quest should we check?</param>
     public static bool TestQuestClicked(int QuestId)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Create a new Tip and display it in the TipTracker
@@ -669,7 +702,8 @@ public static class SBL
     /// <param name="TipCategory">The localized string for the Tip Category.</param>
     public static bool ActivateTip(out int TipId, AttackableUnit Player, string TipName, string TipCategory)
     {
-        throw new NotImplementedException();
+        TipId = default;
+        return false;
     }
     /// <summary>
     /// Removes Tip from the Tip Tracker immediately
@@ -680,7 +714,7 @@ public static class SBL
     /// <param name="TipId">Unique identfier used to refer to the Tip; returned by ActivateTip</param>
     public static bool RemoveTip(int TipId)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Enables mouse events in the Tip Tracker
@@ -691,7 +725,7 @@ public static class SBL
     /// <param name="Player">The player whose Tip Tracker you want to enable</param>
     public static bool EnableTipEvents(AttackableUnit Player)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Disables mouse events in the Tip Tracker
@@ -702,7 +736,7 @@ public static class SBL
     /// <param name="Player">The player whose Tip Tracker you want to disable</param>
     public static bool DisableTipEvents(AttackableUnit Player)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Tests to see if a Tip in the Tip Tracker or a Tip Dialogue has been clicked by the user
@@ -713,7 +747,7 @@ public static class SBL
     /// <param name="TipId">Unique identfier used to refer to the Tip; returned by ActivateTip or ActivateTipDialogue</param>
     public static bool TestTipClicked(int TipId)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Create a new Tip Dialogue and display it in the HUD
@@ -728,7 +762,8 @@ public static class SBL
     /// <param name="TipImage">Optional. The path+filename of the image to display in the tap dialog.</param>
     public static bool ActivateTipDialogue(out int TipId, AttackableUnit Player, string TipName, string TipBody, string TipImage)
     {
-        throw new NotImplementedException();
+        TipId = default;
+        return false;
     }
     /// <summary>
     /// Enables mouse events in the Tip Dialogue
@@ -739,7 +774,7 @@ public static class SBL
     /// <param name="Player">The player whose Tip Dialogue you want to enable</param>
     public static bool EnableTipDialogueEvents(AttackableUnit Player)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Disables mouse events in the Tip Dialogue
@@ -750,7 +785,7 @@ public static class SBL
     /// <param name="Player">The player whose Tip Dialogue you want to disable</param>
     public static bool DisableTipDialogueEvents(AttackableUnit Player)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Creates a vector from three static components
@@ -764,7 +799,8 @@ public static class SBL
     /// <param name="Z">Z component</param>
     public static bool MakeVector(out Vector3 Vector, float X, float Y, float Z)
     {
-        throw new NotImplementedException();
+        Vector = default;
+        return false;
     }
     /// <summary>
     /// Turn on or off a UI highlight for a specific UI Element
@@ -776,7 +812,7 @@ public static class SBL
     /// <param name="Enabled">If true, turns on the UI Highlight, if false then turns off the UI Highlight</param>
     public static bool ToggleUIHighlight(UIElement UIElement, bool Enabled)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Keeps track whether a player has opened his scoreboard.
@@ -788,7 +824,8 @@ public static class SBL
     /// <param name="Unit">Handle of the attacking unit</param>
     public static bool RegisterScoreboardOpened(out bool Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Keeps track of the number of minions (not neutrals) not on the attacker's team killed by an attacker
@@ -800,7 +837,8 @@ public static class SBL
     /// <param name="Unit">Handle of the attacking unit</param>
     public static bool RegisterMinionKillCounter(out int Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns an int containing the number of kills the champion has.
@@ -812,7 +850,8 @@ public static class SBL
     /// <param name="Unit">Handle of the champion to poll</param>
     public static bool GetChampionKills(out int Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns an int containing the number of deaths the champion has.
@@ -824,7 +863,8 @@ public static class SBL
     /// <param name="Unit">Handle of the champion to poll</param>
     public static bool GetChampionDeaths(out int Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns an int containing the number of assists the champion has.
@@ -836,7 +876,8 @@ public static class SBL
     /// <param name="Unit">Handle of the champion to poll</param>
     public static bool GetChampionAssists(out int Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Gives target champion a variable amount of gold.
@@ -848,7 +889,7 @@ public static class SBL
     /// <param name="GoldAmount">Amount of gold to give the champion.</param>
     public static bool GiveChampionGold(AttackableUnit Unit, float GoldAmount)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Orders a unit to stop its movement.
@@ -859,7 +900,7 @@ public static class SBL
     /// <param name="Unit">Handle of the champion to order.</param>
     public static bool StopUnitMovement(AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test if a hero has a specific item.
@@ -871,7 +912,7 @@ public static class SBL
     /// <param name="ItemID">Numerical ID of the item to look for.</param>
     public static bool TestChampionHasItem(AttackableUnit Unit, int ItemID)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Pause or unpause the game.
@@ -882,7 +923,7 @@ public static class SBL
     /// <param name="Pause">Pause or unpause the game.</param>
     public static bool SetGamePauseState(bool Pause)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Pan the camera from its current position to a target point.
@@ -893,9 +934,9 @@ public static class SBL
     /// <param name="Unit">The unit whose camera is being manipulated.</param>
     /// <param name="TargetPosition">3D Point containing the target camera position.</param>
     /// <param name="Time">The amount of time the pan should take; this will scale the pan speed. </param>
-    public static Task<bool> PanCameraFromCurrentPositionToPoint(AttackableUnit Unit, Vector3 TargetPosition, float Time)
+    public static async Task<bool> PanCameraFromCurrentPositionToPoint(AttackableUnit Unit, Vector3 TargetPosition, float Time)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns the number of item slots filled for a particular champion.
@@ -907,7 +948,8 @@ public static class SBL
     /// <param name="Unit">Handle of the unit whose inventory you want to check.</param>
     public static bool GetNumberOfInventorySlotsFilled(out int Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the level of the target unit.
@@ -919,7 +961,8 @@ public static class SBL
     /// <param name="Unit">Handle of the unit whose level you want to check.</param>
     public static bool GetUnitLevel(out int Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the current XP total of the target champion.
@@ -931,7 +974,8 @@ public static class SBL
     /// <param name="Unit">Handle of the unit whose XP total you want to get.</param>
     public static bool GetUnitXP(out float Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the distance between the Unit and the Point
@@ -944,7 +988,8 @@ public static class SBL
     /// <param name="Point">Point</param>
     public static bool DistanceBetweenObjectAndPoint(out float Output, AttackableUnit Unit, Vector3 Point)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns a collection of units in the target area.
@@ -959,7 +1004,8 @@ public static class SBL
     /// <param name="SpellFlags">Associated spell flags for target filtering of the unit gathering check.</param>
     public static bool GetUnitsInTargetArea(out IEnumerable<AttackableUnit> Output, AttackableUnit Unit, Vector3 TargetLocation, float Radius, SpellFlags SpellFlags)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Test to see if unit is alive
@@ -970,7 +1016,7 @@ public static class SBL
     /// <param name="Unit">Unit to be tested</param>
     public static bool TestUnitCondition(AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test to see if unit is invulnerable
@@ -981,7 +1027,7 @@ public static class SBL
     /// <param name="Unit">Unit to be tested</param>
     public static bool TestUnitIsInvulnerable(AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test to see if unit is in brush
@@ -992,7 +1038,7 @@ public static class SBL
     /// <param name="Unit">Unit to be tested</param>
     public static bool TestUnitInBrush(AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test to see if unit has a specific buff
@@ -1005,7 +1051,7 @@ public static class SBL
     /// <param name="BuffName">Name of buff to be tested</param>
     public static bool TestUnitHasBuff(AttackableUnit TargetUnit, AttackableUnit CasterUnit, string BuffName)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test to see if a one unit has visibility of another unit
@@ -1017,7 +1063,7 @@ public static class SBL
     /// <param name="TargetUnit">Is this unit visible to the viewer unit?</param>
     public static bool TestUnitVisibility(AttackableUnit Viewer, AttackableUnit TargetUnit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Disabled or Enables all user input
@@ -1028,7 +1074,7 @@ public static class SBL
     /// <param name="Enabled">If False disables all input for all users. If True, enables it.</param>
     public static bool ToggleUserInput(bool Enabled)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Disabled or Enables the texture for fog of war for all users.
@@ -1039,7 +1085,7 @@ public static class SBL
     /// <param name="Enabled">If False disables the texture for all users for all users. If True, enables it.</param>
     public static bool ToggleFogOfWarTexture(bool Enabled)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Plays a localized VO event
@@ -1050,9 +1096,9 @@ public static class SBL
     /// <param name="EventID">FMOD event ID</param>
     /// <param name="FolderName">Folder the FMOD event is in in the Dialogue folder of the VO sound bank</param>
     /// <param name="FireAndForget">If true, plays sound as fire-and-forget and the node will return SUCCESS immediately.  If false, node will return RUNNING until the client tells the server that the VO is finished.</param>
-    public static Task<bool> PlayVOAudioEvent(string EventID, string FolderName, bool FireAndForget)
+    public static async Task<bool> PlayVOAudioEvent(string EventID, string FolderName, bool FireAndForget)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns the attack range for unit
@@ -1064,7 +1110,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitAttackRange(out float Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Disables or Enables initial neutral minion spawn.
@@ -1075,7 +1122,7 @@ public static class SBL
     /// <param name="Enabled">If True, enables neutral minion spawning; if False, delays neutral minion spawning.</param>
     public static bool SetNeutralSpawnEnabled(bool Enabled)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns the amount of gold the unit has
@@ -1087,7 +1134,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitGold(out float Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns unit unspent skill points
@@ -1099,7 +1147,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitSkillPoints(out int Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Adds a unit Perception Bubble
@@ -1117,7 +1166,8 @@ public static class SBL
     /// <param name="RevealSpecificUnitOnly">OPTIONAL. If set then only a units that have the RevealSpecificUnit state on are seeable by this bubble.</param>
     public static bool AddUnitPerceptionBubble(out uint BubbleID, AttackableUnit TargetUnit, float Radius, float Duration, TeamID Team, bool RevealStealth, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly)
     {
-        throw new NotImplementedException();
+        BubbleID = default;
+        return false;
     }
     /// <summary>
     /// Adds a position Perception Bubble
@@ -1135,7 +1185,8 @@ public static class SBL
     /// <param name="RevealSpecificUnitOnly">OPTIONAL. If set then only a units that have the RevealSpecificUnit state on are seeable by this bubble.</param>
     public static bool AddPositionPerceptionBubble(out uint BubbleID, Vector3 Position, float Radius, float Duration, TeamID Team, bool RevealStealth, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly)
     {
-        throw new NotImplementedException();
+        BubbleID = default;
+        return false;
     }
     /// <summary>
     /// Removes Perception Bubble
@@ -1146,7 +1197,7 @@ public static class SBL
     /// <param name="BubbleID">Unique identfier used to refer to the Perception Bubble; returned by AddPerceptionBubble nodes</param>
     public static bool RemovePerceptionBubble(uint BubbleID)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Adds a unit particle effect
@@ -1169,7 +1220,8 @@ public static class SBL
     /// <param name="SendIfOnScreenOrDiscard">If true, will only try to send the particle if a unit can see it when the particle spawns.  Use for one-shot particles; saves a lot of bandwidth, so use as often as possible.</param>
     public static bool CreateUnitParticle(out uint EffectID, AttackableUnit BindObject, string BoneName, string EffectName, AttackableUnit TargetObject, string TargetBoneName, Vector3 TargetPosition, Vector3 OrientTowards, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly, float FOWVisibilityRadius, TeamID FOWTeam, bool SendIfOnScreenOrDiscard)
     {
-        throw new NotImplementedException();
+        EffectID = default;
+        return false;
     }
     /// <summary>
     /// Adds a unit particle effect
@@ -1191,7 +1243,8 @@ public static class SBL
     /// <param name="SendIfOnScreenOrDiscard">If true, will only try to send the particle if a unit can see it when the particle spawns.  Use for one-shot particles; saves a lot of bandwidth, so use as often as possible.</param>
     public static bool CreatePositionParticle(out uint EffectID, Vector3 Position, string EffectName, AttackableUnit TargetObject, string TargetBoneName, Vector3 TargetPosition, Vector3 OrientTowards, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly, float FOWVisibilityRadius, TeamID FOWTeam, bool SendIfOnScreenOrDiscard)
     {
-        throw new NotImplementedException();
+        EffectID = default;
+        return false;
     }
     /// <summary>
     /// Removes Particle
@@ -1202,7 +1255,7 @@ public static class SBL
     /// <param name="EffectID">Unique identfier used to refer to the particle effect; returned by CreateParticle nodes</param>
     public static bool RemoveParticle(uint EffectID)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns unit Team ID
@@ -1214,7 +1267,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitTeam(out TeamID Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Sets unit state DisableAmbientGold.  If disabled, unit does not get ambient gold gain (but still gets gold/5 from runes).
@@ -1226,7 +1280,7 @@ public static class SBL
     /// <param name="Disabled">If true, ambient gold gain is disabled.</param>
     public static bool SetStateDisableAmbientGold(AttackableUnit Unit, bool Disabled)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Sets unit level cap.  Level cap 0 means no cap.  Otherwise unit will earn experience up to one XP less than the level cap.
@@ -1238,7 +1292,7 @@ public static class SBL
     /// <param name="LevelCap">If 0, no level cap; otherwise unit cannot get higher than this level.</param>
     public static bool SetUnitLevelCap(AttackableUnit Unit, int LevelCap)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Locks all player cameras to their champions.
@@ -1249,7 +1303,7 @@ public static class SBL
     /// <param name="Lock">If true, locks all player cameras to their champions.  If false, unlocks all player cameras from their champions.</param>
     public static bool LockAllPlayerCameras(bool Lock)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test to see if Player has camera locking enabled (camera locked to hero).
@@ -1260,7 +1314,7 @@ public static class SBL
     /// <param name="Player">Player to test.</param>
     public static bool TestPlayerCameraLocked(AttackableUnit Player)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// A Procedure call
@@ -1275,7 +1329,9 @@ public static class SBL
     /// <param name="ChatMessage">Chat string</param>
     public static bool Procedure2To2(out string Output1, out UnitType Output2, string PocedureName, AttackableUnit Unit, string ChatMessage)
     {
-        throw new NotImplementedException();
+        Output1 = default;
+        Output2 = default;
+        return false;
     }
     /// <summary>
     /// Test if game started
@@ -1285,7 +1341,7 @@ public static class SBL
     /// </remarks>
     public static bool TestGameStarted()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Tests if the specified unit is under attack
@@ -1296,7 +1352,7 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool TestUnitUnderAttack(AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns the type of a specific unit
@@ -1308,7 +1364,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitType(out UnitType Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the creature type of a specific unit
@@ -1320,7 +1377,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitCreatureType(out CreatureType Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Tests if the specified unit can use the specified spell
@@ -1333,7 +1391,7 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool TestCanCastSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Cast specified Spell
@@ -1346,7 +1404,7 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool CastUnitSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Set ignore visibility for a specific spell
@@ -1357,7 +1415,7 @@ public static class SBL
     /// <param name="IgnoreVisibility">Ignore visibility ?</param>
     public static bool SetUnitSpellIgnoreVisibity(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex, bool IgnoreVisibility)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Set specified Spell target position
@@ -1366,7 +1424,7 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool SetUnitAISpellTargetLocation(Vector3 TargetLocation, int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Set specified Spell target
@@ -1375,7 +1433,7 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool SetUnitAISpellTarget(AttackableUnit TargetUnit, int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Clears specified Spell target
@@ -1383,7 +1441,7 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool ClearUnitAISpellTarget(int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Test validity of specified Spell target
@@ -1391,7 +1449,7 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool TestUnitAISpellTargetValid(int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Gets the cooldown value for the spell in a given slot
@@ -1405,7 +1463,8 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool GetSpellSlotCooldown(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Gets the cooldown value for the spell in a given slot
@@ -1419,7 +1478,7 @@ public static class SBL
     /// <param name="Cooldown">Slot cooldown</param>
     public static bool SetSpellSlotCooldown(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex, float Cooldown)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns the PAR type for specified unit
@@ -1431,7 +1490,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitPARType(out PrimaryAbilityResourceType Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the cost for spell specified slot
@@ -1445,7 +1505,8 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool GetUnitSpellCost(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the cast range for spell specified slot
@@ -1459,7 +1520,8 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool GetUnitSpellCastRange(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the level for spell specified slot
@@ -1473,7 +1535,8 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool GetUnitSpellLevel(out int Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Levels up a specified spell
@@ -1483,7 +1546,7 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool LevelUpUnitSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Tests if the specified unit can level up the specified spell
@@ -1495,7 +1558,7 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool TestUnitCanLevelUpSpell(AttackableUnit Unit, int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Gets a handle to the the unit running the behavior tree in OutputRef
@@ -1506,14 +1569,15 @@ public static class SBL
     /// <param name="Output">Destination reference; holds a AI object handle</param>
     public static bool GetUnitAISelf(out AttackableUnit Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Unit run logic for first time
     /// </summary>
     public static bool TestUnitAIFirstTime()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Sets unit to assist
@@ -1524,7 +1588,7 @@ public static class SBL
     /// <param name="TargetUnit">Target unit</param>
     public static bool SetUnitAIAssistTarget(AttackableUnit TargetUnit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Sets unit to target
@@ -1535,7 +1599,7 @@ public static class SBL
     /// <param name="TargetUnit">Source Reference</param>
     public static bool SetUnitAIAttackTarget(AttackableUnit TargetUnit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Gets unit being assisted
@@ -1546,7 +1610,8 @@ public static class SBL
     /// <param name="Output">Destination reference</param>
     public static bool GetUnitAIAssistTarget(out AttackableUnit Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Gets unit being targeted
@@ -1557,7 +1622,8 @@ public static class SBL
     /// <param name="Output">Destination reference</param>
     public static bool GetUnitAIAttackTarget(out AttackableUnit Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Issue Move Order
@@ -1567,7 +1633,7 @@ public static class SBL
     /// </remarks>
     public static bool IssueMoveOrder()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Move Order
@@ -1578,7 +1644,7 @@ public static class SBL
     /// <param name="TargetUnit">Target Unit.</param>
     public static bool IssueMoveToUnitOrder(AttackableUnit TargetUnit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Move Order
@@ -1589,7 +1655,7 @@ public static class SBL
     /// <param name="Location">Position to move to</param>
     public static bool IssueMoveToPositionOrder(Vector3 Location)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Chase Order
@@ -1599,7 +1665,7 @@ public static class SBL
     /// </remarks>
     public static bool IssueChaseOrder()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Attack Order
@@ -1609,7 +1675,7 @@ public static class SBL
     /// </remarks>
     public static bool IssueAttackOrder()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Wander order
@@ -1619,7 +1685,7 @@ public static class SBL
     /// </remarks>
     public static bool IssueWanderOrder()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Emote Order
@@ -1630,7 +1696,7 @@ public static class SBL
     /// <param name="EmoteIndex">Emote ID</param>
     public static bool IssueAIEmoteOrder(uint EmoteIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Emote Order
@@ -1642,7 +1708,7 @@ public static class SBL
     /// <param name="EmoteIndex">Emote ID</param>
     public static bool IssueGloabalEmoteOrder(AttackableUnit Unit, uint EmoteIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Chat Order
@@ -1654,7 +1720,7 @@ public static class SBL
     /// <param name="ChatRcvr">Chat receiver</param>
     public static bool IssueAIChatOrder(string ChatMessage, string ChatRcvr)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Chat Order
@@ -1666,7 +1732,7 @@ public static class SBL
     /// <param name="ChatRcvr">Chat receiver</param>
     public static bool IssueImmediateChatOrder(string ChatMessage, string ChatRcvr)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue disable task
@@ -1676,7 +1742,7 @@ public static class SBL
     /// </remarks>
     public static bool IssueAIDisableTaskOrder()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue enable task
@@ -1686,21 +1752,21 @@ public static class SBL
     /// </remarks>
     public static bool IssueAIEnableTaskOrder()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Clear AI Attack target
     /// </summary>
     public static bool ClearUnitAIAttackTarget()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Clear AI assist target
     /// </summary>
     public static bool ClearUnitAIAssistTarget()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Teleport To base
@@ -1710,7 +1776,7 @@ public static class SBL
     /// </remarks>
     public static bool IssueTeleportToBaseOrder()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns the number of discrete attackers.
@@ -1722,21 +1788,22 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitAIAttackers(out IEnumerable<AttackableUnit> Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Unit can buy next recommended item
     /// </summary>
     public static bool TestUnitAICanBuyRecommendedItem()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Buy next recommended item
     /// </summary>
     public static bool UnitAIBuyRecommendedItem()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Unit can buy item
@@ -1744,7 +1811,7 @@ public static class SBL
     /// <param name="ItemID">Item to buy.</param>
     public static bool TestUnitAICanBuyItem(uint ItemID)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Buy item
@@ -1752,7 +1819,7 @@ public static class SBL
     /// <param name="ItemID">Item to buy.</param>
     public static bool UnitAIBuyItem(uint ItemID)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Computes a position for spell cast
@@ -1763,7 +1830,7 @@ public static class SBL
     /// <param name="UnitSide">Which side of target are we going to (in between our out)</param>
     public static bool ComputeUnitAISpellPosition(AttackableUnit TargetUnit, AttackableUnit ReferenceUnit, float Range, bool UnitSide)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Retrieves a position for spell cast
@@ -1771,21 +1838,22 @@ public static class SBL
     /// <param name="Output">Destination reference</param>
     public static bool GetUnitAISpellPosition(out Vector3 Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Clears position for spell cast
     /// </summary>
     public static bool ClearUnitAISpellPosition()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Unit precomputed cast location valid 
     /// </summary>
     public static bool TestUnitAISpellPositionValid()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Unit at precomputed spell cast location
@@ -1798,7 +1866,7 @@ public static class SBL
     /// <param name="Error">Accepted error</param>
     public static bool TestUnitAtLocation(AttackableUnit Unit, Vector3 Location, float Error)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Unit in safe range
@@ -1806,7 +1874,7 @@ public static class SBL
     /// <param name="Range">Unit in safe Range</param>
     public static bool TestUnitAIIsInSafeRange(float Range)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Computes a safe position for AI unit
@@ -1816,7 +1884,7 @@ public static class SBL
     /// <param name="UseEnemy">If True, use enemies to guide in search</param>
     public static bool ComputeUnitAISafePosition(float Range, bool UseDefender, bool UseEnemy)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Retrieves a safe position for AI unit
@@ -1824,21 +1892,22 @@ public static class SBL
     /// <param name="Output">Destination reference</param>
     public static bool GetUnitAISafePosition(out Vector3 Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Clears position for safe
     /// </summary>
     public static bool ClearUnitAISafePosition()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Unit precomputed safe location valid 
     /// </summary>
     public static bool TestUnitAISafePositionValid()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns the base location of a given unit
@@ -1850,7 +1919,8 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public static bool GetUnitAIBasePosition(out Vector3 Output, AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns the radius AOE of spell in a given slot
@@ -1864,7 +1934,8 @@ public static class SBL
     /// <param name="SlotIndex">Spell slot.</param>
     public static bool GetUnitSpellRadius(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Returns distance between 2 units
@@ -1877,7 +1948,8 @@ public static class SBL
     /// <param name="DestinationUnit">Destination unit</param>
     public static bool GetDistanceBetweenUnits(out float Output, AttackableUnit SourceUnit, AttackableUnit DestinationUnit)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Unit target is in range
@@ -1885,7 +1957,7 @@ public static class SBL
     /// <param name="Error">Accepted error for unit location</param>
     public static bool TestUnitAIAttackTargetInRange(float Error)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Unit has valid target
@@ -1895,7 +1967,7 @@ public static class SBL
     /// </remarks>
     public static bool TestUnitAIAttackTargetValid()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Unit can see target
@@ -1904,7 +1976,7 @@ public static class SBL
     /// <param name="TargetUnit">Target  Unit</param>
     public static bool TestUnitIsVisible(AttackableUnit Unit, AttackableUnit TargetUnit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Sets item target
@@ -1916,14 +1988,14 @@ public static class SBL
     /// <param name="ItemID">Item ID</param>
     public static bool SetUnitAIItemTarget(AttackableUnit TargetUnit, int ItemID)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Clears item target
     /// </summary>
     public static bool ClearUnitAIItemTarget()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Unit can use item
@@ -1931,7 +2003,7 @@ public static class SBL
     /// <param name="ItemID">Item ID</param>
     public static bool TestUnitAICanUseItem(int ItemID)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Issue Use item Order
@@ -1942,7 +2014,7 @@ public static class SBL
     /// <param name="ItemID">Item ID</param>
     public static bool IssueUseItemOrder(int ItemID)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Tests if specified slot has spell toggled ON
@@ -1951,7 +2023,7 @@ public static class SBL
     /// <param name="SlotIndex">spell slot ID</param>
     public static bool TestUnitSpellToggledOn(AttackableUnit Unit, int SlotIndex)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Tests if unit is channeling
@@ -1959,7 +2031,7 @@ public static class SBL
     /// <param name="Unit">Unit to poll</param>
     public static bool TestUnitIsChanneling(AttackableUnit Unit)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns unit that casted a buff on input unit
@@ -1969,14 +2041,15 @@ public static class SBL
     /// <param name="BuffName">Buff name</param>
     public static bool GetUnitBuffCaster(out AttackableUnit Output, AttackableUnit Unit, string BuffName)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// AI Unit has an assigned task
     /// </summary>
     public static bool TestUnitAIHasTask()
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Returns position computed by a task assigned to the unit
@@ -1984,7 +2057,8 @@ public static class SBL
     /// <param name="Output">Destination reference</param>
     public static bool GetUnitAITaskPosition(out Vector3 Output)
     {
-        throw new NotImplementedException();
+        Output = default;
+        return false;
     }
     /// <summary>
     /// Permanently modifies a target unit's armor.
@@ -1996,7 +2070,7 @@ public static class SBL
     /// <param name="Delta">Delta</param>
     public static bool IncPermanentFlatArmorMod(AttackableUnit Unit, float Delta)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Permanently modifies a target unit's magic resistance.
@@ -2008,7 +2082,7 @@ public static class SBL
     /// <param name="Delta">Delta</param>
     public static bool IncPermanentFlatMagicResistanceMod(AttackableUnit Unit, float Delta)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Permanently modifies a target unit's max health.  This will heal the target.
@@ -2020,7 +2094,7 @@ public static class SBL
     /// <param name="Delta">Delta</param>
     public static bool IncPermanentFlatMaxHealthMod(AttackableUnit Unit, float Delta)
     {
-        throw new NotImplementedException();
+        return false;
     }
     /// <summary>
     /// Permanently modifies a target unit's attack damage.
@@ -2032,6 +2106,6 @@ public static class SBL
     /// <param name="Delta">Delta</param>
     public static bool IncPermanentFlatAttackDamageMod(AttackableUnit Unit, float Delta)
     {
-        throw new NotImplementedException();
+        return false;
     }
 }
