@@ -98,6 +98,7 @@ class BlockDefinition
         var paramStrings = filteredParameters.Select(
             param => param.ToCSharp()
         );
+        //TODO: sync & async child versions
         bool isAsync = IsAsync;
         if(CanHaveChildren && NumberOfChildren > 0)
         {
@@ -111,9 +112,11 @@ class BlockDefinition
                     $">? Child{i} = null")
             );
         }
-        ret += $"public extern static {(isAsync ? "Task<bool>" : "bool")} {Name}(" +
+        ret += $"public static {(isAsync ? "Task<bool>" : "bool")} {Name}(" +
             string.Join(", ", paramStrings) +
-        ");";
+        ")\n" + "{\n" +
+            "throw new NotImplementedException();".Indent() +
+        "\n}";
         return ret;
     }
 }
@@ -641,6 +644,7 @@ class BehaviorTreeNodeParameter
         if(_scope == "Global")
             return $"this.{Value}";
         else //if(_scope == "Tree")
+            //TODO: Check
             if(Value is not ("" or null))
                 return Value;
         else
@@ -662,6 +666,7 @@ class BehaviorTreeNodeParameter
         {
             if(isString)
                 ret = '"' + Value + '"';
+            //TODO: Check
             else if(Value is not ("" or null))
                 ret = Value;
             else
