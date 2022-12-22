@@ -1769,17 +1769,17 @@ class UnnamedBehaviourTree
                 (
                     (
                         GetUnitType(out UnitType, Unit) &&
-                        EqualUnitType(UnitType, MINION_UNIT) &&
+                        UnitType == MINION_UNIT &&
                         AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 20)
                     ) ||
                     (
                         GetUnitType(out UnitType, Unit) &&
-                        EqualUnitType(UnitType, HERO_UNIT) &&
+                        UnitType == HERO_UNIT &&
                         AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 30)
                     ) ||
                     (
                         GetUnitType(out UnitType, Unit) &&
-                        EqualUnitType(UnitType, TURRET_UNIT) &&
+                        UnitType == TURRET_UNIT &&
                         AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 90)
                     )
                 )
@@ -1796,7 +1796,7 @@ class UnnamedBehaviourTree
             SetVarBool(out this.ValueChanged, false) &&
             IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
                 DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
-                LessFloat(Distance, this.CurrentClosestDistance) &&
+                Distance < this.CurrentClosestDistance &&
                 SetVarFloat(out this.CurrentClosestDistance, Distance) &&
                 SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&
                 SetVarBool(out this.ValueChanged, true)
@@ -1811,8 +1811,8 @@ class UnnamedBehaviourTree
         await MaskFailure(async () => (
             SetVarBool(out this.LostAggro, false) &&
             DistanceBetweenObjectAndPoint(out Distance, this.AggroTarget, this.AggroPosition) &&
-            GreaterFloat(Distance, 800) &&
-            LessFloat(Distance, 1200) &&
+            Distance > 800 &&
+            Distance < 1200 &&
             SetVarBool(out this.LostAggro, true)
         ));
     }
@@ -1851,8 +1851,8 @@ class UnnamedBehaviourTree
                         GetGameTime(out CurrentTime) &&
                         SubtractFloat(out TimeDiff, CurrentTime, this.PrevTime) &&
                         (
-                            GreaterFloat(TimeDiff, 1) ||
-                            LessFloat(TimeDiff, 0)
+                            TimeDiff > 1 ||
+                            TimeDiff < 0
                         ) &&
                         (
                             MultiplyFloat(out this.AccumulatedDamage, this.AccumulatedDamage, 0.8f) &&
@@ -1870,7 +1870,7 @@ class UnnamedBehaviourTree
                             GetUnitAIAttackers(out this.TargetCollection, this.Self) &&
                             await MaskFailure(async () => IterateUntilSuccessDecorator(out Unit, this.TargetCollection, async () => (
                                 GetUnitType(out UnitType, Unit) &&
-                                EqualUnitType(UnitType, TURRET_UNIT) &&
+                                UnitType == TURRET_UNIT &&
                                 AddFloat(out this.StrengthRatioOverTime, this.StrengthRatioOverTime, 8)
                             )))
                         ) &&
@@ -1879,7 +1879,7 @@ class UnnamedBehaviourTree
                     await MaskFailure(async () => (
                         GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
                         SubtractFloat(out NewDamage, this.PrevHealth, CurrentHealth) &&
-                        GreaterFloat(NewDamage, 0) &&
+                        NewDamage > 0 &&
                         AddFloat(out this.AccumulatedDamage, this.AccumulatedDamage, NewDamage)
                     )) &&
                     GetUnitCurrentHealth(out this.PrevHealth, this.Self)
@@ -1900,7 +1900,7 @@ class UnnamedBehaviourTree
         (
             GetUnitAIBasePosition(out BaseLocation, this.Self) &&
             DistanceBetweenObjectAndPoint(out Distance, this.Self, BaseLocation) &&
-            LessEqualFloat(Distance, 450) &&
+            Distance <= 450 &&
             SetVarBool(out this.TeleportHome, false) &&
             (
                 (
@@ -1908,7 +1908,7 @@ class UnnamedBehaviourTree
                     GetUnitMaxHealth(out MaxHealth, this.Self) &&
                     GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
                     DivideFloat(out Health_Ratio, CurrentHealth, MaxHealth) &&
-                    LessFloat(Health_Ratio, 0.95f) &&
+                    Health_Ratio < 0.95f &&
                     await DebugAction(0, SUCCESS, "Success ----- Heal -----")
                 ) ||
                 (
@@ -1982,7 +1982,7 @@ class UnnamedBehaviourTree
                     ) ||
                     (
                         GetUnitGold(out temp, this.Self) &&
-                        GreaterFloat(temp, 0) &&
+                        temp > 0 &&
                         TestChampionHasItem(this.Self, 3105) &&
                         TestChampionHasItem(this.Self, 3009) &&
                         TestChampionHasItem(this.Self, 3068) &&
@@ -2038,7 +2038,7 @@ class UnnamedBehaviourTree
                         )
                     ) ||
                     (
-                        GreaterInt(this.PotionsToBuy, 0) &&
+                        this.PotionsToBuy > 0 &&
                         !TestChampionHasItem(this.Self, 2003) &&
                         TestUnitAICanBuyItem(2003) &&
                         UnitAIBuyItem(2003) &&
@@ -2059,7 +2059,7 @@ class UnnamedBehaviourTree
         return
         (
             GetUnitSkillPoints(out SkillPoints, this.Self) &&
-            GreaterInt(SkillPoints, 0) &&
+            SkillPoints > 0 &&
             GetUnitSpellLevel(out Ability0Level, this.Self, SPELLBOOK_UNKNOWN, 0) &&
             GetUnitSpellLevel(out Ability1Level, this.Self, SPELLBOOK_UNKNOWN, 1) &&
             GetUnitSpellLevel(out Ability2Level, this.Self, SPELLBOOK_UNKNOWN, 2) &&
@@ -2073,14 +2073,14 @@ class UnnamedBehaviourTree
                     TestUnitCanLevelUpSpell(this.Self, 1) &&
                     (
                         (
-                            GreaterEqualInt(Ability0Level, 1) &&
-                            GreaterEqualInt(Ability2Level, 1) &&
-                            LessEqualInt(Ability1Level, 0)
+                            Ability0Level >= 1 &&
+                            Ability2Level >= 1 &&
+                            Ability1Level <= 0
                         ) ||
                         (
-                            GreaterEqualInt(Ability0Level, 3) &&
-                            GreaterEqualInt(Ability2Level, 3) &&
-                            LessEqualInt(Ability1Level, 1)
+                            Ability0Level >= 3 &&
+                            Ability2Level >= 3 &&
+                            Ability1Level <= 1
                         )
                     ) &&
                     LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
@@ -2089,7 +2089,7 @@ class UnnamedBehaviourTree
                 (
                     (
                         TestUnitCanLevelUpSpell(this.Self, 2) &&
-                        LessEqualInt(Ability2Level, Ability0Level) &&
+                        Ability2Level <= Ability0Level &&
                         LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 2) &&
                         await DebugAction(0, SUCCESS, "levelup 0")
                     ) ||
@@ -2145,7 +2145,7 @@ class UnnamedBehaviourTree
                 SetVarVector(out this.AggroPosition, this.AssistPosition) &&
                 TestUnitIsVisible(this.Self, this.AggroTarget) &&
                 await GarenDeaggroChecker() &&
-                EqualBool(this.LostAggro, false) &&
+                this.LostAggro == false &&
                 await DebugAction(0, SUCCESS, "+++ Use Previous Target +++")
             ) ||
             (
@@ -2157,13 +2157,13 @@ class UnnamedBehaviourTree
                     TestUnitUnderAttack(unit) &&
                     GetUnitAIAttackers(out this.TargetCollection, unit) &&
                     GarenFindClosestVisibleTarget() &&
-                    EqualBool(this.ValueChanged, true) &&
+                    this.ValueChanged == true &&
                     SetUnitAIAssistTarget(this.Self) &&
                     SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                    EqualUnit(unit, this.Self) &&
+                    unit == this.Self &&
                     SetVarVector(out this.AssistPosition, this.SelfPosition)
                 )) &&
-                EqualBool(this.ValueChanged, true) &&
+                this.ValueChanged == true &&
                 await DebugAction(0, SUCCESS, "+++ Acquired Ally under attack +++")
             ) ||
             (
@@ -2172,26 +2172,26 @@ class UnnamedBehaviourTree
                 GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectBuildings|AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
                 (
                     GetCollectionCount(out Count, this.TargetCollection) &&
-                    GreaterInt(Count, 0) &&
+                    Count > 0 &&
                     SetVarBool(out this.ValueChanged, false) &&
                     IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
                         DistanceBetweenObjectAndPoint(out Distance, unit, this.SelfPosition) &&
-                        LessFloat(Distance, this.CurrentClosestDistance) &&
+                        Distance < this.CurrentClosestDistance &&
                         TestUnitIsVisible(this.Self, unit) &&
                         (
                             (
-                                EqualBool(this.LostAggro, true) &&
+                                this.LostAggro == true &&
                                 GetUnitAIAttackTarget(out this.AggroTarget) &&
-                                NotEqualUnit(this.AggroTarget, unit)
+                                this.AggroTarget != unit
                             ) ||
-                            EqualBool(this.LostAggro, false)
+                            this.LostAggro == false
                         ) &&
                         SetVarFloat(out this.CurrentClosestDistance, Distance) &&
                         SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
                         SetVarBool(out this.ValueChanged, true)
                     ))
                 ) &&
-                EqualBool(this.ValueChanged, true) &&
+                this.ValueChanged == true &&
                 SetUnitAIAssistTarget(this.Self) &&
                 SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
                 SetVarVector(out this.AssistPosition, this.SelfPosition) &&
@@ -2214,18 +2214,18 @@ class UnnamedBehaviourTree
             GetUnitAIAttackTarget(out Target) &&
             GetUnitTeam(out SelfTeam, this.Self) &&
             GetUnitTeam(out TargetTeam, Target) &&
-            NotEqualUnitTeam(SelfTeam, TargetTeam) &&
+            SelfTeam != TargetTeam &&
             (
                 (
                     GetUnitType(out UnitType, Target) &&
-                    EqualUnitType(UnitType, MINION_UNIT) &&
+                    UnitType == MINION_UNIT &&
                     GetUnitCurrentHealth(out currentHealth, Target) &&
                     GetUnitMaxHealth(out MaxHealth, Target) &&
                     DivideFloat(out HP_Ratio, currentHealth, MaxHealth) &&
-                    LessFloat(HP_Ratio, 0.2f) &&
+                    HP_Ratio < 0.2f &&
                     (
                         (
-                            GreaterFloat(this.StrengthRatioOverTime, 2) &&
+                            this.StrengthRatioOverTime > 2 &&
                             GarenCanCastAbility2() &&
                             SetUnitAIAttackTarget(this.Self) &&
                             await GarenCastAbility2()
@@ -2239,7 +2239,7 @@ class UnnamedBehaviourTree
                 ) ||
                 (
                     GetUnitType(out UnitType, Target) &&
-                    EqualUnitType(UnitType, HERO_UNIT) &&
+                    UnitType == HERO_UNIT &&
                     (
                         (
                             GarenCanCastAbility0() &&
@@ -2271,7 +2271,7 @@ class UnnamedBehaviourTree
         (
             GetUnitAIBasePosition(out BaseLocation, this.Self) &&
             DistanceBetweenObjectAndPoint(out Distance, this.Self, BaseLocation) &&
-            GreaterFloat(Distance, 300) &&
+            Distance > 300 &&
             (
                 (
                     GetUnitMaxHealth(out MaxHealth, this.Self) &&
@@ -2279,12 +2279,12 @@ class UnnamedBehaviourTree
                     DivideFloat(out Health_Ratio, Health, MaxHealth) &&
                     (
                         (
-                            EqualBool(this.TeleportHome, true) &&
-                            LessEqualFloat(Health_Ratio, 0.35f)
+                            this.TeleportHome == true &&
+                            Health_Ratio <= 0.35f
                         ) ||
                         (
-                            EqualBool(this.TeleportHome, false) &&
-                            LessEqualFloat(Health_Ratio, 0.25f) &&
+                            this.TeleportHome == false &&
+                            Health_Ratio <= 0.25f &&
                             SetVarBool(out this.TeleportHome, true)
                         )
                     )
@@ -2298,17 +2298,17 @@ class UnnamedBehaviourTree
                     SetVarFloat(out this.CurrentClosestDistance, 30000) &&
                     GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 30000, AffectFriends|AffectTurrets) &&
                     GarenFindClosestTarget() &&
-                    EqualBool(this.ValueChanged, true) &&
+                    this.ValueChanged == true &&
                     (
                         (
                             GetDistanceBetweenUnits(out Distance, this.CurrentClosestTarget, this.Self) &&
-                            LessFloat(Distance, 125) &&
+                            Distance < 125 &&
                             (
                                 (
                                     TestUnitAISpellPositionValid() &&
                                     GetUnitAISpellPosition(out TeleportPosition) &&
                                     DistanceBetweenObjectAndPoint(out DistanceToTeleportPosition, this.Self, TeleportPosition) &&
-                                    LessFloat(DistanceToTeleportPosition, 50)
+                                    DistanceToTeleportPosition < 50
                                 ) ||
                                 !TestUnitAISpellPositionValid()
                             ) &&
@@ -2355,7 +2355,7 @@ class UnnamedBehaviourTree
                     GetUnitMaxHealth(out MaxHealth, this.Self) &&
                     GetUnitCurrentHealth(out Health, this.Self) &&
                     DivideFloat(out Health_Ratio, Health, MaxHealth) &&
-                    LessEqualFloat(Health_Ratio, 0.25f) &&
+                    Health_Ratio <= 0.25f &&
                     await DebugAction(0, SUCCESS, "+++ LowHealthUnderAttack +++") &&
                     SetVarBool(out SuperHighThreat, true)
                 ) ||
@@ -2364,12 +2364,12 @@ class UnnamedBehaviourTree
                     DivideFloat(out Damage_Ratio, this.AccumulatedDamage, MaxHealth) &&
                     (
                         (
-                            EqualBool(this.AggressiveKillMode, true) &&
-                            GreaterFloat(Damage_Ratio, 0.15f)
+                            this.AggressiveKillMode == true &&
+                            Damage_Ratio > 0.15f
                         ) ||
                         (
-                            EqualBool(this.AggressiveKillMode, false) &&
-                            GreaterFloat(Damage_Ratio, 0.02f)
+                            this.AggressiveKillMode == false &&
+                            Damage_Ratio > 0.02f
                         )
                     ) &&
                     await DebugAction(0, SUCCESS, "+++ BurstDamage +++")
@@ -2379,13 +2379,13 @@ class UnnamedBehaviourTree
             ClearUnitAIAttackTarget() &&
             (
                 (
-                    EqualBool(SuperHighThreat, true) &&
+                    SuperHighThreat == true &&
                     GarenCanCastAbility1() &&
                     SetUnitAIAttackTarget(this.Self) &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1)
                 ) ||
                 (
-                    EqualBool(SuperHighThreat, true) &&
+                    SuperHighThreat == true &&
                     GarenCanCastAbility0() &&
                     SetUnitAIAttackTarget(this.Self) &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
@@ -2403,14 +2403,14 @@ class UnnamedBehaviourTree
         (
             (
                 (
-                    GreaterFloat(this.StrengthRatioOverTime, 6) &&
+                    this.StrengthRatioOverTime > 6 &&
                     ClearUnitAIAttackTarget() &&
                     SetVarBool(out this.LowThreatMode, true)
                 ) ||
                 (
-                    EqualBool(this.LowThreatMode, true) &&
+                    this.LowThreatMode == true &&
                     SetVarBool(out this.LowThreatMode, false) &&
-                    GreaterFloat(this.StrengthRatioOverTime, 4) &&
+                    this.StrengthRatioOverTime > 4 &&
                     ClearUnitAIAttackTarget() &&
                     SetVarBool(out this.LowThreatMode, true)
                 ) ||
@@ -2439,7 +2439,7 @@ class UnnamedBehaviourTree
             SetVarBool(out this.AggressiveKillMode, false) &&
             (
                 (
-                    LessFloat(this.StrengthRatioOverTime, 3) &&
+                    this.StrengthRatioOverTime < 3 &&
                     GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies|AffectHeroes) &&
                     SetVarFloat(out CurrentLowestHealthRatio, 0.8f) &&
                     SetVarBool(out this.ValueChanged, false) &&
@@ -2447,13 +2447,13 @@ class UnnamedBehaviourTree
                         GetUnitCurrentHealth(out CurrentHealth, unit) &&
                         GetUnitMaxHealth(out MaxHealth, unit) &&
                         DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
-                        LessFloat(HP_Ratio, CurrentLowestHealthRatio) &&
+                        HP_Ratio < CurrentLowestHealthRatio &&
                         TestUnitIsVisible(this.Self, unit) &&
                         SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
                         SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
                         SetVarBool(out this.ValueChanged, true)
                     )) &&
-                    EqualBool(this.ValueChanged, true) &&
+                    this.ValueChanged == true &&
                     SetUnitAIAssistTarget(this.Self) &&
                     SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
                     SetVarVector(out this.AssistPosition, this.SelfPosition) &&
@@ -2461,11 +2461,11 @@ class UnnamedBehaviourTree
                     await DebugAction(0, SUCCESS, "PassiveKillChampion")
                 ) ||
                 (
-                    LessFloat(this.StrengthRatioOverTime, 5.1f) &&
+                    this.StrengthRatioOverTime < 5.1f &&
                     GetUnitMaxHealth(out MaxHealth, this.Self) &&
                     GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
                     DivideFloat(out MyHealthRatio, CurrentHealth, MaxHealth) &&
-                    GreaterFloat(MyHealthRatio, 0.5f) &&
+                    MyHealthRatio > 0.5f &&
                     GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 1000, AffectEnemies|AffectHeroes) &&
                     SetVarFloat(out CurrentLowestHealthRatio, 0.4f) &&
                     SetVarBool(out this.ValueChanged, false) &&
@@ -2473,13 +2473,13 @@ class UnnamedBehaviourTree
                         GetUnitCurrentHealth(out CurrentHealth, unit) &&
                         GetUnitMaxHealth(out MaxHealth, unit) &&
                         DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
-                        LessFloat(HP_Ratio, CurrentLowestHealthRatio) &&
+                        HP_Ratio < CurrentLowestHealthRatio &&
                         TestUnitIsVisible(this.Self, unit) &&
                         SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
                         SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
                         SetVarBool(out this.ValueChanged, true)
                     )) &&
-                    EqualBool(this.ValueChanged, true) &&
+                    this.ValueChanged == true &&
                     SetUnitAIAssistTarget(this.Self) &&
                     SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
                     SetVarVector(out this.AssistPosition, this.SelfPosition) &&
@@ -2494,7 +2494,7 @@ class UnnamedBehaviourTree
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
                 ) ||
                 (
-                    EqualBool(Aggressive, true) &&
+                    Aggressive == true &&
                     GarenCanCastAbility3() &&
                     await GarenCastAbility3() &&
                     await DebugAction(0, SUCCESS, "+++ Use Ultiamte +++")
@@ -2529,12 +2529,12 @@ class UnnamedBehaviourTree
                     GetUnitCurrentHealth(out CurrentHealth, unit) &&
                     GetUnitMaxHealth(out MaxHealth, unit) &&
                     DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
-                    LessFloat(HP_Ratio, CurrentLowestHealthRatio) &&
+                    HP_Ratio < CurrentLowestHealthRatio &&
                     SetVarBool(out this.ValueChanged, true) &&
                     SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
                     SetVarAttackableUnit(out this.CurrentClosestTarget, unit)
                 )) &&
-                EqualBool(this.ValueChanged, true) &&
+                this.ValueChanged == true &&
                 SetUnitAIAssistTarget(this.Self) &&
                 SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
                 SetVarVector(out this.AssistPosition, this.SelfPosition) &&
@@ -2557,7 +2557,7 @@ class UnnamedBehaviourTree
                 (
                     (
                         DistanceBetweenObjectAndPoint(out Distance, this.Self, SafePosition) &&
-                        LessFloat(Distance, 50) &&
+                        Distance < 50 &&
                         ComputeUnitAISafePosition(800, false, false) &&
                         await DebugAction(0, SUCCESS, "------- At location computed new position --------------")
                     ) ||
@@ -2585,7 +2585,7 @@ class UnnamedBehaviourTree
                     GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                     GetUnitAttackRange(out AttackRange, this.Self) &&
                     MultiplyFloat(out AttackRange, AttackRange, 0.9f) &&
-                    LessEqualFloat(Distance, AttackRange) &&
+                    Distance <= AttackRange &&
                     ClearUnitAIAttackTarget() &&
                     SetUnitAIAttackTarget(Target) &&
                     IssueAttackOrder()
@@ -2601,7 +2601,7 @@ class UnnamedBehaviourTree
         return
         (
             GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 0) &&
-            LessEqualFloat(Cooldown, 0) &&
+            Cooldown <= 0 &&
             TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 0)
         );
     }
@@ -2612,7 +2612,7 @@ class UnnamedBehaviourTree
         return
         (
             GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 1) &&
-            LessEqualFloat(Cooldown, 0) &&
+            Cooldown <= 0 &&
             TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 1)
         );
     }
@@ -2623,7 +2623,7 @@ class UnnamedBehaviourTree
         return
         (
             GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 2) &&
-            LessEqualFloat(Cooldown, 0) &&
+            Cooldown <= 0 &&
             TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 2)
         );
     }
@@ -2634,7 +2634,7 @@ class UnnamedBehaviourTree
         return
         (
             GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 0) &&
-            LessEqualFloat(Cooldown, 0) &&
+            Cooldown <= 0 &&
             TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 3)
         );
     }
@@ -2654,7 +2654,7 @@ class UnnamedBehaviourTree
                     await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
                     GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                     await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    LessEqualFloat(Distance, Range) &&
+                    Distance <= Range &&
                     await DebugAction(0, SUCCESS, "Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0) &&
                     await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
@@ -2683,7 +2683,7 @@ class UnnamedBehaviourTree
                     await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
                     GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                     await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    LessEqualFloat(Distance, Range) &&
+                    Distance <= Range &&
                     await DebugAction(0, SUCCESS, "Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
                     await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
@@ -2720,7 +2720,7 @@ class UnnamedBehaviourTree
                             await DebugAction(0, SUCCESS, "Pareparing to cast ability 2") &&
                             GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                             await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                            LessEqualFloat(Distance, Range) &&
+                            Distance <= Range &&
                             await DebugAction(0, SUCCESS, "Range Check Succses") &&
                             CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 2) &&
                             await DebugAction(0, SUCCESS, "Ability 2 Success ----------------")
@@ -2751,7 +2751,7 @@ class UnnamedBehaviourTree
                     await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
                     GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                     await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    LessEqualFloat(Distance, Range) &&
+                    Distance <= Range &&
                     await DebugAction(0, SUCCESS, "Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 3) &&
                     await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
@@ -2794,32 +2794,32 @@ class UnnamedBehaviourTree
                 GetUnitAIAttackTarget(out this.PreviousTarget) &&
                 GetUnitTeam(out SelfTeam, this.Self) &&
                 GetUnitTeam(out UnitTeam, this.PreviousTarget) &&
-                NotEqualUnitTeam(UnitTeam, SelfTeam) &&
+                UnitTeam != SelfTeam &&
                 GetUnitAIAssistTarget(out Assist) &&
                 (
                     (
-                        EqualUnit(Assist, this.Self) &&
+                        Assist == this.Self &&
                         DistanceBetweenObjectAndPoint(out Distance, this.Self, this.AssistPosition) &&
                         await MaskFailure(async () => (
-                            GreaterEqualFloat(Distance, this.DeaggroDistance) &&
+                            Distance >= this.DeaggroDistance &&
                             ClearUnitAIAttackTarget() &&
                             SetVarBool(out this.LostAggro, true) &&
                             await DebugAction(0, SUCCESS, "+++ Lost Aggro +++")
                         )) &&
-                        LessFloat(Distance, this.DeaggroDistance) &&
+                        Distance < this.DeaggroDistance &&
                         await DebugAction(0, SUCCESS, "+++ In Aggro Range, Use Previous")
                     ) ||
                     (
-                        NotEqualUnit(this.Self, Assist) &&
+                        this.Self != Assist &&
                         GetUnitPosition(out AssistPosition, Assist) &&
                         DistanceBetweenObjectAndPoint(out Distance, this.PreviousTarget, this.SelfPosition) &&
                         await MaskFailure(async () => (
-                            GreaterEqualFloat(Distance, 1000) &&
+                            Distance >= 1000 &&
                             ClearUnitAIAttackTarget() &&
                             SetVarBool(out this.LostAggro, true) &&
                             await DebugAction(0, SUCCESS, "------- Losing aggro from assist ----------")
                         )) &&
-                        LessFloat(Distance, 1000) &&
+                        Distance < 1000 &&
                         await DebugAction(0, SUCCESS, "============= Use Previous Target: Still close to assist -----------")
                     )
                 ) &&
@@ -2832,24 +2832,24 @@ class UnnamedBehaviourTree
                 GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
                 (
                     GetCollectionCount(out Count, this.TargetCollection) &&
-                    GreaterInt(Count, 0) &&
+                    Count > 0 &&
                     SetVarBool(out this.ValueChanged, false) &&
                     IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
                         (
                             (
-                                EqualBool(this.LostAggro, true) &&
-                                NotEqualUnit(Attacker, this.PreviousTarget)
+                                this.LostAggro == true &&
+                                Attacker != this.PreviousTarget
                             ) ||
-                            EqualBool(this.LostAggro, false)
+                            this.LostAggro == false
                         ) &&
                         DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
-                        LessFloat(Distance, this.CurrentClosestDistance) &&
+                        Distance < this.CurrentClosestDistance &&
                         SetVarFloat(out this.CurrentClosestDistance, Distance) &&
                         SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&
                         SetVarBool(out this.ValueChanged, true)
                     ))
                 ) &&
-                EqualBool(this.ValueChanged, true) &&
+                this.ValueChanged == true &&
                 SetUnitAIAssistTarget(this.Self) &&
                 SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
                 SetVarVector(out this.AssistPosition, this.SelfPosition) &&
@@ -2869,7 +2869,7 @@ class UnnamedBehaviourTree
             GetUnitMaxHealth(out MaxHealth, this.Self) &&
             DivideFloat(out HP_Ratio, Health, MaxHealth) &&
             (
-                LessFloat(HP_Ratio, 0.5f) &&
+                HP_Ratio < 0.5f &&
                 TestUnitAICanUseItem(2003) &&
                 IssueUseItemOrder(2003)
             )
@@ -2884,7 +2884,7 @@ class UnnamedBehaviourTree
         (
             GetUnitMaxHealth(out MaxHealth, this.Self) &&
             DivideFloat(out Damage_Ratio, this.AccumulatedDamage, MaxHealth) &&
-            GreaterEqualFloat(Damage_Ratio, 0.1f) &&
+            Damage_Ratio >= 0.1f &&
             (
                 (
                     GarenCanCastAbility1() &&
@@ -2909,7 +2909,7 @@ class UnnamedBehaviourTree
             SetVarBool(out this.ValueChanged, false) &&
             IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
                 DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
-                LessFloat(Distance, this.CurrentClosestDistance) &&
+                Distance < this.CurrentClosestDistance &&
                 TestUnitIsVisible(this.Self, Attacker) &&
                 SetVarFloat(out this.CurrentClosestDistance, Distance) &&
                 SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&

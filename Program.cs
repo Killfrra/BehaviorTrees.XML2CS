@@ -380,12 +380,13 @@ class BehaviorTreeNode
             "SetVarFloat",
             "SetVarVector"
         };
+        */
         public string[] Comparers =
         {
             "EqualInt", "NotEqualInt", "LessInt", "LessEqualInt", "GreaterInt", "GreaterEqualInt",
-            "AddInt", "SubtractInt", "MultiplyInt", "DivideInt", "ModulusInt",
+            //"AddInt", "SubtractInt", "MultiplyInt", "DivideInt", "ModulusInt",
             "EqualFloat", "NotEqualFloat", "LessFloat", "LessEqualFloat", "GreaterFloat", "GreaterEqualFloat",
-            "AddFloat", "SubtractFloat", "MultiplyFloat", "DivideFloat",
+            //"AddFloat", "SubtractFloat", "MultiplyFloat", "DivideFloat",
             "EqualUnit", "NotEqualUnit",
             "EqualPARType", "NotEqualPARType",
             "EqualUnitType", "NotEqualUnitType",
@@ -396,7 +397,6 @@ class BehaviorTreeNode
             "EqualString", "NotEqualString",
 
         };
-        */
         public List<string> All = new();
         public ReplacableClass()
         {
@@ -444,21 +444,26 @@ class BehaviorTreeNode
                 var ret = input;
                 
                 var param = OutParameters[0];
-                return $"({param.ScopeDotValue()} = {ret}, true)";
+                return $"MaskFailure(async () => {param.ScopeDotValue()} = {ret})";
             }
-            else if(Replacable.Comparers.Contains(Type))
-            {
+            else 
+            */
+            if(
+                Replacable.Comparers.Contains(Type)
+                && OutParameters.Count == 0
+            ){
                 var isStr = Type.Contains("String");
                 var left = Parameters.Find(param => param.Name == "LeftHandSide")!.ToCSharp(false, isStr);
                 var right = Parameters.Find(param => param.Name == "RightHandSide")!.ToCSharp(false, isStr);
                 var op = "";
-
+                /*
                 if(Type.StartsWith("Add")) op += "+";
                 else if(Type.StartsWith("Subtract")) op += "-";
                 else if(Type.StartsWith("Multiply")) op += "*";
                 else if(Type.StartsWith("Divide")) op += "/";
                 else if(Type.StartsWith("Modulus")) op += "%";
                 else
+                */
                 {
                     var eq = Type.Contains("Equal");
                     if(Type.StartsWith("NotEqual")) op += "!";
@@ -468,17 +473,17 @@ class BehaviorTreeNode
                     if(eq) op += "=";
                 }
                 var ret = $"{left} {op} {right}";
-                
+                /*
                 if(OutParameters.Count >= 1)
                 {
                     var param = OutParameters[0];
-                    return $"({param.ScopeDotValue()} = {ret}, true)";
+                    return $"MaskFailure(async () => {param.ScopeDotValue()} = {ret})";
                 }
                 else
+                */
                     return ret;
             }
             else
-            */
             {
                 BlockDefinitions.TryGetTarget(out var blockDefinitions);
                 Debug.Assert(blockDefinitions != null);
