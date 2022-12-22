@@ -1,6 +1,4 @@
-using static SBL;
 using System.Numerics;
-using static AllEnumMembers;
 public static class SBL
 {
     /// <summary>
@@ -11,7 +9,7 @@ public static class SBL
     /// </remarks>
     /// <param name="TreeName">Name of the tree to instantiate</param>
     /// <param name="Type">The type of the instance.  For now I strongly recommend only using DELETE_SELF.</param>
-    public extern static bool CreateDynamicBTInstance(string TreeName = "", BTInstanceType Type = DELETE_SELF);
+    public extern static bool CreateDynamicBTInstance(string TreeName, BTInstanceType Type);
     /// <summary>
     /// Debug node used to return an explicit value and write a string to log.  In the case that RUNNING is selected the node will return RUNNING a number of times equal to runningLimit.
     /// </summary>
@@ -21,7 +19,7 @@ public static class SBL
     /// <param name="RunningLimit">How many times should we return RUNNING before returning SUCCESS?</param>
     /// <param name="Result">What the node should return when ticked</param>
     /// <param name="String">The string that should be outputted to log</param>
-    public extern static Task<bool> DebugAction(int RunningLimit = 0, BehaveResult Result = SUCCESS, string String = "Yo");
+    public extern static Task<bool> DebugAction(int RunningLimit, BehaveResult Result, string String);
     /// <summary>
     /// Decorator that masks FAILURE.
     /// </summary>
@@ -36,31 +34,34 @@ public static class SBL
     /// Need comment
     /// </remarks>
     /// <param name="RunningLimit">The number of times the sub tree is to be executed</param>
-    public extern static bool LoopNTimes(int RunningLimit = 1, Func<Task<bool>>? Child0 = null);
+    public extern static Task<bool> LoopNTimes(int RunningLimit, Func<Task<bool>>? Child0 = null);
     /// <summary>
     /// Decorator that will iterate through a collection, looping its children for each entry.
     /// </summary>
     /// <remarks>
     /// Right now this only supports AttackableUnit collections.  This will always return SUCCESS.
     /// </remarks>
+    /// <param name="Output">Output reference for each individual iteration of the node.  This should only be referenced by children!</param>
     /// <param name="Collection">The collection that the iterator should loop over.</param>
-    public extern static bool IterateOverAllDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<Task<bool>>? Child0 = null);
+    public extern static Task<bool> IterateOverAllDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<AttackableUnit, Task<bool>>? Child0 = null);
     /// <summary>
     /// Decorator that will iterate through a collection, looping its children for each entry.  Iteration will stop when a child returns FAILURE.
     /// </summary>
     /// <remarks>
     /// Right now this only supports AttackableUnit collections.  This will return SUCCESS if all children return SUCCESS and FAILURE if one child returns FAILURE.
     /// </remarks>
+    /// <param name="Output">Output reference for each individual iteration of the node.  This should only be referenced by children!</param>
     /// <param name="Collection">The collection that the iterator should loop over.</param>
-    public extern static bool IterateUntilFailureDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<Task<bool>>? Child0 = null);
+    public extern static Task<bool> IterateUntilFailureDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<AttackableUnit, Task<bool>>? Child0 = null);
     /// <summary>
     /// Decorator that will iterate through a collection, looping its children for each entry.  Iteration will stop when a child returns SUCCESS.
     /// </summary>
     /// <remarks>
     /// Right now this only supports AttackableUnit collections.  This will return SUCCESS if a child returns SUCCESS and FAILURE if all children return FAILURE.
     /// </remarks>
+    /// <param name="Output">Output reference for each individual iteration of the node.  This should only be referenced by children!</param>
     /// <param name="Collection">The collection that the iterator should loop over.</param>
-    public extern static bool IterateUntilSuccessDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<Task<bool>>? Child0 = null);
+    public extern static Task<bool> IterateUntilSuccessDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<AttackableUnit, Task<bool>>? Child0 = null);
     /// <summary>
     /// Return RUNNING for X seconds after first tick.
     /// </summary>
@@ -68,7 +69,7 @@ public static class SBL
     /// This is a blocking delay and it uses the real timer not the game timer, so it is unaffected by pause.
     /// </remarks>
     /// <param name="DelayAmount">The amount of time to delay after first tick.</param>
-    public extern static Task<bool> DelayNSecondsBlocking(float DelayAmount = 0);
+    public extern static Task<bool> DelayNSecondsBlocking(float DelayAmount);
     /// <summary>
     /// Enable/Disable a quest by name
     /// </summary>
@@ -77,7 +78,7 @@ public static class SBL
     /// </remarks>
     /// <param name="Enabled">Should the quest be enabled or disabled?</param>
     /// <param name="Name">The name of the quest to adjust</param>
-    public extern static bool SetBTInstanceStatus(bool Enabled = true, string Name = "");
+    public extern static bool SetBTInstanceStatus(bool Enabled, string Name);
     /// <summary>
     /// Set all map barracks active/inactive
     /// </summary>
@@ -85,7 +86,7 @@ public static class SBL
     /// This functionally is the same as the kill minions cheat
     /// </remarks>
     /// <param name="Enable">The status of the barracks</param>
-    public extern static bool SetBarrackStatus(bool Enable = true);
+    public extern static bool SetBarrackStatus(bool Enable);
     /// <summary>
     /// Display objective text using the Tutorial1 flash element
     /// </summary>
@@ -93,7 +94,7 @@ public static class SBL
     /// This should only accept localized strings
     /// </remarks>
     /// <param name="String">The localized string to display.</param>
-    public extern static bool ShowObjectiveText(string String = "EMPTY STRING");
+    public extern static bool ShowObjectiveText(string String);
     /// <summary>
     /// Hide objective text using the Tutorial1 flash element
     /// </summary>
@@ -108,7 +109,7 @@ public static class SBL
     /// This should only accept localized strings
     /// </remarks>
     /// <param name="String">The localized string to display.</param>
-    public extern static bool ShowAuxiliaryText(string String = "EMPTY STRING");
+    public extern static bool ShowAuxiliaryText(string String);
     /// <summary>
     /// Hide auxiliary text using the Tutorial1 flash element
     /// </summary>
@@ -122,56 +123,63 @@ public static class SBL
     /// <remarks>
     /// This version is for bool References
     /// </remarks>
+    /// <param name="Output">Destination Reference</param>
     /// <param name="Input">Source Reference</param>
-    public extern static bool SetVarBool(out bool Output, bool Input = true);
+    public extern static bool SetVarBool(out bool Output, bool Input);
     /// <summary>
     /// Sets OutputRef with the value of Input
     /// </summary>
     /// <remarks>
     /// This version is for AttackableUnit References
     /// </remarks>
+    /// <param name="Output">Destination Reference</param>
     /// <param name="Input">Source Reference</param>
-    public extern static bool SetVarAttackableUnit(out AttackableUnit Output, AttackableUnit Input = True);
+    public extern static bool SetVarAttackableUnit(out AttackableUnit Output, AttackableUnit Input);
     /// <summary>
     /// Sets OutputRef with the value of Input
     /// </summary>
     /// <remarks>
     /// This version is for int References
     /// </remarks>
+    /// <param name="Output">Destination Reference</param>
     /// <param name="Input">Source Reference</param>
-    public extern static bool SetVarInt(out int Output, int Input = 0);
+    public extern static bool SetVarInt(out int Output, int Input);
     /// <summary>
     /// Sets OutputRef with the value of Input
     /// </summary>
     /// <remarks>
     /// This version is for int References
     /// </remarks>
+    /// <param name="Output">Destination Reference</param>
     /// <param name="Input">Source Reference</param>
-    public extern static bool SetVarDWORD(out DWORD Output, DWORD Input = 0);
+    public extern static bool SetVarDWORD(out uint Output, uint Input);
     /// <summary>
     /// Sets OutputRef with the value of Input
     /// </summary>
     /// <remarks>
     /// This version is for string References
     /// </remarks>
+    /// <param name="Output">Destination Reference</param>
     /// <param name="Input">Source Reference</param>
-    public extern static bool SetVarString(out string Output, string Input = "DEFAULT STRING");
+    public extern static bool SetVarString(out string Output, string Input);
     /// <summary>
     /// Sets OutputRef with the value of Input
     /// </summary>
     /// <remarks>
     /// This version is for float References
     /// </remarks>
+    /// <param name="Output">Destination Reference</param>
     /// <param name="Input">Source Reference</param>
-    public extern static bool SetVarFloat(out float Output, float Input = 0);
+    public extern static bool SetVarFloat(out float Output, float Input);
     /// <summary>
     /// Sets OutputRef with the value of Input
     /// </summary>
     /// <remarks>
     /// This version is for Vector References.  If you want to make a vector out of 3 floats, use MakeVector.
     /// </remarks>
+    /// <param name="Output">Destination Reference</param>
     /// <param name="Input">Source Reference</param>
-    public extern static bool SetVarVector(out Vector3 Output, Vector3 Input = Vector3.Zero);
+    public extern static bool SetVarVector(out Vector3 Output, Vector3 Input);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -180,7 +188,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualUnitTeam(TeamID LeftHandSide = TEAM_UNKNOWN, TeamID RightHandSide = TEAM_UNKNOWN);
+    public extern static bool EqualUnitTeam(TeamID LeftHandSide, TeamID RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -189,7 +197,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualUnitTeam(TeamID LeftHandSide = TEAM_UNKNOWN, TeamID RightHandSide = TEAM_UNKNOWN);
+    public extern static bool NotEqualUnitTeam(TeamID LeftHandSide, TeamID RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -198,7 +206,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualBool(bool LeftHandSide = true, bool RightHandSide = true);
+    public extern static bool EqualBool(bool LeftHandSide, bool RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -207,7 +215,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualBool(bool LeftHandSide = true, bool RightHandSide = true);
+    public extern static bool NotEqualBool(bool LeftHandSide, bool RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -216,7 +224,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualString(string LeftHandSide = "True", string RightHandSide = "True");
+    public extern static bool EqualString(string LeftHandSide, string RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -225,7 +233,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualString(string LeftHandSide = "True", string RightHandSide = "True");
+    public extern static bool NotEqualString(string LeftHandSide, string RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -234,7 +242,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualInt(int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool EqualInt(int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -243,7 +251,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualInt(int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool NotEqualInt(int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is less than the RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -252,7 +260,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool LessInt(int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool LessInt(int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is less than or equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -261,7 +269,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool LessEqualInt(int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool LessEqualInt(int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is greater than RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -270,7 +278,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool GreaterInt(int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool GreaterInt(int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is greater than or equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -279,7 +287,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool GreaterEqualInt(int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool GreaterEqualInt(int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -288,7 +296,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool EqualFloat(float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -297,7 +305,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool NotEqualFloat(float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is less than the RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -306,7 +314,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool LessFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool LessFloat(float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is less than or equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -315,7 +323,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool LessEqualFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool LessEqualFloat(float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is greater than RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -324,7 +332,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool GreaterFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool GreaterFloat(float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -333,7 +341,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualUnit(AttackableUnit LeftHandSide = 0, AttackableUnit RightHandSide = 0);
+    public extern static bool EqualUnit(AttackableUnit LeftHandSide, AttackableUnit RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -342,7 +350,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualUnit(AttackableUnit LeftHandSide = 0, AttackableUnit RightHandSide = 0);
+    public extern static bool NotEqualUnit(AttackableUnit LeftHandSide, AttackableUnit RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is greater than or equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -351,130 +359,144 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool GreaterEqualFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool GreaterEqualFloat(float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Adds the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Ints.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool AddInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool AddInt(out int Output, int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Subtracts the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Ints.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool SubtractInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool SubtractInt(out int Output, int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Multiplies the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Ints.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool MultiplyInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool MultiplyInt(out int Output, int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Divides the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Ints.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool DivideInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool DivideInt(out int Output, int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Divides the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Ints.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool ModulusInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool ModulusInt(out int Output, int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the lesser value in Output
     /// </summary>
     /// <remarks>
     /// This version is for Ints.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool MinInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool MinInt(out int Output, int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the greater value in Output
     /// </summary>
     /// <remarks>
     /// This version is for Ints.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool MaxInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    public extern static bool MaxInt(out int Output, int LeftHandSide, int RightHandSide);
     /// <summary>
     /// Adds the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Floats.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool AddFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool AddFloat(out float Output, float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Subtracts the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Floats.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool SubtractFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool SubtractFloat(out float Output, float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Multiplies the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Floats.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool MultiplyFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool MultiplyFloat(out float Output, float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Divides the LeftHandSide to the RightHandSide and places the result in Output
     /// </summary>
     /// <remarks>
     /// This version is for Floats.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool DivideFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool DivideFloat(out float Output, float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the lesser value in Output
     /// </summary>
     /// <remarks>
     /// This version is for Floats.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool MinFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool MinFloat(out float Output, float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the greater value in Output
     /// </summary>
     /// <remarks>
     /// This version is for Floats.  This will always return SUCCESS. 
     /// </remarks>
+    /// <param name="Output">Output reference of the operation</param>
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
-    public extern static bool MaxFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    public extern static bool MaxFloat(out float Output, float LeftHandSide, float RightHandSide);
     /// <summary>
     /// Gets a handle to the player and puts it in OutputRef
     /// </summary>
     /// <remarks>
     /// Only works in Tutorial, or other situation where there's only one player.  Works by getting the first player in the roster that has a legal client ID.
     /// </remarks>
+    /// <param name="Output">Destination reference; holds a hero object handle</param>
     public extern static bool GetTutorialPlayer(out AttackableUnit Output);
     /// <summary>
     /// Returns a handle to a collection containing all champions in the game.
@@ -482,6 +504,7 @@ public static class SBL
     /// <remarks>
     /// This is an unfiltered collection, so it contains champions who have disconnected or are played by bots.
     /// </remarks>
+    /// <param name="Output">Destination reference; holds the collection of all champions in the game.</param>
     public extern static bool GetChampionCollection(out IEnumerable<Champion> Output);
     /// <summary>
     /// Returns a handle to a collection containing all turrets alive in the game.
@@ -489,6 +512,7 @@ public static class SBL
     /// <remarks>
     /// This is an unfiltered collection, so it contains turrets on both teams.
     /// </remarks>
+    /// <param name="Output">Destination reference; holds the collection of all champions in the game.</param>
     public extern static bool GetTurretCollection(out IEnumerable<Turret> Output);
     /// <summary>
     /// Gets a handle to the turret in a specific lane
@@ -496,33 +520,37 @@ public static class SBL
     /// <remarks>
     /// I think this will return FAILURE if the turret is not alive, should confirm.
     /// </remarks>
+    /// <param name="Turret">Destination Reference; holds a turret object handle</param>
     /// <param name="Team">Team of the turrets to be checked.</param>
     /// <param name="Lane">Lane of the turret.  Check the level script for the enum.</param>
     /// <param name="Position">Position of the turret.  Check the level script for the enum.</param>
-    public extern static bool GetTurret(out AttackableUnit Turret, TeamID Team = TEAM_ORDER, int Lane = 1, int Position = 1);
+    public extern static bool GetTurret(out AttackableUnit Turret, TeamID Team, int Lane, int Position);
     /// <summary>
     /// Gets a handle to the inhibitor in a specific lane
     /// </summary>
     /// <remarks>
     /// I think this will return FAILURE if the inhibitor is not alive, should confirm.
     /// </remarks>
+    /// <param name="Inhibitor">Destination Reference; holds an inhibitor object handle</param>
     /// <param name="Team">Team of the inhibitor to be checked.</param>
     /// <param name="Lane">Lane of the inhibitor.  Check the level script for the enum.</param>
-    public extern static bool GetInhibitor(out AttackableUnit Inhibitor, TeamID Team = TEAM_ORDER, int Lane = 1);
+    public extern static bool GetInhibitor(out AttackableUnit Inhibitor, TeamID Team, int Lane);
     /// <summary>
     /// Gets a handle to the nexus on a specific teamin a specific lane
     /// </summary>
     /// <remarks>
     /// I think this will return FAILURE if the Nexus is not alive, should confirm.
     /// </remarks>
+    /// <param name="Nexus">Destination Reference; holds a nexus object handle</param>
     /// <param name="Team">Team of the nexus to return.</param>
-    public extern static bool GetNexus(out AttackableUnit Nexus, TeamID Team = TEAM_ORDER);
+    public extern static bool GetNexus(out AttackableUnit Nexus, TeamID Team);
     /// <summary>
     /// Returns the current position of a specific unit
     /// </summary>
     /// <remarks>
     /// Always returns SUCCESS
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the current position of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitPosition(out Vector3 Output, AttackableUnit Unit);
     /// <summary>
@@ -531,6 +559,7 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the currently elapsed game time.</param>
     public extern static bool GetGameTime(out float Output);
     /// <summary>
     /// Returns the lane position of a turret.
@@ -538,6 +567,7 @@ public static class SBL
     /// <remarks>
     /// This position is defined in the level script and is map specific.
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the integer position of the turret.  This is defined in the level script.</param>
     /// <param name="Turret">Turret to poll.</param>
     public extern static bool GetTurretPosition(out int Output, AttackableUnit Turret);
     /// <summary>
@@ -546,6 +576,7 @@ public static class SBL
     /// <remarks>
     /// MAX health
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the max health of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitMaxHealth(out float Output, AttackableUnit Unit);
     /// <summary>
@@ -554,6 +585,7 @@ public static class SBL
     /// <remarks>
     /// CURRENT health
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the current health of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitCurrentHealth(out float Output, AttackableUnit Unit);
     /// <summary>
@@ -562,24 +594,27 @@ public static class SBL
     /// <remarks>
     /// CURRENT health
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the current Primary Ability Resource value of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="PrimaryAbilityResourceType">Primary Ability Resource type.</param>
-    public extern static bool GetUnitCurrentPAR(out float Output, AttackableUnit Unit, PrimaryAbilityResourceType PrimaryAbilityResourceType = PAR_MANA);
+    public extern static bool GetUnitCurrentPAR(out float Output, AttackableUnit Unit, PrimaryAbilityResourceType PrimaryAbilityResourceType);
     /// <summary>
     /// Returns the maximum Primary Ability Resource of a specific unit
     /// </summary>
     /// <remarks>
     /// MAX PAR
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the maximum Primary Ability Resource value of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="PrimaryAbilityResourceType">Primary Ability Resource type.</param>
-    public extern static bool GetUnitMaxPAR(out float Output, AttackableUnit Unit, PrimaryAbilityResourceType PrimaryAbilityResourceType = PAR_MANA);
+    public extern static bool GetUnitMaxPAR(out float Output, AttackableUnit Unit, PrimaryAbilityResourceType PrimaryAbilityResourceType);
     /// <summary>
     /// Returns the current armor of a specific unit
     /// </summary>
     /// <remarks>
     /// CURRENT armor
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the current armor of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitArmor(out float Output, AttackableUnit Unit);
     /// <summary>
@@ -588,6 +623,7 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the number of elements in the collection.</param>
     /// <param name="Collection">Collection to count.</param>
     public extern static bool GetCollectionCount(out int Output, IEnumerable<AttackableUnit> Collection);
     /// <summary>
@@ -596,6 +632,7 @@ public static class SBL
     /// <remarks>
     /// Since buildings don't hame skins, it will return the name of the building.
     /// </remarks>
+    /// <param name="Output">Destination reference; contains the skin name of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitSkinName(out string Output, AttackableUnit Unit);
     /// <summary>
@@ -616,7 +653,7 @@ public static class SBL
     /// <param name="PingingUnit">Unit originating the ping.  Important for team coloration and chat info.</param>
     /// <param name="TargetUnit">Unit to be pinged.</param>
     /// <param name="PlayAudio">Play audio with ping?</param>
-    public extern static bool PingMinimapUnit(AttackableUnit PingingUnit, AttackableUnit TargetUnit, bool PlayAudio = true);
+    public extern static bool PingMinimapUnit(AttackableUnit PingingUnit, AttackableUnit TargetUnit, bool PlayAudio);
     /// <summary>
     /// Pings a location on the minimap.
     /// </summary>
@@ -626,19 +663,20 @@ public static class SBL
     /// <param name="PingingUnit">Unit originating the ping.  Important for team coloration and chat info.</param>
     /// <param name="TargetPosition">Location to be pinged.</param>
     /// <param name="PlayAudio">Play audio with ping?</param>
-    public extern static bool PingMinimapLocation(AttackableUnit PingingUnit, Vector3 TargetPosition = Vector3.Zero, bool PlayAudio = true);
+    public extern static bool PingMinimapLocation(AttackableUnit PingingUnit, Vector3 TargetPosition, bool PlayAudio);
     /// <summary>
     /// Create a new quest and display it in the HUD
     /// </summary>
     /// <remarks>
     /// This should only accept localized strings
     /// </remarks>
+    /// <param name="QuestId">Gives a unique identifier to refer back to this quest</param>
     /// <param name="String">The localized string to display.</param>
     /// <param name="Player">The player whose quest you want to activate</param>
     /// <param name="QuestType">Quest type; which quest tracker you want the quest to be added to</param>
     /// <param name="HandleRollOver">OPTIONAL. Should we handle the mousing rolling over and rolling out from this quest?</param>
     /// <param name="Tooltip">Optional: The tooltip to display on rollover of the quest.</param>
-    public extern static bool ActivateQuest(out int QuestId, string String = "EMPTY STRING", AttackableUnit Player, QuestType QuestType = PRIMARY_QUEST, bool HandleRollOver = false, string Tooltip = "");
+    public extern static bool ActivateQuest(out int QuestId, string String, AttackableUnit Player, QuestType QuestType, bool HandleRollOver, string Tooltip);
     /// <summary>
     /// Plays a quest completion animation and then removes it from the HUD
     /// </summary>
@@ -677,10 +715,11 @@ public static class SBL
     /// <remarks>
     /// This should only accept localized strings
     /// </remarks>
+    /// <param name="TipId">Gives a unique identifier to refer back to this Tip.</param>
     /// <param name="Player">The player whose tip you want to activate.</param>
     /// <param name="TipName">The localized string for the Tip Name.</param>
     /// <param name="TipCategory">The localized string for the Tip Category.</param>
-    public extern static bool ActivateTip(out int TipId, AttackableUnit Player, string TipName = "EMPTY STRING", string TipCategory = "EMPTY STRING");
+    public extern static bool ActivateTip(out int TipId, AttackableUnit Player, string TipName, string TipCategory);
     /// <summary>
     /// Removes Tip from the Tip Tracker immediately
     /// </summary>
@@ -719,11 +758,12 @@ public static class SBL
     /// <remarks>
     /// This should only accept localized strings
     /// </remarks>
+    /// <param name="TipId">Gives a unique identifier to refer back to this Tip Dialogue.</param>
     /// <param name="Player">The player whose tip you want to activate.</param>
     /// <param name="TipName">The localized string for the Tip Name.</param>
     /// <param name="TipBody">The localized string for the Tip Body.</param>
     /// <param name="TipImage">Optional. The path+filename of the image to display in the tap dialog.</param>
-    public extern static bool ActivateTipDialogue(out int TipId, AttackableUnit Player, string TipName = "EMPTY STRING", string TipBody = "EMPTY STRING", string TipImage = "");
+    public extern static bool ActivateTipDialogue(out int TipId, AttackableUnit Player, string TipName, string TipBody, string TipImage);
     /// <summary>
     /// Enables mouse events in the Tip Dialogue
     /// </summary>
@@ -746,10 +786,11 @@ public static class SBL
     /// <remarks>
     /// If you want to copy a Vector, use SetVarVector.
     /// </remarks>
+    /// <param name="Vector">OutputVector</param>
     /// <param name="X">X component</param>
     /// <param name="Y">Y component</param>
     /// <param name="Z">Z component</param>
-    public extern static bool MakeVector(out Vector3 Vector, float X = 0, float Y = 0, float Z = 0);
+    public extern static bool MakeVector(out Vector3 Vector, float X, float Y, float Z);
     /// <summary>
     /// Turn on or off a UI highlight for a specific UI Element
     /// </summary>
@@ -758,13 +799,14 @@ public static class SBL
     /// </remarks>
     /// <param name="UIElement">UIElement; which element on the minimap do you want to highlight</param>
     /// <param name="Enabled">If true, turns on the UI Highlight, if false then turns off the UI Highlight</param>
-    public extern static bool ToggleUIHighlight(UIElement UIElement = UI_MINIMAP, bool Enabled = true);
+    public extern static bool ToggleUIHighlight(UIElement UIElement, bool Enabled);
     /// <summary>
     /// Keeps track whether a player has opened his scoreboard.
     /// </summary>
     /// <remarks>
     /// Ticking this registers with the event system; disabling the tree unregisters the callback and clears the count
     /// </remarks>
+    /// <param name="Output">Destination Reference; holds whether the scoreboard has been opened since the tree was enabled.</param>
     /// <param name="Unit">Handle of the attacking unit</param>
     public extern static bool RegisterScoreboardOpened(out bool Output, AttackableUnit Unit);
     /// <summary>
@@ -773,6 +815,7 @@ public static class SBL
     /// <remarks>
     /// Ticking this registers with the event system; disabling the tree unregisters the callback and clears the count
     /// </remarks>
+    /// <param name="Output">Destination Reference; holds the number of units killed by the attacker</param>
     /// <param name="Unit">Handle of the attacking unit</param>
     public extern static bool RegisterMinionKillCounter(out int Output, AttackableUnit Unit);
     /// <summary>
@@ -781,6 +824,7 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.  TODO: Convert this into Hero only
     /// </remarks>
+    /// <param name="Output">Destination Reference; holds the number of champions killed by the attacker</param>
     /// <param name="Unit">Handle of the champion to poll</param>
     public extern static bool GetChampionKills(out int Output, AttackableUnit Unit);
     /// <summary>
@@ -789,6 +833,7 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.  TODO: Convert this into Hero only
     /// </remarks>
+    /// <param name="Output">Destination Reference; holds the number of times the champion has been killed.</param>
     /// <param name="Unit">Handle of the champion to poll</param>
     public extern static bool GetChampionDeaths(out int Output, AttackableUnit Unit);
     /// <summary>
@@ -797,6 +842,7 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.  TODO: Convert this into Hero only
     /// </remarks>
+    /// <param name="Output">Destination Reference; holds the number of assists the champion has earned.</param>
     /// <param name="Unit">Handle of the champion to poll</param>
     public extern static bool GetChampionAssists(out int Output, AttackableUnit Unit);
     /// <summary>
@@ -824,7 +870,7 @@ public static class SBL
     /// </remarks>
     /// <param name="Unit">Handle of the unit whose inventory you want to check.</param>
     /// <param name="ItemID">Numerical ID of the item to look for.</param>
-    public extern static bool TestChampionHasItem(AttackableUnit Unit, int ItemID = 0);
+    public extern static bool TestChampionHasItem(AttackableUnit Unit, int ItemID);
     /// <summary>
     /// Pause or unpause the game.
     /// </summary>
@@ -832,7 +878,7 @@ public static class SBL
     /// Be careful using this!  It is not fully protected for use in a production environment!
     /// </remarks>
     /// <param name="Pause">Pause or unpause the game.</param>
-    public extern static bool SetGamePauseState(bool Pause = true);
+    public extern static bool SetGamePauseState(bool Pause);
     /// <summary>
     /// Pan the camera from its current position to a target point.
     /// </summary>
@@ -842,13 +888,14 @@ public static class SBL
     /// <param name="Unit">The unit whose camera is being manipulated.</param>
     /// <param name="TargetPosition">3D Point containing the target camera position.</param>
     /// <param name="Time">The amount of time the pan should take; this will scale the pan speed. </param>
-    public extern static Task<bool> PanCameraFromCurrentPositionToPoint(AttackableUnit Unit, Vector3 TargetPosition = Vector3.Zero, float Time = 1);
+    public extern static Task<bool> PanCameraFromCurrentPositionToPoint(AttackableUnit Unit, Vector3 TargetPosition, float Time);
     /// <summary>
     /// Returns the number of item slots filled for a particular champion.
     /// </summary>
     /// <remarks>
     /// Always returns SUCCESS.
     /// </remarks>
+    /// <param name="Output">The number of items in the target's inventory.</param>
     /// <param name="Unit">Handle of the unit whose inventory you want to check.</param>
     public extern static bool GetNumberOfInventorySlotsFilled(out int Output, AttackableUnit Unit);
     /// <summary>
@@ -857,6 +904,7 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.
     /// </remarks>
+    /// <param name="Output">The level of the target unit.</param>
     /// <param name="Unit">Handle of the unit whose level you want to check.</param>
     public extern static bool GetUnitLevel(out int Output, AttackableUnit Unit);
     /// <summary>
@@ -865,6 +913,7 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.  Returns 0 if unit is not champion.
     /// </remarks>
+    /// <param name="Output">The current XP of the target unit.</param>
     /// <param name="Unit">Handle of the unit whose XP total you want to get.</param>
     public extern static bool GetUnitXP(out float Output, AttackableUnit Unit);
     /// <summary>
@@ -873,20 +922,22 @@ public static class SBL
     /// <remarks>
     /// Distance is measured from the edge of the unit's bounding box
     /// </remarks>
+    /// <param name="Output">Destination Reference; holds the distance from the unit to the point</param>
     /// <param name="Unit">Handle of the unit</param>
     /// <param name="Point">Point</param>
-    public extern static bool DistanceBetweenObjectAndPoint(out float Output, AttackableUnit Unit, Vector3 Point = Vector3.Zero);
+    public extern static bool DistanceBetweenObjectAndPoint(out float Output, AttackableUnit Unit, Vector3 Point);
     /// <summary>
     /// Returns a collection of units in the target area.
     /// </summary>
     /// <remarks>
     /// Always returns SUCCESS.  Uses the reference unit for enemy/ally checks; must be present!
     /// </remarks>
+    /// <param name="Output">Destination Reference; holds a collection of units discovered</param>
     /// <param name="Unit">Handle of the unit that serves as the reference for team flags.</param>
     /// <param name="TargetLocation">Center of the test</param>
     /// <param name="Radius">Radius of the unit test</param>
     /// <param name="SpellFlags">Associated spell flags for target filtering of the unit gathering check.</param>
-    public extern static bool GetUnitsInTargetArea(out IEnumerable<AttackableUnit> Output, AttackableUnit Unit, Vector3 TargetLocation = Vector3.Zero, float Radius = 0, SpellFlags SpellFlags = AlwaysSelf);
+    public extern static bool GetUnitsInTargetArea(out IEnumerable<AttackableUnit> Output, AttackableUnit Unit, Vector3 TargetLocation, float Radius, SpellFlags SpellFlags);
     /// <summary>
     /// Test to see if unit is alive
     /// </summary>
@@ -920,7 +971,7 @@ public static class SBL
     /// <param name="TargetUnit">Unit to be tested</param>
     /// <param name="CasterUnit">OPTIONAL.  Additional filter to check if buff was cast by a specific unit</param>
     /// <param name="BuffName">Name of buff to be tested</param>
-    public extern static bool TestUnitHasBuff(AttackableUnit TargetUnit, AttackableUnit CasterUnit, string BuffName = "");
+    public extern static bool TestUnitHasBuff(AttackableUnit TargetUnit, AttackableUnit CasterUnit, string BuffName);
     /// <summary>
     /// Test to see if a one unit has visibility of another unit
     /// </summary>
@@ -937,7 +988,7 @@ public static class SBL
     /// Disables or Enables all user input, for all users.
     /// </remarks>
     /// <param name="Enabled">If False disables all input for all users. If True, enables it.</param>
-    public extern static bool ToggleUserInput(bool Enabled = true);
+    public extern static bool ToggleUserInput(bool Enabled);
     /// <summary>
     /// Disabled or Enables the texture for fog of war for all users.
     /// </summary>
@@ -945,7 +996,7 @@ public static class SBL
     /// This will not reveal any units in the fog of war; perception bubbles are necessary for that.
     /// </remarks>
     /// <param name="Enabled">If False disables the texture for all users for all users. If True, enables it.</param>
-    public extern static bool ToggleFogOfWarTexture(bool Enabled = true);
+    public extern static bool ToggleFogOfWarTexture(bool Enabled);
     /// <summary>
     /// Plays a localized VO event
     /// </summary>
@@ -955,13 +1006,14 @@ public static class SBL
     /// <param name="EventID">FMOD event ID</param>
     /// <param name="FolderName">Folder the FMOD event is in in the Dialogue folder of the VO sound bank</param>
     /// <param name="FireAndForget">If true, plays sound as fire-and-forget and the node will return SUCCESS immediately.  If false, node will return RUNNING until the client tells the server that the VO is finished.</param>
-    public extern static Task<bool> PlayVOAudioEvent(string EventID = "", string FolderName = "", bool FireAndForget = true);
+    public extern static Task<bool> PlayVOAudioEvent(string EventID, string FolderName, bool FireAndForget);
     /// <summary>
     /// Returns the attack range for unit
     /// </summary>
     /// <remarks>
     /// Returns FAILURE if the unit is not valid
     /// </remarks>
+    /// <param name="Output">Destination reference</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitAttackRange(out float Output, AttackableUnit Unit);
     /// <summary>
@@ -971,13 +1023,14 @@ public static class SBL
     /// Once neutral minion spawning has begun, this node no longer has any effect.
     /// </remarks>
     /// <param name="Enabled">If True, enables neutral minion spawning; if False, delays neutral minion spawning.</param>
-    public extern static bool SetNeutralSpawnEnabled(bool Enabled = true);
+    public extern static bool SetNeutralSpawnEnabled(bool Enabled);
     /// <summary>
     /// Returns the amount of gold the unit has
     /// </summary>
     /// <remarks>
     /// Returns FAILURE if the unit is not valid
     /// </remarks>
+    /// <param name="Output">Destination reference.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitGold(out float Output, AttackableUnit Unit);
     /// <summary>
@@ -986,6 +1039,7 @@ public static class SBL
     /// <remarks>
     /// Returns FAILURE if unit is invalid
     /// </remarks>
+    /// <param name="Output">Destination reference.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitSkillPoints(out int Output, AttackableUnit Unit);
     /// <summary>
@@ -994,6 +1048,7 @@ public static class SBL
     /// <remarks>
     /// Returns a BubbleID which you can use to remove the perception bubble
     /// </remarks>
+    /// <param name="BubbleID">Unique identfier used to refer to the Perception Bubble</param>
     /// <param name="TargetUnit">Unit to attach the Perception Bubble to.</param>
     /// <param name="Radius">Radius of Perception Bubble. If set to 0, the bubble visibility radius matches the visibility radius of the target unit.</param>
     /// <param name="Duration">Duration of Perception Bubble in seconds.  Bubbles can be removed earlier by using the RemovePerceptionBubble node.</param>
@@ -1001,13 +1056,14 @@ public static class SBL
     /// <param name="RevealStealth">If this is true then the bubble will reveal stealth for anything inside of that bubble.</param>
     /// <param name="SpecificUnitsClientOnly">OPTIONAL. If specified a client specific message will be sent only to this client about this bubble.  Only that client will have that visiblity.</param>
     /// <param name="RevealSpecificUnitOnly">OPTIONAL. If set then only a units that have the RevealSpecificUnit state on are seeable by this bubble.</param>
-    public extern static bool AddUnitPerceptionBubble(out DWORD BubbleID, AttackableUnit TargetUnit, float Radius = 0.0f, float Duration = 0.0f, TeamID Team = TEAM_ORDER, bool RevealStealth = false, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly);
+    public extern static bool AddUnitPerceptionBubble(out uint BubbleID, AttackableUnit TargetUnit, float Radius, float Duration, TeamID Team, bool RevealStealth, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly);
     /// <summary>
     /// Adds a position Perception Bubble
     /// </summary>
     /// <remarks>
     /// Returns a BubbleID which you can use to remove the perception bubble
     /// </remarks>
+    /// <param name="BubbleID">Unique identfier used to refer to the Perception Bubble</param>
     /// <param name="Position">Position of the Perception Bubble.</param>
     /// <param name="Radius">Radius of Perception Bubble. If set to 0, the bubble visibility radius matches the visibility radius of the target unit.</param>
     /// <param name="Duration">Duration of Perception Bubble in seconds.  Bubbles can be removed earlier by using the RemovePerceptionBubble node.</param>
@@ -1015,7 +1071,7 @@ public static class SBL
     /// <param name="RevealStealth">If this is true then the bubble will reveal stealth for anything inside of that bubble.</param>
     /// <param name="SpecificUnitsClientOnly">OPTIONAL. If specified a client specific message will be sent only to this client about this bubble.  Only that client will have that visiblity.</param>
     /// <param name="RevealSpecificUnitOnly">OPTIONAL. If set then only a units that have the RevealSpecificUnit state on are seeable by this bubble.</param>
-    public extern static bool AddPositionPerceptionBubble(out DWORD BubbleID, Vector3 Position = Vector3.Zero, float Radius = 0.0f, float Duration = 0.0f, TeamID Team = TEAM_ORDER, bool RevealStealth = false, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly);
+    public extern static bool AddPositionPerceptionBubble(out uint BubbleID, Vector3 Position, float Radius, float Duration, TeamID Team, bool RevealStealth, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly);
     /// <summary>
     /// Removes Perception Bubble
     /// </summary>
@@ -1023,13 +1079,14 @@ public static class SBL
     /// Used on Bubble IDs returned by the AddUnitPerceptionBubble and AddPositionPerceptionBubble
     /// </remarks>
     /// <param name="BubbleID">Unique identfier used to refer to the Perception Bubble; returned by AddPerceptionBubble nodes</param>
-    public extern static bool RemovePerceptionBubble(DWORD BubbleID);
+    public extern static bool RemovePerceptionBubble(uint BubbleID);
     /// <summary>
     /// Adds a unit particle effect
     /// </summary>
     /// <remarks>
     /// Returns an EffectID which you can use to remove the perception bubble
     /// </remarks>
+    /// <param name="EffectID">Unique identfier used to refer to the particle effect; used to remove particle.</param>
     /// <param name="BindObject">Unit to attach the particle effect to.</param>
     /// <param name="BoneName">OPTIONAL. Name of the bone to attach the particle effect to.</param>
     /// <param name="EffectName">File name of the particle effect file to use.</param>
@@ -1042,13 +1099,14 @@ public static class SBL
     /// <param name="FOWVisibilityRadius">Used with FOWTeam to determine particle visibility in the FoW.  The particle will be visible if a unit has visibility into the area defined by this radius and the center of the particle.</param>
     /// <param name="FOWTeam">OPTIONAL.  If the viewing unit is on the same team as set by this variable, that unit will see this particle even if it's in the Fog of War.  Only used if FOWVisibilityRadius is non-zero.</param>
     /// <param name="SendIfOnScreenOrDiscard">If true, will only try to send the particle if a unit can see it when the particle spawns.  Use for one-shot particles; saves a lot of bandwidth, so use as often as possible.</param>
-    public extern static bool CreateUnitParticle(out DWORD EffectID, AttackableUnit BindObject, string BoneName = "", string EffectName = "", AttackableUnit TargetObject, string TargetBoneName = "", Vector3 TargetPosition = Vector3.Zero, Vector3 OrientTowards = Vector3.Zero, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly = TEAM_UNKNOWN, float FOWVisibilityRadius = 0.0f, TeamID FOWTeam = TEAM_UNKNOWN, bool SendIfOnScreenOrDiscard = false);
+    public extern static bool CreateUnitParticle(out uint EffectID, AttackableUnit BindObject, string BoneName, string EffectName, AttackableUnit TargetObject, string TargetBoneName, Vector3 TargetPosition, Vector3 OrientTowards, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly, float FOWVisibilityRadius, TeamID FOWTeam, bool SendIfOnScreenOrDiscard);
     /// <summary>
     /// Adds a unit particle effect
     /// </summary>
     /// <remarks>
     /// Returns an EffectID which you can use to remove the perception bubble
     /// </remarks>
+    /// <param name="EffectID">Unique identfier used to refer to the particle effect; used to remove particle.</param>
     /// <param name="Position">Position of the particle effect.</param>
     /// <param name="EffectName">File name of the particle effect file to use.</param>
     /// <param name="TargetObject">OPTIONAL. Unit to attach the far end of a beam particle to.  Use either TargetObject or TargetPosition; if you have both, TargetObject wins.</param>
@@ -1060,7 +1118,7 @@ public static class SBL
     /// <param name="FOWVisibilityRadius">Used with FOWTeam to determine particle visibility in the FoW.  The particle will be visible if a unit has visibility into the area defined by this radius and the center of the particle.</param>
     /// <param name="FOWTeam">OPTIONAL.  If the viewing unit is on the same team as set by this variable, that unit will see this particle even if it's in the Fog of War.  Only used if FOWVisibilityRadius is non-zero.</param>
     /// <param name="SendIfOnScreenOrDiscard">If true, will only try to send the particle if a unit can see it when the particle spawns.  Use for one-shot particles; saves a lot of bandwidth, so use as often as possible.</param>
-    public extern static bool CreatePositionParticle(out DWORD EffectID, Vector3 Position = Vector3.Zero, string EffectName = "", AttackableUnit TargetObject, string TargetBoneName = "", Vector3 TargetPosition = Vector3.Zero, Vector3 OrientTowards = Vector3.Zero, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly = TEAM_UNKNOWN, float FOWVisibilityRadius = 0.0f, TeamID FOWTeam = TEAM_UNKNOWN, bool SendIfOnScreenOrDiscard = false);
+    public extern static bool CreatePositionParticle(out uint EffectID, Vector3 Position, string EffectName, AttackableUnit TargetObject, string TargetBoneName, Vector3 TargetPosition, Vector3 OrientTowards, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly, float FOWVisibilityRadius, TeamID FOWTeam, bool SendIfOnScreenOrDiscard);
     /// <summary>
     /// Removes Particle
     /// </summary>
@@ -1068,13 +1126,14 @@ public static class SBL
     /// Used on Effect IDs returned by the CreateUnitParticle and CreatePositionParticle
     /// </remarks>
     /// <param name="EffectID">Unique identfier used to refer to the particle effect; returned by CreateParticle nodes</param>
-    public extern static bool RemoveParticle(DWORD EffectID);
+    public extern static bool RemoveParticle(uint EffectID);
     /// <summary>
     /// Returns unit Team ID
     /// </summary>
     /// <remarks>
     /// Returns FAILURE if unit is invalid
     /// </remarks>
+    /// <param name="Output">Destination reference.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitTeam(out TeamID Output, AttackableUnit Unit);
     /// <summary>
@@ -1085,7 +1144,7 @@ public static class SBL
     /// </remarks>
     /// <param name="Unit">Sets state of this unit.</param>
     /// <param name="Disabled">If true, ambient gold gain is disabled.</param>
-    public extern static bool SetStateDisableAmbientGold(AttackableUnit Unit, bool Disabled = false);
+    public extern static bool SetStateDisableAmbientGold(AttackableUnit Unit, bool Disabled);
     /// <summary>
     /// Sets unit level cap.  Level cap 0 means no cap.  Otherwise unit will earn experience up to one XP less than the level cap.
     /// </summary>
@@ -1094,7 +1153,7 @@ public static class SBL
     /// </remarks>
     /// <param name="Unit">Sets level cap of this unit.</param>
     /// <param name="LevelCap">If 0, no level cap; otherwise unit cannot get higher than this level.</param>
-    public extern static bool SetUnitLevelCap(AttackableUnit Unit, int LevelCap = 0);
+    public extern static bool SetUnitLevelCap(AttackableUnit Unit, int LevelCap);
     /// <summary>
     /// Locks all player cameras to their champions.
     /// </summary>
@@ -1102,7 +1161,7 @@ public static class SBL
     /// Always returns SUCCESS.
     /// </remarks>
     /// <param name="Lock">If true, locks all player cameras to their champions.  If false, unlocks all player cameras from their champions.</param>
-    public extern static bool LockAllPlayerCameras(bool Lock = true);
+    public extern static bool LockAllPlayerCameras(bool Lock);
     /// <summary>
     /// Test to see if Player has camera locking enabled (camera locked to hero).
     /// </summary>
@@ -1117,10 +1176,12 @@ public static class SBL
     /// <remarks>
     /// Procedure
     /// </remarks>
+    /// <param name="Output1">Destination reference contains float value.</param>
+    /// <param name="Output2">Destination reference contains UnitType value.</param>
     /// <param name="PocedureName"> can not be empty </param>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="ChatMessage">Chat string</param>
-    public extern static bool Procedure2To2(out string Output1, out UnitType Output2, string PocedureName = "", AttackableUnit Unit, string ChatMessage = "Bot Talking Here");
+    public extern static bool Procedure2To2(out string Output1, out UnitType Output2, string PocedureName, AttackableUnit Unit, string ChatMessage);
     /// <summary>
     /// Test if game started
     /// </summary>
@@ -1142,6 +1203,7 @@ public static class SBL
     /// <remarks>
     /// Unit type
     /// </remarks>
+    /// <param name="Output">Destination reference contains the type of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitType(out UnitType Output, AttackableUnit Unit);
     /// <summary>
@@ -1150,6 +1212,7 @@ public static class SBL
     /// <remarks>
     /// Unit creature type
     /// </remarks>
+    /// <param name="Output">Destination reference contains the creature type of the unit.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitCreatureType(out CreatureType Output, AttackableUnit Unit);
     /// <summary>
@@ -1161,7 +1224,7 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool TestCanCastSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex);
+    public extern static bool TestCanCastSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex);
     /// <summary>
     /// Cast specified Spell
     /// </summary>
@@ -1171,7 +1234,7 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool CastUnitSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex);
+    public extern static bool CastUnitSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex);
     /// <summary>
     /// Set ignore visibility for a specific spell
     /// </summary>
@@ -1179,13 +1242,13 @@ public static class SBL
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
     /// <param name="IgnoreVisibility">Ignore visibility ?</param>
-    public extern static bool SetUnitSpellIgnoreVisibity(AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex, bool IgnoreVisibility = false);
+    public extern static bool SetUnitSpellIgnoreVisibity(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex, bool IgnoreVisibility);
     /// <summary>
     /// Set specified Spell target position
     /// </summary>
     /// <param name="TargetLocation">Location to be targeted.</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool SetUnitAISpellTargetLocation(Vector3 TargetLocation = Vector3.Zero, int SlotIndex);
+    public extern static bool SetUnitAISpellTargetLocation(Vector3 TargetLocation, int SlotIndex);
     /// <summary>
     /// Set specified Spell target
     /// </summary>
@@ -1208,10 +1271,11 @@ public static class SBL
     /// <remarks>
     /// Cooldown for spell in given slot
     /// </remarks>
+    /// <param name="Output">Destination reference contains cooldown</param>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool GetSpellSlotCooldown(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex);
+    public extern static bool GetSpellSlotCooldown(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex);
     /// <summary>
     /// Gets the cooldown value for the spell in a given slot
     /// </summary>
@@ -1222,13 +1286,14 @@ public static class SBL
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
     /// <param name="Cooldown">Slot cooldown</param>
-    public extern static bool SetSpellSlotCooldown(AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex, float Cooldown = 1);
+    public extern static bool SetSpellSlotCooldown(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex, float Cooldown);
     /// <summary>
     /// Returns the PAR type for specified unit
     /// </summary>
     /// <remarks>
     /// PAR Type
     /// </remarks>
+    /// <param name="Output">Destination reference.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitPARType(out PrimaryAbilityResourceType Output, AttackableUnit Unit);
     /// <summary>
@@ -1237,37 +1302,40 @@ public static class SBL
     /// <remarks>
     /// Spell cost
     /// </remarks>
+    /// <param name="Output">Destination reference</param>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool GetUnitSpellCost(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex);
+    public extern static bool GetUnitSpellCost(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex);
     /// <summary>
     /// Returns the cast range for spell specified slot
     /// </summary>
     /// <remarks>
     /// Spell cast range
     /// </remarks>
+    /// <param name="Output">Destination reference</param>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool GetUnitSpellCastRange(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex);
+    public extern static bool GetUnitSpellCastRange(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex);
     /// <summary>
     /// Returns the level for spell specified slot
     /// </summary>
     /// <remarks>
     /// Spell level
     /// </remarks>
+    /// <param name="Output">Destination reference</param>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool GetUnitSpellLevel(out int Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex);
+    public extern static bool GetUnitSpellLevel(out int Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex);
     /// <summary>
     /// Levels up a specified spell
     /// </summary>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool LevelUpUnitSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex);
+    public extern static bool LevelUpUnitSpell(AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex);
     /// <summary>
     /// Tests if the specified unit can level up the specified spell
     /// </summary>
@@ -1283,6 +1351,7 @@ public static class SBL
     /// <remarks>
     /// Gets a handle to the the unit running the behavior tree
     /// </remarks>
+    /// <param name="Output">Destination reference; holds a AI object handle</param>
     public extern static bool GetUnitAISelf(out AttackableUnit Output);
     /// <summary>
     /// Unit run logic for first time
@@ -1310,6 +1379,7 @@ public static class SBL
     /// <remarks>
     /// This version is for AttackableUnit References
     /// </remarks>
+    /// <param name="Output">Destination reference</param>
     public extern static bool GetUnitAIAssistTarget(out AttackableUnit Output);
     /// <summary>
     /// Gets unit being targeted
@@ -1317,6 +1387,7 @@ public static class SBL
     /// <remarks>
     /// This version is for AttackableUnit References
     /// </remarks>
+    /// <param name="Output">Destination reference</param>
     public extern static bool GetUnitAIAttackTarget(out AttackableUnit Output);
     /// <summary>
     /// Issue Move Order
@@ -1340,7 +1411,7 @@ public static class SBL
     /// Move
     /// </remarks>
     /// <param name="Location">Position to move to</param>
-    public extern static bool IssueMoveToPositionOrder(Vector3 Location = Vector3.Zero);
+    public extern static bool IssueMoveToPositionOrder(Vector3 Location);
     /// <summary>
     /// Issue Chase Order
     /// </summary>
@@ -1369,7 +1440,7 @@ public static class SBL
     /// Emote
     /// </remarks>
     /// <param name="EmoteIndex">Emote ID</param>
-    public extern static bool IssueAIEmoteOrder(uint EmoteIndex = 0);
+    public extern static bool IssueAIEmoteOrder(uint EmoteIndex);
     /// <summary>
     /// Issue Emote Order
     /// </summary>
@@ -1378,7 +1449,7 @@ public static class SBL
     /// </remarks>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="EmoteIndex">Emote ID</param>
-    public extern static bool IssueGloabalEmoteOrder(AttackableUnit Unit, uint EmoteIndex = 0);
+    public extern static bool IssueGloabalEmoteOrder(AttackableUnit Unit, uint EmoteIndex);
     /// <summary>
     /// Issue Chat Order
     /// </summary>
@@ -1387,7 +1458,7 @@ public static class SBL
     /// </remarks>
     /// <param name="ChatMessage">Chat message</param>
     /// <param name="ChatRcvr">Chat receiver</param>
-    public extern static bool IssueAIChatOrder(string ChatMessage = "Bot Chat", string ChatRcvr = "/all");
+    public extern static bool IssueAIChatOrder(string ChatMessage, string ChatRcvr);
     /// <summary>
     /// Issue Chat Order
     /// </summary>
@@ -1396,7 +1467,7 @@ public static class SBL
     /// </remarks>
     /// <param name="ChatMessage">Chat message</param>
     /// <param name="ChatRcvr">Chat receiver</param>
-    public extern static bool IssueImmediateChatOrder(string ChatMessage = "Bot Chat", string ChatRcvr = "/all");
+    public extern static bool IssueImmediateChatOrder(string ChatMessage, string ChatRcvr);
     /// <summary>
     /// Issue disable task
     /// </summary>
@@ -1432,6 +1503,7 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.
     /// </remarks>
+    /// <param name="Output">Destination reference; contains collection of attacking units.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitAIAttackers(out IEnumerable<AttackableUnit> Output, AttackableUnit Unit);
     /// <summary>
@@ -1442,7 +1514,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualPARType(PrimaryAbilityResourceType LeftHandSide = PAR_MANA, PrimaryAbilityResourceType RightHandSide = PAR_MANA);
+    public extern static bool EqualPARType(PrimaryAbilityResourceType LeftHandSide, PrimaryAbilityResourceType RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -1451,7 +1523,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualPARType(PrimaryAbilityResourceType LeftHandSide = PAR_MANA, PrimaryAbilityResourceType RightHandSide = PAR_MANA);
+    public extern static bool NotEqualPARType(PrimaryAbilityResourceType LeftHandSide, PrimaryAbilityResourceType RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -1460,7 +1532,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualUnitType(UnitType LeftHandSide = UNKNOWN_UNIT, UnitType RightHandSide = UNKNOWN_UNIT);
+    public extern static bool EqualUnitType(UnitType LeftHandSide, UnitType RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -1469,7 +1541,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualUnitType(UnitType LeftHandSide = UNKNOWN_UNIT, UnitType RightHandSide = UNKNOWN_UNIT);
+    public extern static bool NotEqualUnitType(UnitType LeftHandSide, UnitType RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -1478,7 +1550,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualCreatureType(CreatureType LeftHandSide = UNKNOWN_CREATURE, CreatureType RightHandSide = UNKNOWN_CREATURE);
+    public extern static bool EqualCreatureType(CreatureType LeftHandSide, CreatureType RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -1487,7 +1559,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualCreatureType(CreatureType LeftHandSide = UNKNOWN_CREATURE, CreatureType RightHandSide = UNKNOWN_CREATURE);
+    public extern static bool NotEqualCreatureType(CreatureType LeftHandSide, CreatureType RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -1496,7 +1568,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool EqualSpellbookType(SpellbookTypeEnum LeftHandSide = SPELLBOOK_UNKNOWN, SpellbookTypeEnum RightHandSide = SPELLBOOK_UNKNOWN);
+    public extern static bool EqualSpellbookType(SpellbookTypeEnum LeftHandSide, SpellbookTypeEnum RightHandSide);
     /// <summary>
     /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
     /// </summary>
@@ -1505,7 +1577,7 @@ public static class SBL
     /// </remarks>
     /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
     /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
-    public extern static bool NotEqualSpellbookType(SpellbookTypeEnum LeftHandSide = SPELLBOOK_UNKNOWN, SpellbookTypeEnum RightHandSide = SPELLBOOK_UNKNOWN);
+    public extern static bool NotEqualSpellbookType(SpellbookTypeEnum LeftHandSide, SpellbookTypeEnum RightHandSide);
     /// <summary>
     /// Unit can buy next recommended item
     /// </summary>
@@ -1518,12 +1590,12 @@ public static class SBL
     /// Unit can buy item
     /// </summary>
     /// <param name="ItemID">Item to buy.</param>
-    public extern static bool TestUnitAICanBuyItem(uint ItemID = 0);
+    public extern static bool TestUnitAICanBuyItem(uint ItemID);
     /// <summary>
     /// Buy item
     /// </summary>
     /// <param name="ItemID">Item to buy.</param>
-    public extern static bool UnitAIBuyItem(uint ItemID = 0);
+    public extern static bool UnitAIBuyItem(uint ItemID);
     /// <summary>
     /// Computes a position for spell cast
     /// </summary>
@@ -1531,10 +1603,11 @@ public static class SBL
     /// <param name="ReferenceUnit">Reference unit</param>
     /// <param name="Range">Spell range</param>
     /// <param name="UnitSide">Which side of target are we going to (in between our out)</param>
-    public extern static bool ComputeUnitAISpellPosition(AttackableUnit TargetUnit, AttackableUnit ReferenceUnit, float Range, bool UnitSide = true);
+    public extern static bool ComputeUnitAISpellPosition(AttackableUnit TargetUnit, AttackableUnit ReferenceUnit, float Range, bool UnitSide);
     /// <summary>
     /// Retrieves a position for spell cast
     /// </summary>
+    /// <param name="Output">Destination reference</param>
     public extern static bool GetUnitAISpellPosition(out Vector3 Output);
     /// <summary>
     /// Clears position for spell cast
@@ -1553,22 +1626,23 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Location">Source Reference</param>
     /// <param name="Error">Accepted error</param>
-    public extern static bool TestUnitAtLocation(AttackableUnit Unit, Vector3 Location = Vector3.Zero, float Error = 200);
+    public extern static bool TestUnitAtLocation(AttackableUnit Unit, Vector3 Location, float Error);
     /// <summary>
     /// Unit in safe range
     /// </summary>
     /// <param name="Range">Unit in safe Range</param>
-    public extern static bool TestUnitAIIsInSafeRange(float Range = 600);
+    public extern static bool TestUnitAIIsInSafeRange(float Range);
     /// <summary>
     /// Computes a safe position for AI unit
     /// </summary>
     /// <param name="Range">safe range</param>
     /// <param name="UseDefender">If True, use defenders in search</param>
     /// <param name="UseEnemy">If True, use enemies to guide in search</param>
-    public extern static bool ComputeUnitAISafePosition(float Range, bool UseDefender = true, bool UseEnemy = true);
+    public extern static bool ComputeUnitAISafePosition(float Range, bool UseDefender, bool UseEnemy);
     /// <summary>
     /// Retrieves a safe position for AI unit
     /// </summary>
+    /// <param name="Output">Destination reference</param>
     public extern static bool GetUnitAISafePosition(out Vector3 Output);
     /// <summary>
     /// Clears position for safe
@@ -1584,6 +1658,7 @@ public static class SBL
     /// <remarks>
     /// Return SUCCES if we can find the base
     /// </remarks>
+    /// <param name="Output">Destination reference;.</param>
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitAIBasePosition(out Vector3 Output, AttackableUnit Unit);
     /// <summary>
@@ -1592,16 +1667,18 @@ public static class SBL
     /// <remarks>
     /// Always returns SUCCESS.
     /// </remarks>
+    /// <param name="Output">Destination reference;.</param>
     /// <param name="Unit">Unit to poll.</param>
     /// <param name="Spellbook">Spellbook</param>
     /// <param name="SlotIndex">Spell slot.</param>
-    public extern static bool GetUnitSpellRadius(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook = SPELLBOOK_UNKNOWN, int SlotIndex);
+    public extern static bool GetUnitSpellRadius(out float Output, AttackableUnit Unit, SpellbookTypeEnum Spellbook, int SlotIndex);
     /// <summary>
     /// Returns distance between 2 units
     /// </summary>
     /// <remarks>
     /// takes into account their BB
     /// </remarks>
+    /// <param name="Output">Destination reference;.</param>
     /// <param name="SourceUnit">Source unit</param>
     /// <param name="DestinationUnit">Destination unit</param>
     public extern static bool GetDistanceBetweenUnits(out float Output, AttackableUnit SourceUnit, AttackableUnit DestinationUnit);
@@ -1609,7 +1686,7 @@ public static class SBL
     /// Unit target is in range
     /// </summary>
     /// <param name="Error">Accepted error for unit location</param>
-    public extern static bool TestUnitAIAttackTargetInRange(float Error = 0);
+    public extern static bool TestUnitAIAttackTargetInRange(float Error);
     /// <summary>
     /// Unit has valid target
     /// </summary>
@@ -1631,7 +1708,7 @@ public static class SBL
     /// </remarks>
     /// <param name="TargetUnit">Target</param>
     /// <param name="ItemID">Item ID</param>
-    public extern static bool SetUnitAIItemTarget(AttackableUnit TargetUnit, int ItemID = 0);
+    public extern static bool SetUnitAIItemTarget(AttackableUnit TargetUnit, int ItemID);
     /// <summary>
     /// Clears item target
     /// </summary>
@@ -1640,7 +1717,7 @@ public static class SBL
     /// Unit can use item
     /// </summary>
     /// <param name="ItemID">Item ID</param>
-    public extern static bool TestUnitAICanUseItem(int ItemID = 0);
+    public extern static bool TestUnitAICanUseItem(int ItemID);
     /// <summary>
     /// Issue Use item Order
     /// </summary>
@@ -1648,7 +1725,7 @@ public static class SBL
     /// Use item
     /// </remarks>
     /// <param name="ItemID">Item ID</param>
-    public extern static bool IssueUseItemOrder(int ItemID = 0);
+    public extern static bool IssueUseItemOrder(int ItemID);
     /// <summary>
     /// Tests if specified slot has spell toggled ON
     /// </summary>
@@ -1663,9 +1740,10 @@ public static class SBL
     /// <summary>
     /// Returns unit that casted a buff on input unit
     /// </summary>
+    /// <param name="Output">Destination reference;.</param>
     /// <param name="Unit">Source unit</param>
     /// <param name="BuffName">Buff name</param>
-    public extern static bool GetUnitBuffCaster(out AttackableUnit Output, AttackableUnit Unit, string BuffName = "");
+    public extern static bool GetUnitBuffCaster(out AttackableUnit Output, AttackableUnit Unit, string BuffName);
     /// <summary>
     /// AI Unit has an assigned task
     /// </summary>
@@ -1673,6 +1751,7 @@ public static class SBL
     /// <summary>
     /// Returns position computed by a task assigned to the unit
     /// </summary>
+    /// <param name="Output">Destination reference</param>
     public extern static bool GetUnitAITaskPosition(out Vector3 Output);
     /// <summary>
     /// Permanently modifies a target unit's armor.
@@ -1710,1211 +1789,4 @@ public static class SBL
     /// <param name="Unit">Unit to modify.</param>
     /// <param name="Delta">Delta</param>
     public extern static bool IncPermanentFlatAttackDamageMod(AttackableUnit Unit, float Delta);
-}
-class UnnamedBehaviourTree
-{
-    float TotalUnitStrength;
-    IEnumerable<AttackableUnit> TargetCollection;
-    AttackableUnit Self;
-    bool ValueChanged;
-    Vector3 SelfPosition;
-    float CurrentClosestDistance;
-    AttackableUnit CurrentClosestTarget;
-    bool LostAggro;
-    AttackableUnit AggroTarget;
-    Vector3 AggroPosition;
-    float DeaggroDistance;
-    float AccumulatedDamage;
-    float PrevHealth;
-    float PrevTime;
-    float StrengthRatioOverTime;
-    bool AggressiveKillMode;
-    bool LowThreatMode;
-    int PotionsToBuy;
-    bool TeleportHome;
-    Vector3 AssistPosition;
-    AttackableUnit PreviousTarget;
-    
-    async Task<bool> GarenBehavior()
-    {
-        
-        return
-        (
-            await GarenInit() &&
-            (
-                await GarenAtBaseHealAndBuy() ||
-                await GarenLevelUp() ||
-                await GarenGameNotStarted() ||
-                ReduceDamageTaken() ||
-                await GarenHighThreatManagement() ||
-                await GarenReturnToBase() ||
-                await GarenKillChampion() ||
-                await GarenLowThreatManagement() ||
-                GarenHeal() ||
-                await GarenAttack() ||
-                await GarenPushLane()
-            )
-        );
-    }
-    
-    bool GarenStrengthEvaluator()
-    {
-        AttackableUnit Unit;
-        UnitType UnitType;
-        return
-        (
-            SetVarFloat(out this.TotalUnitStrength, 1) &&
-            IterateOverAllDecorator(out Unit, this.TargetCollection, async () => (
-                TestUnitIsVisible(this.Self, Unit) &&
-                (
-                    (
-                        GetUnitType(out UnitType, Unit) &&
-                        UnitType == MINION_UNIT &&
-                        AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 20)
-                    ) ||
-                    (
-                        GetUnitType(out UnitType, Unit) &&
-                        UnitType == HERO_UNIT &&
-                        AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 30)
-                    ) ||
-                    (
-                        GetUnitType(out UnitType, Unit) &&
-                        UnitType == TURRET_UNIT &&
-                        AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 90)
-                    )
-                )
-            ))
-        );
-    }
-    
-    bool GarenFindClosestTarget()
-    {
-        AttackableUnit Attacker;
-        float Distance;
-        return
-        (
-            SetVarBool(out this.ValueChanged, false) &&
-            IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
-                DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
-                Distance < this.CurrentClosestDistance &&
-                SetVarFloat(out this.CurrentClosestDistance, Distance) &&
-                SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&
-                SetVarBool(out this.ValueChanged, true)
-            ))
-        );
-    }
-    
-    async Task<bool> GarenDeaggroChecker()
-    {
-        float Distance;
-        return
-        await MaskFailure(async () => (
-            SetVarBool(out this.LostAggro, false) &&
-            DistanceBetweenObjectAndPoint(out Distance, this.AggroTarget, this.AggroPosition) &&
-            Distance > 800 &&
-            Distance < 1200 &&
-            SetVarBool(out this.LostAggro, true)
-        ));
-    }
-    
-    async Task<bool> GarenInit()
-    {
-        float CurrentTime;
-        float TimeDiff;
-        float EnemyStrength;
-        float FriendStrength;
-        float StrRatio;
-        AttackableUnit Unit;
-        UnitType UnitType;
-        float CurrentHealth;
-        float NewDamage;
-        return
-        (
-            GetUnitAISelf(out this.Self) &&
-            GetUnitPosition(out this.SelfPosition, this.Self) &&
-            SetVarFloat(out this.DeaggroDistance, 1200) &&
-            (
-                (
-                    TestUnitAIFirstTime() &&
-                    SetVarFloat(out this.AccumulatedDamage, 0) &&
-                    GetUnitCurrentHealth(out this.PrevHealth, this.Self) &&
-                    GetGameTime(out this.PrevTime) &&
-                    SetVarBool(out this.LostAggro, false) &&
-                    SetVarFloat(out this.StrengthRatioOverTime, 1) &&
-                    SetVarBool(out this.AggressiveKillMode, false) &&
-                    SetVarBool(out this.LowThreatMode, false) &&
-                    SetVarInt(out this.PotionsToBuy, 4) &&
-                    SetVarBool(out this.TeleportHome, false)
-                ) ||
-                (
-                    await MaskFailure(async () => (
-                        GetGameTime(out CurrentTime) &&
-                        SubtractFloat(out TimeDiff, CurrentTime, this.PrevTime) &&
-                        (
-                            TimeDiff > 1 ||
-                            TimeDiff < 0
-                        ) &&
-                        (
-                            MultiplyFloat(out this.AccumulatedDamage, this.AccumulatedDamage, 0.8f) &&
-                            MultiplyFloat(out this.StrengthRatioOverTime, this.StrengthRatioOverTime, 0.8f)
-                        ) &&
-                        (
-                            GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 1000, AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
-                            GarenStrengthEvaluator() &&
-                            SetVarFloat(out EnemyStrength, this.TotalUnitStrength) &&
-                            GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectFriends|AffectHeroes|AffectMinions|AffectTurrets) &&
-                            GarenStrengthEvaluator() &&
-                            SetVarFloat(out FriendStrength, this.TotalUnitStrength) &&
-                            DivideFloat(out StrRatio, EnemyStrength, FriendStrength) &&
-                            AddFloat(out this.StrengthRatioOverTime, this.StrengthRatioOverTime, StrRatio) &&
-                            GetUnitAIAttackers(out this.TargetCollection, this.Self) &&
-                            await MaskFailure(async () => IterateUntilSuccessDecorator(out Unit, this.TargetCollection, async () => (
-                                GetUnitType(out UnitType, Unit) &&
-                                UnitType == TURRET_UNIT &&
-                                AddFloat(out this.StrengthRatioOverTime, this.StrengthRatioOverTime, 8)
-                            )))
-                        ) &&
-                        GetGameTime(out this.PrevTime)
-                    )) &&
-                    await MaskFailure(async () => (
-                        GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
-                        SubtractFloat(out NewDamage, this.PrevHealth, CurrentHealth) &&
-                        NewDamage > 0 &&
-                        AddFloat(out this.AccumulatedDamage, this.AccumulatedDamage, NewDamage)
-                    )) &&
-                    GetUnitCurrentHealth(out this.PrevHealth, this.Self)
-                )
-            )
-        );
-    }
-    
-    async Task<bool> GarenAtBaseHealAndBuy()
-    {
-        Vector3 BaseLocation;
-        float Distance;
-        float MaxHealth;
-        float CurrentHealth;
-        float Health_Ratio;
-        float temp;
-        return
-        (
-            GetUnitAIBasePosition(out BaseLocation, this.Self) &&
-            DistanceBetweenObjectAndPoint(out Distance, this.Self, BaseLocation) &&
-            Distance <= 450 &&
-            SetVarBool(out this.TeleportHome, false) &&
-            (
-                (
-                    await DebugAction(0, SUCCESS, "Start ----- Heal -----") &&
-                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
-                    GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
-                    DivideFloat(out Health_Ratio, CurrentHealth, MaxHealth) &&
-                    Health_Ratio < 0.95f &&
-                    await DebugAction(0, SUCCESS, "Success ----- Heal -----")
-                ) ||
-                (
-                    (
-                        !TestChampionHasItem(this.Self, 1054) &&
-                        TestUnitAICanBuyItem(1054) &&
-                        UnitAIBuyItem(1054)
-                    ) ||
-                    (
-                        !TestChampionHasItem(this.Self, 1001) &&
-                        !TestChampionHasItem(this.Self, 3009) &&
-                        !TestChampionHasItem(this.Self, 3117) &&
-                        !TestChampionHasItem(this.Self, 3020) &&
-                        !TestChampionHasItem(this.Self, 3006) &&
-                        TestUnitAICanBuyItem(3111) &&
-                        UnitAIBuyItem(1001)
-                    ) ||
-                    (
-                        !TestChampionHasItem(this.Self, 3105) &&
-                        (
-                            (
-                                !TestChampionHasItem(this.Self, 1028) &&
-                                TestUnitAICanBuyItem(1028) &&
-                                UnitAIBuyItem(1028)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 1029) &&
-                                TestUnitAICanBuyItem(1029) &&
-                                UnitAIBuyItem(1029)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 1033) &&
-                                TestUnitAICanBuyItem(1033) &&
-                                UnitAIBuyItem(1033)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 3105) &&
-                                TestUnitAICanBuyItem(3105) &&
-                                UnitAIBuyItem(3105)
-                            )
-                        )
-                    ) ||
-                    (
-                        TestChampionHasItem(this.Self, 3105) &&
-                        TestChampionHasItem(this.Self, 1001) &&
-                        !TestChampionHasItem(this.Self, 3009) &&
-                        TestUnitAICanBuyItem(3009) &&
-                        UnitAIBuyItem(3009)
-                    ) ||
-                    (
-                        TestChampionHasItem(this.Self, 3105) &&
-                        TestChampionHasItem(this.Self, 3009) &&
-                        !TestChampionHasItem(this.Self, 3068) &&
-                        (
-                            (
-                                !TestChampionHasItem(this.Self, 1011) &&
-                                TestUnitAICanBuyItem(1011) &&
-                                UnitAIBuyItem(1011)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 1031) &&
-                                TestUnitAICanBuyItem(1031) &&
-                                UnitAIBuyItem(1031)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 3068) &&
-                                TestUnitAICanBuyItem(3068) &&
-                                UnitAIBuyItem(3068)
-                            )
-                        )
-                    ) ||
-                    (
-                        GetUnitGold(out temp, this.Self) &&
-                        temp > 0 &&
-                        TestChampionHasItem(this.Self, 3105) &&
-                        TestChampionHasItem(this.Self, 3009) &&
-                        TestChampionHasItem(this.Self, 3068) &&
-                        !TestChampionHasItem(this.Self, 3026) &&
-                        (
-                            (
-                                !TestChampionHasItem(this.Self, 1029) &&
-                                TestUnitAICanBuyItem(1029) &&
-                                UnitAIBuyItem(1029)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 1033) &&
-                                TestUnitAICanBuyItem(1033) &&
-                                UnitAIBuyItem(1033)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 1031) &&
-                                TestUnitAICanBuyItem(1031) &&
-                                UnitAIBuyItem(1031)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 3026) &&
-                                TestUnitAICanBuyItem(3026) &&
-                                UnitAIBuyItem(3026)
-                            )
-                        )
-                    ) ||
-                    (
-                        TestChampionHasItem(this.Self, 3105) &&
-                        TestChampionHasItem(this.Self, 3009) &&
-                        TestChampionHasItem(this.Self, 3068) &&
-                        TestChampionHasItem(this.Self, 3026) &&
-                        !TestChampionHasItem(this.Self, 3142) &&
-                        (
-                            (
-                                !TestChampionHasItem(this.Self, 1036) &&
-                                !TestChampionHasItem(this.Self, 3134) &&
-                                !TestChampionHasItem(this.Self, 3142) &&
-                                TestUnitAICanBuyItem(1036) &&
-                                UnitAIBuyItem(1036)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 3134) &&
-                                !TestChampionHasItem(this.Self, 3142) &&
-                                TestUnitAICanBuyItem(3134) &&
-                                UnitAIBuyItem(3134)
-                            ) ||
-                            (
-                                !TestChampionHasItem(this.Self, 3142) &&
-                                TestUnitAICanBuyItem(3142) &&
-                                UnitAIBuyItem(3142)
-                            )
-                        )
-                    ) ||
-                    (
-                        this.PotionsToBuy > 0 &&
-                        !TestChampionHasItem(this.Self, 2003) &&
-                        TestUnitAICanBuyItem(2003) &&
-                        UnitAIBuyItem(2003) &&
-                        SubtractInt(out this.PotionsToBuy, this.PotionsToBuy, 1)
-                    )
-                )
-            ) &&
-            await DebugAction(0, SUCCESS, "++++ At Base Heal & Buy +++")
-        );
-    }
-    
-    async Task<bool> GarenLevelUp()
-    {
-        int SkillPoints;
-        int Ability0Level;
-        int Ability1Level;
-        int Ability2Level;
-        return
-        (
-            GetUnitSkillPoints(out SkillPoints, this.Self) &&
-            SkillPoints > 0 &&
-            GetUnitSpellLevel(out Ability0Level, this.Self, SPELLBOOK_UNKNOWN, 0) &&
-            GetUnitSpellLevel(out Ability1Level, this.Self, SPELLBOOK_UNKNOWN, 1) &&
-            GetUnitSpellLevel(out Ability2Level, this.Self, SPELLBOOK_UNKNOWN, 2) &&
-            (
-                (
-                    TestUnitCanLevelUpSpell(this.Self, 3) &&
-                    LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 3) &&
-                    await DebugAction(0, SUCCESS, "levelup 3")
-                ) ||
-                (
-                    TestUnitCanLevelUpSpell(this.Self, 1) &&
-                    (
-                        (
-                            Ability0Level >= 1 &&
-                            Ability2Level >= 1 &&
-                            Ability1Level <= 0
-                        ) ||
-                        (
-                            Ability0Level >= 3 &&
-                            Ability2Level >= 3 &&
-                            Ability1Level <= 1
-                        )
-                    ) &&
-                    LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
-                    await DebugAction(0, SUCCESS, "levelup 0")
-                ) ||
-                (
-                    (
-                        TestUnitCanLevelUpSpell(this.Self, 2) &&
-                        Ability2Level <= Ability0Level &&
-                        LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 2) &&
-                        await DebugAction(0, SUCCESS, "levelup 0")
-                    ) ||
-                    (
-                        TestUnitCanLevelUpSpell(this.Self, 0) &&
-                        LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0) &&
-                        await DebugAction(0, SUCCESS, "levelup 0")
-                    )
-                ) ||
-                (
-                    TestUnitCanLevelUpSpell(this.Self, 1) &&
-                    LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
-                    await DebugAction(0, SUCCESS, "levelup 0")
-                )
-            ) &&
-            await DebugAction(0, SUCCESS, "++++ Level up ++++")
-        );
-    }
-    
-    async Task<bool> GarenGameNotStarted()
-    {
-        
-        return
-        (
-            !TestGameStarted() &&
-            await DebugAction(0, SUCCESS, "+++ Game Not Started +++")
-        );
-    }
-    
-    async Task<bool> GarenAttack()
-    {
-        
-        return
-        (
-            await GarenAcquireTarget() &&
-            await GarenAttackTarget() &&
-            await DebugAction(0, SUCCESS, "++++ Attack ++++")
-        );
-    }
-    
-    async Task<bool> GarenAcquireTarget()
-    {
-        IEnumerable<AttackableUnit> FriendlyUnits;
-        AttackableUnit unit;
-        int Count;
-        float Distance;
-        return
-        (
-            (
-                SetVarBool(out this.LostAggro, false) &&
-                TestUnitAIAttackTargetValid() &&
-                GetUnitAIAttackTarget(out this.AggroTarget) &&
-                SetVarVector(out this.AggroPosition, this.AssistPosition) &&
-                TestUnitIsVisible(this.Self, this.AggroTarget) &&
-                await GarenDeaggroChecker() &&
-                this.LostAggro == false &&
-                await DebugAction(0, SUCCESS, "+++ Use Previous Target +++")
-            ) ||
-            (
-                await DebugAction(0, SUCCESS, "EnableOrDisableAllyAggro") &&
-                SetVarFloat(out this.CurrentClosestDistance, 800) &&
-                GetUnitsInTargetArea(out FriendlyUnits, this.Self, this.SelfPosition, 800, AffectFriends|AffectHeroes|AlwaysSelf) &&
-                SetVarBool(out this.ValueChanged, false) &&
-                IterateOverAllDecorator(out unit, FriendlyUnits, async () => (
-                    TestUnitUnderAttack(unit) &&
-                    GetUnitAIAttackers(out this.TargetCollection, unit) &&
-                    GarenFindClosestVisibleTarget() &&
-                    this.ValueChanged == true &&
-                    SetUnitAIAssistTarget(this.Self) &&
-                    SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                    unit == this.Self &&
-                    SetVarVector(out this.AssistPosition, this.SelfPosition)
-                )) &&
-                this.ValueChanged == true &&
-                await DebugAction(0, SUCCESS, "+++ Acquired Ally under attack +++")
-            ) ||
-            (
-                await DebugAction(0, SUCCESS, "??? EnableDisableAcquire New Target ???") &&
-                SetVarFloat(out this.CurrentClosestDistance, 800) &&
-                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectBuildings|AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
-                (
-                    GetCollectionCount(out Count, this.TargetCollection) &&
-                    Count > 0 &&
-                    SetVarBool(out this.ValueChanged, false) &&
-                    IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
-                        DistanceBetweenObjectAndPoint(out Distance, unit, this.SelfPosition) &&
-                        Distance < this.CurrentClosestDistance &&
-                        TestUnitIsVisible(this.Self, unit) &&
-                        (
-                            (
-                                this.LostAggro == true &&
-                                GetUnitAIAttackTarget(out this.AggroTarget) &&
-                                this.AggroTarget != unit
-                            ) ||
-                            this.LostAggro == false
-                        ) &&
-                        SetVarFloat(out this.CurrentClosestDistance, Distance) &&
-                        SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
-                        SetVarBool(out this.ValueChanged, true)
-                    ))
-                ) &&
-                this.ValueChanged == true &&
-                SetUnitAIAssistTarget(this.Self) &&
-                SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                SetVarVector(out this.AssistPosition, this.SelfPosition) &&
-                await DebugAction(0, SUCCESS, "+++ AcquiredNewTarget +++")
-            )
-        );
-    }
-    
-    async Task<bool> GarenAttackTarget()
-    {
-        AttackableUnit Target;
-        TeamID SelfTeam;
-        TeamID TargetTeam;
-        UnitType UnitType;
-        float currentHealth;
-        float MaxHealth;
-        float HP_Ratio;
-        return
-        (
-            GetUnitAIAttackTarget(out Target) &&
-            GetUnitTeam(out SelfTeam, this.Self) &&
-            GetUnitTeam(out TargetTeam, Target) &&
-            SelfTeam != TargetTeam &&
-            (
-                (
-                    GetUnitType(out UnitType, Target) &&
-                    UnitType == MINION_UNIT &&
-                    GetUnitCurrentHealth(out currentHealth, Target) &&
-                    GetUnitMaxHealth(out MaxHealth, Target) &&
-                    DivideFloat(out HP_Ratio, currentHealth, MaxHealth) &&
-                    HP_Ratio < 0.2f &&
-                    (
-                        (
-                            this.StrengthRatioOverTime > 2 &&
-                            GarenCanCastAbility2() &&
-                            SetUnitAIAttackTarget(this.Self) &&
-                            await GarenCastAbility2()
-                        ) ||
-                        (
-                            GarenCanCastAbility0() &&
-                            SetUnitAIAttackTarget(this.Self) &&
-                            CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
-                        )
-                    )
-                ) ||
-                (
-                    GetUnitType(out UnitType, Target) &&
-                    UnitType == HERO_UNIT &&
-                    (
-                        (
-                            GarenCanCastAbility0() &&
-                            SetUnitAIAttackTarget(this.Self) &&
-                            CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
-                        ) ||
-                        (
-                            GarenCanCastAbility2() &&
-                            await GarenCastAbility2()
-                        )
-                    )
-                ) ||
-                GarenAutoAttackTarget()
-            ) &&
-            await DebugAction(0, SUCCESS, "++ Attack Success ++")
-        );
-    }
-    
-    async Task<bool> GarenReturnToBase()
-    {
-        Vector3 BaseLocation;
-        float Distance;
-        float MaxHealth;
-        float Health;
-        float Health_Ratio;
-        Vector3 TeleportPosition;
-        float DistanceToTeleportPosition;
-        return
-        (
-            GetUnitAIBasePosition(out BaseLocation, this.Self) &&
-            DistanceBetweenObjectAndPoint(out Distance, this.Self, BaseLocation) &&
-            Distance > 300 &&
-            (
-                (
-                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
-                    GetUnitCurrentHealth(out Health, this.Self) &&
-                    DivideFloat(out Health_Ratio, Health, MaxHealth) &&
-                    (
-                        (
-                            this.TeleportHome == true &&
-                            Health_Ratio <= 0.35f
-                        ) ||
-                        (
-                            this.TeleportHome == false &&
-                            Health_Ratio <= 0.25f &&
-                            SetVarBool(out this.TeleportHome, true)
-                        )
-                    )
-                ) ||
-                (
-                    await DebugAction(0, FAILURE, "EmptyNode: HighGold")
-                )
-            ) &&
-            (
-                (
-                    SetVarFloat(out this.CurrentClosestDistance, 30000) &&
-                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 30000, AffectFriends|AffectTurrets) &&
-                    GarenFindClosestTarget() &&
-                    this.ValueChanged == true &&
-                    (
-                        (
-                            GetDistanceBetweenUnits(out Distance, this.CurrentClosestTarget, this.Self) &&
-                            Distance < 125 &&
-                            (
-                                (
-                                    TestUnitAISpellPositionValid() &&
-                                    GetUnitAISpellPosition(out TeleportPosition) &&
-                                    DistanceBetweenObjectAndPoint(out DistanceToTeleportPosition, this.Self, TeleportPosition) &&
-                                    DistanceToTeleportPosition < 50
-                                ) ||
-                                !TestUnitAISpellPositionValid()
-                            ) &&
-                            IssueTeleportToBaseOrder() &&
-                            ClearUnitAISpellPosition() &&
-                            await DebugAction(0, SUCCESS, "Yo")
-                        ) ||
-                        (
-                            (
-                                (
-                                    !TestUnitAISpellPositionValid() &&
-                                    ComputeUnitAISpellPosition(this.CurrentClosestTarget, this.Self, 150, false)
-                                ) ||
-                                TestUnitAISpellPositionValid()
-                            ) &&
-                            GetUnitAISpellPosition(out TeleportPosition) &&
-                            IssueMoveToPositionOrder(TeleportPosition) &&
-                            await DebugAction(0, SUCCESS, "Yo")
-                        )
-                    )
-                ) ||
-                (
-                    GetUnitAIBasePosition(out BaseLocation, this.Self) &&
-                    IssueMoveToPositionOrder(BaseLocation)
-                )
-            ) &&
-            await DebugAction(0, SUCCESS, "+++ Teleport Home +++")
-        );
-    }
-    
-    async Task<bool> GarenHighThreatManagement()
-    {
-        bool SuperHighThreat;
-        float MaxHealth;
-        float Health;
-        float Health_Ratio;
-        float Damage_Ratio;
-        return
-        (
-            (
-                (
-                    SetVarBool(out SuperHighThreat, false) &&
-                    TestUnitUnderAttack(this.Self) &&
-                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
-                    GetUnitCurrentHealth(out Health, this.Self) &&
-                    DivideFloat(out Health_Ratio, Health, MaxHealth) &&
-                    Health_Ratio <= 0.25f &&
-                    await DebugAction(0, SUCCESS, "+++ LowHealthUnderAttack +++") &&
-                    SetVarBool(out SuperHighThreat, true)
-                ) ||
-                (
-                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
-                    DivideFloat(out Damage_Ratio, this.AccumulatedDamage, MaxHealth) &&
-                    (
-                        (
-                            this.AggressiveKillMode == true &&
-                            Damage_Ratio > 0.15f
-                        ) ||
-                        (
-                            this.AggressiveKillMode == false &&
-                            Damage_Ratio > 0.02f
-                        )
-                    ) &&
-                    await DebugAction(0, SUCCESS, "+++ BurstDamage +++")
-                )
-            ) &&
-            await DebugAction(0, SUCCESS, "+++ High Threat +++") &&
-            ClearUnitAIAttackTarget() &&
-            (
-                (
-                    SuperHighThreat == true &&
-                    GarenCanCastAbility1() &&
-                    SetUnitAIAttackTarget(this.Self) &&
-                    CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1)
-                ) ||
-                (
-                    SuperHighThreat == true &&
-                    GarenCanCastAbility0() &&
-                    SetUnitAIAttackTarget(this.Self) &&
-                    CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
-                ) ||
-                await GarenMicroRetreat()
-            ) &&
-            await DebugAction(0, SUCCESS, "+++ High Threat +++")
-        );
-    }
-    
-    async Task<bool> GarenLowThreatManagement()
-    {
-        
-        return
-        (
-            (
-                (
-                    this.StrengthRatioOverTime > 6 &&
-                    ClearUnitAIAttackTarget() &&
-                    SetVarBool(out this.LowThreatMode, true)
-                ) ||
-                (
-                    this.LowThreatMode == true &&
-                    SetVarBool(out this.LowThreatMode, false) &&
-                    this.StrengthRatioOverTime > 4 &&
-                    ClearUnitAIAttackTarget() &&
-                    SetVarBool(out this.LowThreatMode, true)
-                ) ||
-                (
-                    ClearUnitAISafePosition() &&
-                    await DebugAction(0, FAILURE, "DoNotRemoveForcedFail")
-                )
-            ) &&
-            await GarenMicroRetreat() &&
-            await DebugAction(0, SUCCESS, "++++ Low Threat +++")
-        );
-    }
-    
-    async Task<bool> GarenKillChampion()
-    {
-        float CurrentLowestHealthRatio;
-        AttackableUnit unit;
-        float CurrentHealth;
-        float MaxHealth;
-        float HP_Ratio;
-        bool Aggressive;
-        float MyHealthRatio;
-        AttackableUnit ;
-        return
-        (
-            SetVarBool(out this.AggressiveKillMode, false) &&
-            (
-                (
-                    this.StrengthRatioOverTime < 3 &&
-                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies|AffectHeroes) &&
-                    SetVarFloat(out CurrentLowestHealthRatio, 0.8f) &&
-                    SetVarBool(out this.ValueChanged, false) &&
-                    IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
-                        GetUnitCurrentHealth(out CurrentHealth, unit) &&
-                        GetUnitMaxHealth(out MaxHealth, unit) &&
-                        DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
-                        HP_Ratio < CurrentLowestHealthRatio &&
-                        TestUnitIsVisible(this.Self, unit) &&
-                        SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
-                        SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
-                        SetVarBool(out this.ValueChanged, true)
-                    )) &&
-                    this.ValueChanged == true &&
-                    SetUnitAIAssistTarget(this.Self) &&
-                    SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                    SetVarVector(out this.AssistPosition, this.SelfPosition) &&
-                    SetVarBool(out Aggressive, false) &&
-                    await DebugAction(0, SUCCESS, "PassiveKillChampion")
-                ) ||
-                (
-                    this.StrengthRatioOverTime < 5.1f &&
-                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
-                    GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
-                    DivideFloat(out MyHealthRatio, CurrentHealth, MaxHealth) &&
-                    MyHealthRatio > 0.5f &&
-                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 1000, AffectEnemies|AffectHeroes) &&
-                    SetVarFloat(out CurrentLowestHealthRatio, 0.4f) &&
-                    SetVarBool(out this.ValueChanged, false) &&
-                    IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
-                        GetUnitCurrentHealth(out CurrentHealth, unit) &&
-                        GetUnitMaxHealth(out MaxHealth, unit) &&
-                        DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
-                        HP_Ratio < CurrentLowestHealthRatio &&
-                        TestUnitIsVisible(this.Self, unit) &&
-                        SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
-                        SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
-                        SetVarBool(out this.ValueChanged, true)
-                    )) &&
-                    this.ValueChanged == true &&
-                    SetUnitAIAssistTarget(this.Self) &&
-                    SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                    SetVarVector(out this.AssistPosition, this.SelfPosition) &&
-                    SetVarBool(out Aggressive, true) &&
-                    SetVarBool(out this.AggressiveKillMode, true) &&
-                    await DebugAction(0, SUCCESS, "+++ AggressiveMode +++")
-                )
-            ) &&
-            (
-                (
-                    GarenCanCastAbility0() &&
-                    CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
-                ) ||
-                (
-                    Aggressive == true &&
-                    GarenCanCastAbility3() &&
-                    await GarenCastAbility3() &&
-                    await DebugAction(0, SUCCESS, "+++ Use Ultiamte +++")
-                ) ||
-                (
-                    !TestUnitHasBuff(this.Self, , "GarenBladestorm") &&
-                    GarenCanCastAbility2() &&
-                    await GarenCastAbility2()
-                ) ||
-                GarenAutoAttackTarget() ||
-                await DebugAction(0, SUCCESS, "+++ Attack Champion+++")
-            ) &&
-            await DebugAction(0, SUCCESS, "++++ Success: Kill  +++")
-        );
-    }
-    
-    async Task<bool> GarenLastHitMinion()
-    {
-        float CurrentLowestHealthRatio;
-        AttackableUnit unit;
-        float CurrentHealth;
-        float MaxHealth;
-        float HP_Ratio;
-         Target;
-        return
-        (
-            (
-                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 800, AffectEnemies|AffectMinions) &&
-                SetVarFloat(out CurrentLowestHealthRatio, 0.3f) &&
-                SetVarBool(out this.ValueChanged, false) &&
-                IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
-                    GetUnitCurrentHealth(out CurrentHealth, unit) &&
-                    GetUnitMaxHealth(out MaxHealth, unit) &&
-                    DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
-                    HP_Ratio < CurrentLowestHealthRatio &&
-                    SetVarBool(out this.ValueChanged, true) &&
-                    SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
-                    SetVarAttackableUnit(out this.CurrentClosestTarget, unit)
-                )) &&
-                this.ValueChanged == true &&
-                SetUnitAIAssistTarget(this.Self) &&
-                SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                SetVarVector(out this.AssistPosition, this.SelfPosition) &&
-                SetVarAttackableUnit(out Target, this.CurrentClosestTarget)
-            ) &&
-            GarenAutoAttackTarget() &&
-            await DebugAction(0, SUCCESS, "+++++++ Last Hit ++++++++")
-        );
-    }
-    
-    async Task<bool> GarenMicroRetreat()
-    {
-        Vector3 SafePosition;
-        float Distance;
-        return
-        (
-            (
-                TestUnitAISafePositionValid() &&
-                GetUnitAISafePosition(out SafePosition) &&
-                (
-                    (
-                        DistanceBetweenObjectAndPoint(out Distance, this.Self, SafePosition) &&
-                        Distance < 50 &&
-                        ComputeUnitAISafePosition(800, false, false) &&
-                        await DebugAction(0, SUCCESS, "------- At location computed new position --------------")
-                    ) ||
-                    (
-                        IssueMoveToPositionOrder(SafePosition) &&
-                        await DebugAction(0, SUCCESS, "------------ Success: Move to safe position ----------")
-                    )
-                )
-            ) ||
-            ComputeUnitAISafePosition(600, false, false)
-        );
-    }
-    
-    bool GarenAutoAttackTarget()
-    {
-        AttackableUnit Target;
-        float Distance;
-        float AttackRange;
-        return
-        (
-            GetUnitAIAttackTarget(out Target) &&
-            TestUnitAIAttackTargetValid() &&
-            (
-                (
-                    GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                    GetUnitAttackRange(out AttackRange, this.Self) &&
-                    MultiplyFloat(out AttackRange, AttackRange, 0.9f) &&
-                    Distance <= AttackRange &&
-                    ClearUnitAIAttackTarget() &&
-                    SetUnitAIAttackTarget(Target) &&
-                    IssueAttackOrder()
-                ) ||
-                IssueMoveToUnitOrder(Target)
-            )
-        );
-    }
-    
-    bool GarenCanCastAbility0()
-    {
-        float Cooldown;
-        return
-        (
-            GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 0) &&
-            Cooldown <= 0 &&
-            TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 0)
-        );
-    }
-    
-    bool GarenCanCastAbility1()
-    {
-        float Cooldown;
-        return
-        (
-            GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 1) &&
-            Cooldown <= 0 &&
-            TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 1)
-        );
-    }
-    
-    bool GarenCanCastAbility2()
-    {
-        float Cooldown;
-        return
-        (
-            GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 2) &&
-            Cooldown <= 0 &&
-            TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 2)
-        );
-    }
-    
-    bool GarenCanCastAbility3()
-    {
-        float Cooldown;
-        return
-        (
-            GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 0) &&
-            Cooldown <= 0 &&
-            TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 3)
-        );
-    }
-    
-    async Task<bool> GarenCastAbility0()
-    {
-        float Range;
-        AttackableUnit Target;
-        float Distance;
-        return
-        (
-            await DebugAction(0, SUCCESS, "CastSubTree") &&
-            GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 0) &&
-            GetUnitAIAttackTarget(out Target) &&
-            (
-                (
-                    await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
-                    GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                    await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    Distance <= Range &&
-                    await DebugAction(0, SUCCESS, "Range Check Succses") &&
-                    CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0) &&
-                    await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
-                ) ||
-                (
-                    await DebugAction(0, SUCCESS, "MoveIntoRangeSequence------------------") &&
-                    IssueMoveToUnitOrder(Target) &&
-                    await DebugAction(0, SUCCESS, "Moving To Cast")
-                )
-            )
-        );
-    }
-    
-    async Task<bool> GarenCastAbility1()
-    {
-        float Range;
-        AttackableUnit Target;
-        float Distance;
-        return
-        (
-            await DebugAction(0, SUCCESS, "CastSubTree") &&
-            GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 1) &&
-            GetUnitAIAttackTarget(out Target) &&
-            (
-                (
-                    await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
-                    GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                    await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    Distance <= Range &&
-                    await DebugAction(0, SUCCESS, "Range Check Succses") &&
-                    CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
-                    await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
-                ) ||
-                (
-                    await DebugAction(0, SUCCESS, "MoveIntoRangeSequence------------------") &&
-                    IssueMoveToUnitOrder(Target) &&
-                    await DebugAction(0, SUCCESS, "Moving To Cast")
-                )
-            )
-        );
-    }
-    
-    async Task<bool> GarenCastAbility2()
-    {
-        AttackableUnit Target;
-        AttackableUnit ;
-        float Range;
-        float Distance;
-        return
-        (
-            await DebugAction(0, SUCCESS, "CastSubTree") &&
-            GetUnitAIAttackTarget(out Target) &&
-            (
-                (
-                    TestUnitHasBuff(this.Self, , "GarenBladestorm") &&
-                    IssueMoveToUnitOrder(Target)
-                ) ||
-                (
-                    GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 2) &&
-                    SetVarFloat(out Range, 200) &&
-                    (
-                        (
-                            await DebugAction(0, SUCCESS, "Pareparing to cast ability 2") &&
-                            GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                            await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                            Distance <= Range &&
-                            await DebugAction(0, SUCCESS, "Range Check Succses") &&
-                            CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 2) &&
-                            await DebugAction(0, SUCCESS, "Ability 2 Success ----------------")
-                        ) ||
-                        (
-                            await DebugAction(0, SUCCESS, "MoveIntoRangeSequence------------------") &&
-                            IssueMoveToUnitOrder(Target) &&
-                            await DebugAction(0, SUCCESS, "Moving To Cast")
-                        )
-                    )
-                )
-            )
-        );
-    }
-    
-    async Task<bool> GarenCastAbility3()
-    {
-        float Range;
-        AttackableUnit Target;
-        float Distance;
-        return
-        (
-            await DebugAction(0, SUCCESS, "CastSubTree") &&
-            GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 3) &&
-            GetUnitAIAttackTarget(out Target) &&
-            (
-                (
-                    await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
-                    GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
-                    await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    Distance <= Range &&
-                    await DebugAction(0, SUCCESS, "Range Check Succses") &&
-                    CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 3) &&
-                    await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
-                ) ||
-                (
-                    await DebugAction(0, SUCCESS, "MoveIntoRangeSequence------------------") &&
-                    IssueMoveToUnitOrder(Target) &&
-                    await DebugAction(0, SUCCESS, "Moving To Cast")
-                )
-            )
-        );
-    }
-    
-    async Task<bool> GarenPushLane()
-    {
-        
-        return
-        (
-            ClearUnitAIAttackTarget() &&
-            IssueMoveOrder() &&
-            await DebugAction(0, SUCCESS, "+++ Move To Lane +++")
-        );
-    }
-    
-    async Task<bool> GarenMisc()
-    {
-        TeamID SelfTeam;
-        TeamID UnitTeam;
-        AttackableUnit Assist;
-        float Distance;
-         AssistPosition;
-        int Count;
-        AttackableUnit Attacker;
-        return
-        (
-            (
-                await DebugAction(0, FAILURE, "??? EnableOrDisablePreviousTarget ???") &&
-                TestUnitAIAttackTargetValid() &&
-                SetVarBool(out this.LostAggro, false) &&
-                GetUnitAIAttackTarget(out this.PreviousTarget) &&
-                GetUnitTeam(out SelfTeam, this.Self) &&
-                GetUnitTeam(out UnitTeam, this.PreviousTarget) &&
-                UnitTeam != SelfTeam &&
-                GetUnitAIAssistTarget(out Assist) &&
-                (
-                    (
-                        Assist == this.Self &&
-                        DistanceBetweenObjectAndPoint(out Distance, this.Self, this.AssistPosition) &&
-                        await MaskFailure(async () => (
-                            Distance >= this.DeaggroDistance &&
-                            ClearUnitAIAttackTarget() &&
-                            SetVarBool(out this.LostAggro, true) &&
-                            await DebugAction(0, SUCCESS, "+++ Lost Aggro +++")
-                        )) &&
-                        Distance < this.DeaggroDistance &&
-                        await DebugAction(0, SUCCESS, "+++ In Aggro Range, Use Previous")
-                    ) ||
-                    (
-                        this.Self != Assist &&
-                        GetUnitPosition(out AssistPosition, Assist) &&
-                        DistanceBetweenObjectAndPoint(out Distance, this.PreviousTarget, this.SelfPosition) &&
-                        await MaskFailure(async () => (
-                            Distance >= 1000 &&
-                            ClearUnitAIAttackTarget() &&
-                            SetVarBool(out this.LostAggro, true) &&
-                            await DebugAction(0, SUCCESS, "------- Losing aggro from assist ----------")
-                        )) &&
-                        Distance < 1000 &&
-                        await DebugAction(0, SUCCESS, "============= Use Previous Target: Still close to assist -----------")
-                    )
-                ) &&
-                SetVarBool(out this.LostAggro, false) &&
-                await DebugAction(0, SUCCESS, "++ Use Previous Target ++")
-            ) &&
-            (
-                await DebugAction(0, SUCCESS, "??? EnableDisableAcquire New Target ???") &&
-                SetVarFloat(out this.CurrentClosestDistance, 800) &&
-                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
-                (
-                    GetCollectionCount(out Count, this.TargetCollection) &&
-                    Count > 0 &&
-                    SetVarBool(out this.ValueChanged, false) &&
-                    IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
-                        (
-                            (
-                                this.LostAggro == true &&
-                                Attacker != this.PreviousTarget
-                            ) ||
-                            this.LostAggro == false
-                        ) &&
-                        DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
-                        Distance < this.CurrentClosestDistance &&
-                        SetVarFloat(out this.CurrentClosestDistance, Distance) &&
-                        SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&
-                        SetVarBool(out this.ValueChanged, true)
-                    ))
-                ) &&
-                this.ValueChanged == true &&
-                SetUnitAIAssistTarget(this.Self) &&
-                SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                SetVarVector(out this.AssistPosition, this.SelfPosition) &&
-                await DebugAction(0, SUCCESS, "+++ AcquiredNewTarget +++")
-            )
-        );
-    }
-    
-    bool GarenHeal()
-    {
-        float Health;
-        float MaxHealth;
-        float HP_Ratio;
-        return
-        (
-            GetUnitCurrentHealth(out Health, this.Self) &&
-            GetUnitMaxHealth(out MaxHealth, this.Self) &&
-            DivideFloat(out HP_Ratio, Health, MaxHealth) &&
-            (
-                HP_Ratio < 0.5f &&
-                TestUnitAICanUseItem(2003) &&
-                IssueUseItemOrder(2003)
-            )
-        );
-    }
-    
-    bool ReduceDamageTaken()
-    {
-        float MaxHealth;
-        float Damage_Ratio;
-        return
-        (
-            GetUnitMaxHealth(out MaxHealth, this.Self) &&
-            DivideFloat(out Damage_Ratio, this.AccumulatedDamage, MaxHealth) &&
-            Damage_Ratio >= 0.1f &&
-            (
-                (
-                    GarenCanCastAbility1() &&
-                    SetUnitAIAttackTarget(this.Self) &&
-                    CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1)
-                ) ||
-                (
-                    GarenCanCastAbility0() &&
-                    SetUnitAIAttackTarget(this.Self) &&
-                    CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
-                )
-            )
-        );
-    }
-    
-    bool GarenFindClosestVisibleTarget()
-    {
-        AttackableUnit Attacker;
-        float Distance;
-        return
-        (
-            SetVarBool(out this.ValueChanged, false) &&
-            IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
-                DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
-                Distance < this.CurrentClosestDistance &&
-                TestUnitIsVisible(this.Self, Attacker) &&
-                SetVarFloat(out this.CurrentClosestDistance, Distance) &&
-                SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&
-                SetVarBool(out this.ValueChanged, true)
-            ))
-        );
-    }
 }

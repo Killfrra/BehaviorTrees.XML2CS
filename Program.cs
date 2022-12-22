@@ -7,12 +7,16 @@ var currentDir = Directory.GetCurrentDirectory();
 var file = XElement.Load(Path.Combine(currentDir, "SBL.xml"));
 Debug.Assert(file.Name == "BlockDefinitions");
 var BD = new BlockDefinitions(file);
-Console.WriteLine(BD.ToCSharp());
+File.WriteAllText("SBL.cs", BD.ToCSharp());
 
     file = XElement.Load(Path.Combine(currentDir, "GarenBT.xml"));
 Debug.Assert(file.Name == "BehaviorTrees");
 var BT = new BehaviorTrees(BD, file);
-Console.WriteLine(BT.ToCSharp());
+var res = BT.ToCSharp();
+// Temporary fixes until the translator has learned to do it right
+res = Regex.Replace(res, @"\b(Affect\w+),(?! )", "$1|");
+res = Regex.Replace(res, @"\b(\d+\.\d+)\b", "$1f");
+File.WriteAllText("GarenBT.cs", res);
 
 class BlockDefinitions
 {
@@ -26,9 +30,8 @@ class BlockDefinitions
     public string ToCSharp()
     {
         return
-        "using static SBL;\n" +
         "using System.Numerics;\n" +
-        "using static AllEnumMembers;\n" +
+        //"using static AllEnumMembers;\n" +
         "public static class SBL\n" +
         "{\n" +
             (string.Join("\n", Definitions.FindAll(
@@ -85,24 +88,30 @@ class BlockDefinition
             ret += $"/// {Comments}\n";
             ret += $"/// </remarks>\n";
         }
-        var filteredParameters = Parameters.FindAll(
+        var filteredParameters = OutParameters.Concat(Parameters.FindAll(
             param => param.Name != "ReturnSuccessIf"
-        );
+        ));
         foreach(var param in filteredParameters)
         {
             ret += $"/// <param name=\"{param.Name}\">{param.Description}</param>\n";
         }
-        var paramStrings = OutParameters.Concat(filteredParameters).Select(
+        var paramStrings = filteredParameters.Select(
             param => param.ToCSharp()
         );
+        bool isAsync = IsAsync;
         if(CanHaveChildren && NumberOfChildren > 0)
         {
+            isAsync = true;
             paramStrings = paramStrings.Concat(
                 Enumerable.Range(0, NumberOfChildren)
-                    .Select(i => $"Func<Task<bool>>? Child{i} = null")
+                    .Select(i => "Func<" +
+                        string.Join(", ", OutParameters.Select(
+                            param => BlockDefinitionParam.XMLtoCSType(param.Type, null).Item1
+                        ).Concat(new string[]{ "Task<bool>" })) +
+                    $">? Child{i} = null")
             );
         }
-        ret += $"public extern static {(IsAsync ? "Task<bool>" : "bool")} {Name}(" +
+        ret += $"public extern static {(isAsync ? "Task<bool>" : "bool")} {Name}(" +
             string.Join(", ", paramStrings) +
         ");";
         return ret;
@@ -129,22 +138,23 @@ class BlockDefinitionParam
 
     public string ToCSharp()
     {
-        return VarDeclFromXMLtoCS(Out, Type, Name, Default);
+        return VarDeclFromXMLtoCS(Out, Type, Name, null /*Default*/);
     }
 
     //TODO: Move
-    public static string VarDeclFromXMLtoCS(bool _out, string type, string name, string? def)
+    public static (string, string?) XMLtoCSType(string type, string? def)
     {
         if(type == "String")
         {
             type = "string";
-            def = '"' + def + '"';
+            if(def != null)
+                def = '"' + def + '"';
         }
         else if(type == "Int")
         {
             type = "int";
         }
-        else if(type == "UnsignedInt")
+        else if(type == "UnsignedInt" || type == "DWORD")
         {
             type = "uint";
         }
@@ -185,6 +195,13 @@ class BlockDefinitionParam
         {
             type = "TeamID";
         }
+        return (type, def);
+    }
+
+    //TODO: Move
+    public static string VarDeclFromXMLtoCS(bool _out, string type, string name, string? def)
+    {
+        (type, def) = XMLtoCSType(type, def);
         return _out ? $"out {type} {name}" : ($"{type} {name}" + ((def != null && def != "") ? $" = {def}" : ""));
     }
 }
@@ -214,7 +231,12 @@ class BehaviorTrees
         {
             vars.MergeWith(tree.Root.GetVariables().Global);
         }
-        return $"class UnnamedBehaviourTree\n" + "{\n" +
+        return
+        "using static SBL;\n" +
+        "using System.Numerics;\n" +
+        "using static AllEnumMembers;\n" +
+        "class UnnamedBehaviourTree\n" +
+        "{\n" +
             (
                 vars.ToCSharp() + "\n\n" +
                 string.Join("\n\n", Trees.Select(
@@ -313,7 +335,7 @@ class BehaviorTreeNode
     bool? isAsync = null;
     public static string[] AsyncBlockNames =
     {
-        "MaskFailure", "DebugAction", "DelayNSecondsBlocking", "PanCameraFromCurrentPositionToPoint", "PlayVOAudioEvent"
+        "DebugAction", "DelayNSecondsBlocking", "PanCameraFromCurrentPositionToPoint", "PlayVOAudioEvent"
     };
     public bool IsAsync =>
         isAsync ?? (bool)(isAsync = 
@@ -518,7 +540,9 @@ class BehaviorTreeNode
                     string.Join(", ", allParametersSorted.Select(
                         (tuple) => tuple.Item1.ToCSharp(includeParameterNames, tuple.Item2)
                     ).Concat(Children.Select(
-                        child => $"async () => {child.ToCSharp()}"
+                        child => (child.IsAsync ? "async " : "") + "(" +
+                            string.Join(", ", OutParameters.Select(param => param.Value)) +
+                        $") => {child.ToCSharp()}"
                     )));
                 ret += ")";
                 return ret;

@@ -45,6 +45,7 @@ public enum UIElement
 {
     UI_MINIMAP
 }
+public enum CreatureType {}
 
 public static class AllEnumMembers
 {
