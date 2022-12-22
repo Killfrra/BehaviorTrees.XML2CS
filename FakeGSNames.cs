@@ -39,7 +39,8 @@ public enum UnitType
     UNKNOWN_UNIT,
     UNKNOWN_CREATURE,
     MINION_UNIT,
-    HERO_UNIT
+    HERO_UNIT,
+    TURRET_UNIT
 }
 public enum UIElement
 {
@@ -78,4 +79,5 @@ public static class AllEnumMembers
     public const UnitType UNKNOWN_CREATURE = UnitType.UNKNOWN_CREATURE;
     public const UnitType MINION_UNIT = UnitType.MINION_UNIT;
     public const UnitType HERO_UNIT = UnitType.HERO_UNIT;
+    public const UnitType TURRET_UNIT = UnitType.TURRET_UNIT;
 }

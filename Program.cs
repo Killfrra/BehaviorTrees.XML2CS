@@ -214,6 +214,14 @@ public static class StringExtensions
     }
 }
 
+public static class EnumerableExtensions
+{
+    public static bool ForEach<T>(this IEnumerable<T> source, Func<T, bool> predicate)
+    {
+        return true;
+    }
+}
+
 class BehaviorTrees
 {
     public List<BehaviorTree> Trees = new();
@@ -390,8 +398,8 @@ class BehaviorTreeNode
         public string Sequence = "Sequence";
         public string Selector = "Selector";
         public string SubTree = "SubTree";
-        /*
         public string MaskFailure = "MaskFailure";
+        /*
         public string[] Setters =
         {
             "SetVarBool",
@@ -419,14 +427,17 @@ class BehaviorTreeNode
             "EqualString", "NotEqualString",
 
         };
+        public string[] Decorators =
+        {
+            "IterateOverAllDecorator", "IterateUntilSuccessDecorator", "IterateUntilFailureDecorator"
+        };
         public List<string> All = new();
         public ReplacableClass()
         {
-            All.AddRange(new string[]{ Sequence, Selector, SubTree, /*MaskFailure*/ });
-            /*
-            All.AddRange(Setters);
+            All.AddRange(new string[]{ Sequence, Selector, SubTree, MaskFailure });
+            //All.AddRange(Setters);
             All.AddRange(Comparers);
-            */
+            All.AddRange(Decorators);
         }
     }
     public string ToCSharp()
@@ -446,13 +457,11 @@ class BehaviorTreeNode
             ret += treeName + "()";
             return ret;
         }
-        /*
         else if(Type == Replacable.MaskFailure)
         {
             Debug.Assert(Children.Count == 1);
-            return "(" + Children[0].ToCSharp() + ", true)";
+            return "(" + Children[0].ToCSharp() + " || true)";
         }
-        */
         else
         {
             bool invert = Parameters.Find(
@@ -505,6 +514,28 @@ class BehaviorTreeNode
                 */
                     return ret;
             }
+            else if(Replacable.Decorators.Contains(Type))
+            {
+                var ret = "";
+                Debug.Assert(Children.Count > 0);
+                var child = Children[0];
+                var output = OutParameters.Find(param => param.Name == "Output");
+                var collection = Parameters.Find(param => param.Name == "Collection");
+                Debug.Assert(output?.Scope == "Tree");
+                Debug.Assert(collection?.VariableType == "Reference");
+                var await = child.IsAsync ? "await " : "";
+                var async = child.IsAsync ? "async " : "";
+                var type = Type;
+                if(type == "IterateOverAllDecorator")
+                    type = "ForEach";
+                else if(type == "IterateUntilSuccessDecorator")
+                    type = "Any";
+                else if(type == "IterateUntilFailureDecorator")
+                    type = "All";
+                ret += await + collection.ScopeDotValue() + $".{type}({async}{output.Value} => {child.ToCSharp()})";
+                return ret;
+            }
+            //TODO: LoopNTimes
             else
             {
                 BlockDefinitions.TryGetTarget(out var blockDefinitions);
@@ -555,17 +586,27 @@ class BehaviorTreeNode
     {
         if(vars != null)
             return vars;
+
+        //TODO: Deduplicate
+        BlockDefinitions.TryGetTarget(out var blockDefinitions);
+        Debug.Assert(blockDefinitions != null);
+        var bd = blockDefinitions.Definitions.Find(block => block.Name == Type);
+        Debug.Assert(bd != null);
+        var allParametersA = bd.OutParameters.Concat(bd.Parameters).ToList();
+        var allParametersB = OutParameters.Concat(Parameters).ToList();
+
         vars = new();
-        foreach(var param in Parameters)
+        foreach(var paramB in allParametersB)
         {
-            if(param.VariableType == "Reference")
+            if(paramB.Value is "" or null) continue;
+            
+            var corresp = allParametersA.Find(paramA => paramA.Name == paramB.Name);
+            Debug.Assert(corresp != null);
+            if(paramB.VariableType == "Reference" || paramB.Out)
             {
-                vars.Add(param.Scope, param.Value, param.ReferenceType);
+                vars.Add(paramB.Scope, paramB.Value, corresp.Type);
+                //vars.Add(paramB.Scope, paramB.Value, paramB.ReferenceType);
             }
-        }
-        foreach(var param in OutParameters)
-        {
-            vars.Add(param.Scope, param.Value, null);
         }
         foreach(var child in Children)
         {
@@ -600,7 +641,10 @@ class BehaviorTreeNodeParameter
         if(_scope == "Global")
             return $"this.{Value}";
         else //if(_scope == "Tree")
-            return Value;
+            if(Value is not ("" or null))
+                return Value;
+        else
+            return "null";
     }
 
     public string ToCSharp(bool includeName, bool isString)
@@ -618,8 +662,10 @@ class BehaviorTreeNodeParameter
         {
             if(isString)
                 ret = '"' + Value + '"';
-            else
+            else if(Value is not ("" or null))
                 ret = Value;
+            else
+                ret = "null";
         }
         if(includeName)
             return $"{Name}: " + ret;
