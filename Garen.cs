@@ -1,5 +1,6 @@
 using static SBL;
 using System.Numerics;
+using static AllEnumMembers;
 public static class SBL
 {
     /// <summary>
@@ -22,13 +23,20 @@ public static class SBL
     /// <param name="String">The string that should be outputted to log</param>
     public extern static Task<bool> DebugAction(int RunningLimit = 0, BehaveResult Result = SUCCESS, string String = "Yo");
     /// <summary>
+    /// Decorator that masks FAILURE.
+    /// </summary>
+    /// <remarks>
+    /// Running still returns running
+    /// </remarks>
+    public extern static Task<bool> MaskFailure(Func<Task<bool>>? Child0 = null);
+    /// <summary>
     /// Decorator that allows user to specify the number of times the subtree will run.
     /// </summary>
     /// <remarks>
     /// Need comment
     /// </remarks>
     /// <param name="RunningLimit">The number of times the sub tree is to be executed</param>
-    public extern static bool LoopNTimes(int RunningLimit = 1);
+    public extern static bool LoopNTimes(int RunningLimit = 1, Func<Task<bool>>? Child0 = null);
     /// <summary>
     /// Decorator that will iterate through a collection, looping its children for each entry.
     /// </summary>
@@ -36,7 +44,7 @@ public static class SBL
     /// Right now this only supports AttackableUnit collections.  This will always return SUCCESS.
     /// </remarks>
     /// <param name="Collection">The collection that the iterator should loop over.</param>
-    public extern static bool IterateOverAllDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection);
+    public extern static bool IterateOverAllDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<Task<bool>>? Child0 = null);
     /// <summary>
     /// Decorator that will iterate through a collection, looping its children for each entry.  Iteration will stop when a child returns FAILURE.
     /// </summary>
@@ -44,7 +52,7 @@ public static class SBL
     /// Right now this only supports AttackableUnit collections.  This will return SUCCESS if all children return SUCCESS and FAILURE if one child returns FAILURE.
     /// </remarks>
     /// <param name="Collection">The collection that the iterator should loop over.</param>
-    public extern static bool IterateUntilFailureDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection);
+    public extern static bool IterateUntilFailureDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<Task<bool>>? Child0 = null);
     /// <summary>
     /// Decorator that will iterate through a collection, looping its children for each entry.  Iteration will stop when a child returns SUCCESS.
     /// </summary>
@@ -52,7 +60,7 @@ public static class SBL
     /// Right now this only supports AttackableUnit collections.  This will return SUCCESS if a child returns SUCCESS and FAILURE if all children return FAILURE.
     /// </remarks>
     /// <param name="Collection">The collection that the iterator should loop over.</param>
-    public extern static bool IterateUntilSuccessDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection);
+    public extern static bool IterateUntilSuccessDecorator(out AttackableUnit Output, IEnumerable<AttackableUnit> Collection, Func<Task<bool>>? Child0 = null);
     /// <summary>
     /// Return RUNNING for X seconds after first tick.
     /// </summary>
@@ -109,6 +117,287 @@ public static class SBL
     /// </remarks>
     public extern static bool HideAuxiliaryText();
     /// <summary>
+    /// Sets OutputRef with the value of Input
+    /// </summary>
+    /// <remarks>
+    /// This version is for bool References
+    /// </remarks>
+    /// <param name="Input">Source Reference</param>
+    public extern static bool SetVarBool(out bool Output, bool Input = true);
+    /// <summary>
+    /// Sets OutputRef with the value of Input
+    /// </summary>
+    /// <remarks>
+    /// This version is for AttackableUnit References
+    /// </remarks>
+    /// <param name="Input">Source Reference</param>
+    public extern static bool SetVarAttackableUnit(out AttackableUnit Output, AttackableUnit Input = True);
+    /// <summary>
+    /// Sets OutputRef with the value of Input
+    /// </summary>
+    /// <remarks>
+    /// This version is for int References
+    /// </remarks>
+    /// <param name="Input">Source Reference</param>
+    public extern static bool SetVarInt(out int Output, int Input = 0);
+    /// <summary>
+    /// Sets OutputRef with the value of Input
+    /// </summary>
+    /// <remarks>
+    /// This version is for int References
+    /// </remarks>
+    /// <param name="Input">Source Reference</param>
+    public extern static bool SetVarDWORD(out DWORD Output, DWORD Input = 0);
+    /// <summary>
+    /// Sets OutputRef with the value of Input
+    /// </summary>
+    /// <remarks>
+    /// This version is for string References
+    /// </remarks>
+    /// <param name="Input">Source Reference</param>
+    public extern static bool SetVarString(out string Output, string Input = "DEFAULT STRING");
+    /// <summary>
+    /// Sets OutputRef with the value of Input
+    /// </summary>
+    /// <remarks>
+    /// This version is for float References
+    /// </remarks>
+    /// <param name="Input">Source Reference</param>
+    public extern static bool SetVarFloat(out float Output, float Input = 0);
+    /// <summary>
+    /// Sets OutputRef with the value of Input
+    /// </summary>
+    /// <remarks>
+    /// This version is for Vector References.  If you want to make a vector out of 3 floats, use MakeVector.
+    /// </remarks>
+    /// <param name="Input">Source Reference</param>
+    public extern static bool SetVarVector(out Vector3 Output, Vector3 Input = Vector3.Zero);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Unit team
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualUnitTeam(TeamID LeftHandSide = TEAM_UNKNOWN, TeamID RightHandSide = TEAM_UNKNOWN);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Unit team
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualUnitTeam(TeamID LeftHandSide = TEAM_UNKNOWN, TeamID RightHandSide = TEAM_UNKNOWN);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for bool References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualBool(bool LeftHandSide = true, bool RightHandSide = true);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for bool References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualBool(bool LeftHandSide = true, bool RightHandSide = true);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for string References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualString(string LeftHandSide = "True", string RightHandSide = "True");
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for string References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualString(string LeftHandSide = "True", string RightHandSide = "True");
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for int References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualInt(int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for int References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualInt(int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is less than the RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for int References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool LessInt(int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is less than or equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for int References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool LessEqualInt(int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is greater than RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for int References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool GreaterInt(int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is greater than or equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for int References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool GreaterEqualInt(int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for flooat References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for float References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is less than the RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for float References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool LessFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is less than or equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for float References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool LessEqualFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is greater than RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for float References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool GreaterFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Unit References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualUnit(AttackableUnit LeftHandSide = 0, AttackableUnit RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Unit References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualUnit(AttackableUnit LeftHandSide = 0, AttackableUnit RightHandSide = 0);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is greater than or equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for float References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool GreaterEqualFloat(float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Adds the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Ints.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool AddInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Subtracts the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Ints.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool SubtractInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Multiplies the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Ints.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool MultiplyInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Divides the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Ints.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool DivideInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Divides the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Ints.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool ModulusInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the lesser value in Output
     /// </summary>
     /// <remarks>
@@ -126,6 +415,42 @@ public static class SBL
     /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
     /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
     public extern static bool MaxInt(out int Output, int LeftHandSide = 0, int RightHandSide = 0);
+    /// <summary>
+    /// Adds the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Floats.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool AddFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Subtracts the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Floats.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool SubtractFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Multiplies the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Floats.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool MultiplyFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
+    /// <summary>
+    /// Divides the LeftHandSide to the RightHandSide and places the result in Output
+    /// </summary>
+    /// <remarks>
+    /// This version is for Floats.  This will always return SUCCESS. 
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the operation</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the operation</param>
+    public extern static bool DivideFloat(out float Output, float LeftHandSide = 0, float RightHandSide = 0);
     /// <summary>
     /// Compares LeftHandSide to the RightHandSide and places the lesser value in Output
     /// </summary>
@@ -676,7 +1001,7 @@ public static class SBL
     /// <param name="RevealStealth">If this is true then the bubble will reveal stealth for anything inside of that bubble.</param>
     /// <param name="SpecificUnitsClientOnly">OPTIONAL. If specified a client specific message will be sent only to this client about this bubble.  Only that client will have that visiblity.</param>
     /// <param name="RevealSpecificUnitOnly">OPTIONAL. If set then only a units that have the RevealSpecificUnit state on are seeable by this bubble.</param>
-    public extern static bool AddUnitPerceptionBubble(out DWORD BubbleID, AttackableUnit TargetUnit, float Radius = 0.0, float Duration = 0.0, TeamID Team = TEAM_ORDER, bool RevealStealth = false, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly);
+    public extern static bool AddUnitPerceptionBubble(out DWORD BubbleID, AttackableUnit TargetUnit, float Radius = 0.0f, float Duration = 0.0f, TeamID Team = TEAM_ORDER, bool RevealStealth = false, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly);
     /// <summary>
     /// Adds a position Perception Bubble
     /// </summary>
@@ -690,7 +1015,7 @@ public static class SBL
     /// <param name="RevealStealth">If this is true then the bubble will reveal stealth for anything inside of that bubble.</param>
     /// <param name="SpecificUnitsClientOnly">OPTIONAL. If specified a client specific message will be sent only to this client about this bubble.  Only that client will have that visiblity.</param>
     /// <param name="RevealSpecificUnitOnly">OPTIONAL. If set then only a units that have the RevealSpecificUnit state on are seeable by this bubble.</param>
-    public extern static bool AddPositionPerceptionBubble(out DWORD BubbleID, Vector3 Position = Vector3.Zero, float Radius = 0.0, float Duration = 0.0, TeamID Team = TEAM_ORDER, bool RevealStealth = false, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly);
+    public extern static bool AddPositionPerceptionBubble(out DWORD BubbleID, Vector3 Position = Vector3.Zero, float Radius = 0.0f, float Duration = 0.0f, TeamID Team = TEAM_ORDER, bool RevealStealth = false, AttackableUnit SpecificUnitsClientOnly, AttackableUnit RevealSpecificUnitOnly);
     /// <summary>
     /// Removes Perception Bubble
     /// </summary>
@@ -717,7 +1042,7 @@ public static class SBL
     /// <param name="FOWVisibilityRadius">Used with FOWTeam to determine particle visibility in the FoW.  The particle will be visible if a unit has visibility into the area defined by this radius and the center of the particle.</param>
     /// <param name="FOWTeam">OPTIONAL.  If the viewing unit is on the same team as set by this variable, that unit will see this particle even if it's in the Fog of War.  Only used if FOWVisibilityRadius is non-zero.</param>
     /// <param name="SendIfOnScreenOrDiscard">If true, will only try to send the particle if a unit can see it when the particle spawns.  Use for one-shot particles; saves a lot of bandwidth, so use as often as possible.</param>
-    public extern static bool CreateUnitParticle(out DWORD EffectID, AttackableUnit BindObject, string BoneName = "", string EffectName = "", AttackableUnit TargetObject, string TargetBoneName = "", Vector3 TargetPosition = Vector3.Zero, Vector3 OrientTowards = Vector3.Zero, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly = TEAM_UNKNOWN, float FOWVisibilityRadius = 0.0, TeamID FOWTeam = TEAM_UNKNOWN, bool SendIfOnScreenOrDiscard = false);
+    public extern static bool CreateUnitParticle(out DWORD EffectID, AttackableUnit BindObject, string BoneName = "", string EffectName = "", AttackableUnit TargetObject, string TargetBoneName = "", Vector3 TargetPosition = Vector3.Zero, Vector3 OrientTowards = Vector3.Zero, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly = TEAM_UNKNOWN, float FOWVisibilityRadius = 0.0f, TeamID FOWTeam = TEAM_UNKNOWN, bool SendIfOnScreenOrDiscard = false);
     /// <summary>
     /// Adds a unit particle effect
     /// </summary>
@@ -735,7 +1060,7 @@ public static class SBL
     /// <param name="FOWVisibilityRadius">Used with FOWTeam to determine particle visibility in the FoW.  The particle will be visible if a unit has visibility into the area defined by this radius and the center of the particle.</param>
     /// <param name="FOWTeam">OPTIONAL.  If the viewing unit is on the same team as set by this variable, that unit will see this particle even if it's in the Fog of War.  Only used if FOWVisibilityRadius is non-zero.</param>
     /// <param name="SendIfOnScreenOrDiscard">If true, will only try to send the particle if a unit can see it when the particle spawns.  Use for one-shot particles; saves a lot of bandwidth, so use as often as possible.</param>
-    public extern static bool CreatePositionParticle(out DWORD EffectID, Vector3 Position = Vector3.Zero, string EffectName = "", AttackableUnit TargetObject, string TargetBoneName = "", Vector3 TargetPosition = Vector3.Zero, Vector3 OrientTowards = Vector3.Zero, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly = TEAM_UNKNOWN, float FOWVisibilityRadius = 0.0, TeamID FOWTeam = TEAM_UNKNOWN, bool SendIfOnScreenOrDiscard = false);
+    public extern static bool CreatePositionParticle(out DWORD EffectID, Vector3 Position = Vector3.Zero, string EffectName = "", AttackableUnit TargetObject, string TargetBoneName = "", Vector3 TargetPosition = Vector3.Zero, Vector3 OrientTowards = Vector3.Zero, AttackableUnit SpecificUnitOnly, TeamID SpecificTeamOnly = TEAM_UNKNOWN, float FOWVisibilityRadius = 0.0f, TeamID FOWTeam = TEAM_UNKNOWN, bool SendIfOnScreenOrDiscard = false);
     /// <summary>
     /// Removes Particle
     /// </summary>
@@ -1110,6 +1435,78 @@ public static class SBL
     /// <param name="Unit">Unit to poll.</param>
     public extern static bool GetUnitAIAttackers(out IEnumerable<AttackableUnit> Output, AttackableUnit Unit);
     /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for PAR References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualPARType(PrimaryAbilityResourceType LeftHandSide = PAR_MANA, PrimaryAbilityResourceType RightHandSide = PAR_MANA);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for PAR References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualPARType(PrimaryAbilityResourceType LeftHandSide = PAR_MANA, PrimaryAbilityResourceType RightHandSide = PAR_MANA);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Unit type References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualUnitType(UnitType LeftHandSide = UNKNOWN_UNIT, UnitType RightHandSide = UNKNOWN_UNIT);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Unit type References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualUnitType(UnitType LeftHandSide = UNKNOWN_UNIT, UnitType RightHandSide = UNKNOWN_UNIT);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Creature References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualCreatureType(CreatureType LeftHandSide = UNKNOWN_CREATURE, CreatureType RightHandSide = UNKNOWN_CREATURE);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Creature References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualCreatureType(CreatureType LeftHandSide = UNKNOWN_CREATURE, CreatureType RightHandSide = UNKNOWN_CREATURE);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Creature References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool EqualSpellbookType(SpellbookTypeEnum LeftHandSide = SPELLBOOK_UNKNOWN, SpellbookTypeEnum RightHandSide = SPELLBOOK_UNKNOWN);
+    /// <summary>
+    /// Returns SUCCESS if LeftHandSide is NOT equal to RightHandSide, and FAILURE if it is not
+    /// </summary>
+    /// <remarks>
+    /// This version is for Creature References
+    /// </remarks>
+    /// <param name="LeftHandSide">LeftHandSide Reference of the comparison</param>
+    /// <param name="RightHandSide">RightHandSide Reference of the comparison</param>
+    public extern static bool NotEqualSpellbookType(SpellbookTypeEnum LeftHandSide = SPELLBOOK_UNKNOWN, SpellbookTypeEnum RightHandSide = SPELLBOOK_UNKNOWN);
+    /// <summary>
     /// Unit can buy next recommended item
     /// </summary>
     public extern static bool TestUnitAICanBuyRecommendedItem();
@@ -1316,11 +1713,34 @@ public static class SBL
 }
 class UnnamedBehaviourTree
 {
+    float TotalUnitStrength;
+    IEnumerable<AttackableUnit> TargetCollection;
+    AttackableUnit Self;
+    bool ValueChanged;
+    Vector3 SelfPosition;
+    float CurrentClosestDistance;
+    AttackableUnit CurrentClosestTarget;
+    bool LostAggro;
+    AttackableUnit AggroTarget;
+    Vector3 AggroPosition;
+    float DeaggroDistance;
+    float AccumulatedDamage;
+    float PrevHealth;
+    float PrevTime;
+    float StrengthRatioOverTime;
+    bool AggressiveKillMode;
+    bool LowThreatMode;
+    int PotionsToBuy;
+    bool TeleportHome;
+    Vector3 AssistPosition;
+    AttackableUnit PreviousTarget;
+    
     async Task<bool> GarenBehavior()
     {
+        
         return
         (
-            GarenInit() &&
+            await GarenInit() &&
             (
                 await GarenAtBaseHealAndBuy() ||
                 await GarenLevelUp() ||
@@ -1339,86 +1759,129 @@ class UnnamedBehaviourTree
     
     bool GarenStrengthEvaluator()
     {
+        AttackableUnit Unit;
+        UnitType UnitType;
         return
         (
-            (this.TotalUnitStrength = 1, true) &&
-            IterateOverAllDecorator(out var Unit, this.TargetCollection)
+            SetVarFloat(out this.TotalUnitStrength, 1) &&
+            IterateOverAllDecorator(out Unit, this.TargetCollection, async () => (
+                TestUnitIsVisible(this.Self, Unit) &&
+                (
+                    (
+                        GetUnitType(out UnitType, Unit) &&
+                        EqualUnitType(UnitType, MINION_UNIT) &&
+                        AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 20)
+                    ) ||
+                    (
+                        GetUnitType(out UnitType, Unit) &&
+                        EqualUnitType(UnitType, HERO_UNIT) &&
+                        AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 30)
+                    ) ||
+                    (
+                        GetUnitType(out UnitType, Unit) &&
+                        EqualUnitType(UnitType, TURRET_UNIT) &&
+                        AddFloat(out this.TotalUnitStrength, this.TotalUnitStrength, 90)
+                    )
+                )
+            ))
         );
     }
     
     bool GarenFindClosestTarget()
     {
+        AttackableUnit Attacker;
+        float Distance;
         return
         (
-            (this.ValueChanged = false, true) &&
-            IterateOverAllDecorator(out var Attacker, this.TargetCollection)
+            SetVarBool(out this.ValueChanged, false) &&
+            IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
+                DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
+                LessFloat(Distance, this.CurrentClosestDistance) &&
+                SetVarFloat(out this.CurrentClosestDistance, Distance) &&
+                SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&
+                SetVarBool(out this.ValueChanged, true)
+            ))
         );
     }
     
-    bool GarenDeaggroChecker()
+    async Task<bool> GarenDeaggroChecker()
     {
+        float Distance;
         return
-        ((
-            (this.LostAggro = false, true) &&
-            DistanceBetweenObjectAndPoint(out var Distance, this.AggroTarget, this.AggroPosition) &&
-            Distance > 800 &&
-            Distance < 1200 &&
-            (this.LostAggro = true, true)
-        ), true);
+        await MaskFailure(async () => (
+            SetVarBool(out this.LostAggro, false) &&
+            DistanceBetweenObjectAndPoint(out Distance, this.AggroTarget, this.AggroPosition) &&
+            GreaterFloat(Distance, 800) &&
+            LessFloat(Distance, 1200) &&
+            SetVarBool(out this.LostAggro, true)
+        ));
     }
     
-    bool GarenInit()
+    async Task<bool> GarenInit()
     {
+        float CurrentTime;
+        float TimeDiff;
+        float EnemyStrength;
+        float FriendStrength;
+        float StrRatio;
+        AttackableUnit Unit;
+        UnitType UnitType;
+        float CurrentHealth;
+        float NewDamage;
         return
         (
             GetUnitAISelf(out this.Self) &&
             GetUnitPosition(out this.SelfPosition, this.Self) &&
-            (this.DeaggroDistance = 1200, true) &&
+            SetVarFloat(out this.DeaggroDistance, 1200) &&
             (
                 (
                     TestUnitAIFirstTime() &&
-                    (this.AccumulatedDamage = 0, true) &&
+                    SetVarFloat(out this.AccumulatedDamage, 0) &&
                     GetUnitCurrentHealth(out this.PrevHealth, this.Self) &&
                     GetGameTime(out this.PrevTime) &&
-                    (this.LostAggro = false, true) &&
-                    (this.StrengthRatioOverTime = 1, true) &&
-                    (this.AggressiveKillMode = false, true) &&
-                    (this.LowThreatMode = false, true) &&
-                    (this.PotionsToBuy = 4, true) &&
-                    (this.TeleportHome = false, true)
+                    SetVarBool(out this.LostAggro, false) &&
+                    SetVarFloat(out this.StrengthRatioOverTime, 1) &&
+                    SetVarBool(out this.AggressiveKillMode, false) &&
+                    SetVarBool(out this.LowThreatMode, false) &&
+                    SetVarInt(out this.PotionsToBuy, 4) &&
+                    SetVarBool(out this.TeleportHome, false)
                 ) ||
                 (
-                    ((
-                        GetGameTime(out var CurrentTime) &&
-                        (TimeDiff = CurrentTime - this.PrevTime, true) &&
+                    await MaskFailure(async () => (
+                        GetGameTime(out CurrentTime) &&
+                        SubtractFloat(out TimeDiff, CurrentTime, this.PrevTime) &&
                         (
-                            TimeDiff > 1 ||
-                            TimeDiff < 0
+                            GreaterFloat(TimeDiff, 1) ||
+                            LessFloat(TimeDiff, 0)
                         ) &&
                         (
-                            (this.AccumulatedDamage = this.AccumulatedDamage * 0.8, true) &&
-                            (this.StrengthRatioOverTime = this.StrengthRatioOverTime * 0.8, true)
+                            MultiplyFloat(out this.AccumulatedDamage, this.AccumulatedDamage, 0.8f) &&
+                            MultiplyFloat(out this.StrengthRatioOverTime, this.StrengthRatioOverTime, 0.8f)
                         ) &&
                         (
-                            GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 1000, AffectEnemies,AffectHeroes,AffectMinions,AffectTurrets) &&
+                            GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 1000, AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
                             GarenStrengthEvaluator() &&
-                            (EnemyStrength = this.TotalUnitStrength, true) &&
-                            GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectFriends,AffectHeroes,AffectMinions,AffectTurrets) &&
+                            SetVarFloat(out EnemyStrength, this.TotalUnitStrength) &&
+                            GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectFriends|AffectHeroes|AffectMinions|AffectTurrets) &&
                             GarenStrengthEvaluator() &&
-                            (FriendStrength = this.TotalUnitStrength, true) &&
-                            (StrRatio = EnemyStrength / FriendStrength, true) &&
-                            (this.StrengthRatioOverTime = this.StrengthRatioOverTime + StrRatio, true) &&
+                            SetVarFloat(out FriendStrength, this.TotalUnitStrength) &&
+                            DivideFloat(out StrRatio, EnemyStrength, FriendStrength) &&
+                            AddFloat(out this.StrengthRatioOverTime, this.StrengthRatioOverTime, StrRatio) &&
                             GetUnitAIAttackers(out this.TargetCollection, this.Self) &&
-                            (IterateUntilSuccessDecorator(out var Unit, this.TargetCollection), true)
+                            await MaskFailure(async () => IterateUntilSuccessDecorator(out Unit, this.TargetCollection, async () => (
+                                GetUnitType(out UnitType, Unit) &&
+                                EqualUnitType(UnitType, TURRET_UNIT) &&
+                                AddFloat(out this.StrengthRatioOverTime, this.StrengthRatioOverTime, 8)
+                            )))
                         ) &&
                         GetGameTime(out this.PrevTime)
-                    ), true) &&
-                    ((
-                        GetUnitCurrentHealth(out var CurrentHealth, this.Self) &&
-                        (NewDamage = this.PrevHealth - CurrentHealth, true) &&
-                        NewDamage > 0 &&
-                        (this.AccumulatedDamage = this.AccumulatedDamage + NewDamage, true)
-                    ), true) &&
+                    )) &&
+                    await MaskFailure(async () => (
+                        GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
+                        SubtractFloat(out NewDamage, this.PrevHealth, CurrentHealth) &&
+                        GreaterFloat(NewDamage, 0) &&
+                        AddFloat(out this.AccumulatedDamage, this.AccumulatedDamage, NewDamage)
+                    )) &&
                     GetUnitCurrentHealth(out this.PrevHealth, this.Self)
                 )
             )
@@ -1427,19 +1890,25 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenAtBaseHealAndBuy()
     {
+        Vector3 BaseLocation;
+        float Distance;
+        float MaxHealth;
+        float CurrentHealth;
+        float Health_Ratio;
+        float temp;
         return
         (
-            GetUnitAIBasePosition(out var BaseLocation, this.Self) &&
-            DistanceBetweenObjectAndPoint(out var Distance, this.Self, BaseLocation) &&
-            Distance <= 450 &&
-            (this.TeleportHome = false, true) &&
+            GetUnitAIBasePosition(out BaseLocation, this.Self) &&
+            DistanceBetweenObjectAndPoint(out Distance, this.Self, BaseLocation) &&
+            LessEqualFloat(Distance, 450) &&
+            SetVarBool(out this.TeleportHome, false) &&
             (
                 (
                     await DebugAction(0, SUCCESS, "Start ----- Heal -----") &&
-                    GetUnitMaxHealth(out var MaxHealth, this.Self) &&
-                    GetUnitCurrentHealth(out var CurrentHealth, this.Self) &&
-                    (Health_Ratio = CurrentHealth / MaxHealth, true) &&
-                    Health_Ratio < 0.95 &&
+                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
+                    GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
+                    DivideFloat(out Health_Ratio, CurrentHealth, MaxHealth) &&
+                    LessFloat(Health_Ratio, 0.95f) &&
                     await DebugAction(0, SUCCESS, "Success ----- Heal -----")
                 ) ||
                 (
@@ -1512,8 +1981,8 @@ class UnnamedBehaviourTree
                         )
                     ) ||
                     (
-                        GetUnitGold(out var temp, this.Self) &&
-                        temp > 0 &&
+                        GetUnitGold(out temp, this.Self) &&
+                        GreaterFloat(temp, 0) &&
                         TestChampionHasItem(this.Self, 3105) &&
                         TestChampionHasItem(this.Self, 3009) &&
                         TestChampionHasItem(this.Self, 3068) &&
@@ -1569,11 +2038,11 @@ class UnnamedBehaviourTree
                         )
                     ) ||
                     (
-                        this.PotionsToBuy > 0 &&
+                        GreaterInt(this.PotionsToBuy, 0) &&
                         !TestChampionHasItem(this.Self, 2003) &&
                         TestUnitAICanBuyItem(2003) &&
                         UnitAIBuyItem(2003) &&
-                        (this.PotionsToBuy = this.PotionsToBuy - 1, true)
+                        SubtractInt(out this.PotionsToBuy, this.PotionsToBuy, 1)
                     )
                 )
             ) &&
@@ -1583,13 +2052,17 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenLevelUp()
     {
+        int SkillPoints;
+        int Ability0Level;
+        int Ability1Level;
+        int Ability2Level;
         return
         (
-            GetUnitSkillPoints(out var SkillPoints, this.Self) &&
-            SkillPoints > 0 &&
-            GetUnitSpellLevel(out var Ability0Level, this.Self, SPELLBOOK_UNKNOWN, 0) &&
-            GetUnitSpellLevel(out var Ability1Level, this.Self, SPELLBOOK_UNKNOWN, 1) &&
-            GetUnitSpellLevel(out var Ability2Level, this.Self, SPELLBOOK_UNKNOWN, 2) &&
+            GetUnitSkillPoints(out SkillPoints, this.Self) &&
+            GreaterInt(SkillPoints, 0) &&
+            GetUnitSpellLevel(out Ability0Level, this.Self, SPELLBOOK_UNKNOWN, 0) &&
+            GetUnitSpellLevel(out Ability1Level, this.Self, SPELLBOOK_UNKNOWN, 1) &&
+            GetUnitSpellLevel(out Ability2Level, this.Self, SPELLBOOK_UNKNOWN, 2) &&
             (
                 (
                     TestUnitCanLevelUpSpell(this.Self, 3) &&
@@ -1600,14 +2073,14 @@ class UnnamedBehaviourTree
                     TestUnitCanLevelUpSpell(this.Self, 1) &&
                     (
                         (
-                            Ability0Level >= 1 &&
-                            Ability2Level >= 1 &&
-                            Ability1Level <= 0
+                            GreaterEqualInt(Ability0Level, 1) &&
+                            GreaterEqualInt(Ability2Level, 1) &&
+                            LessEqualInt(Ability1Level, 0)
                         ) ||
                         (
-                            Ability0Level >= 3 &&
-                            Ability2Level >= 3 &&
-                            Ability1Level <= 1
+                            GreaterEqualInt(Ability0Level, 3) &&
+                            GreaterEqualInt(Ability2Level, 3) &&
+                            LessEqualInt(Ability1Level, 1)
                         )
                     ) &&
                     LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
@@ -1616,7 +2089,7 @@ class UnnamedBehaviourTree
                 (
                     (
                         TestUnitCanLevelUpSpell(this.Self, 2) &&
-                        Ability2Level <= Ability0Level &&
+                        LessEqualInt(Ability2Level, Ability0Level) &&
                         LevelUpUnitSpell(this.Self, SPELLBOOK_CHAMPION, 2) &&
                         await DebugAction(0, SUCCESS, "levelup 0")
                     ) ||
@@ -1638,6 +2111,7 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenGameNotStarted()
     {
+        
         return
         (
             !TestGameStarted() &&
@@ -1647,6 +2121,7 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenAttack()
     {
+        
         return
         (
             await GarenAcquireTarget() &&
@@ -1657,41 +2132,69 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenAcquireTarget()
     {
+        IEnumerable<AttackableUnit> FriendlyUnits;
+        AttackableUnit unit;
+        int Count;
+        float Distance;
         return
         (
             (
-                (this.LostAggro = false, true) &&
+                SetVarBool(out this.LostAggro, false) &&
                 TestUnitAIAttackTargetValid() &&
                 GetUnitAIAttackTarget(out this.AggroTarget) &&
-                (this.AggroPosition = this.AssistPosition, true) &&
+                SetVarVector(out this.AggroPosition, this.AssistPosition) &&
                 TestUnitIsVisible(this.Self, this.AggroTarget) &&
-                GarenDeaggroChecker() &&
-                this.LostAggro == false &&
+                await GarenDeaggroChecker() &&
+                EqualBool(this.LostAggro, false) &&
                 await DebugAction(0, SUCCESS, "+++ Use Previous Target +++")
             ) ||
             (
                 await DebugAction(0, SUCCESS, "EnableOrDisableAllyAggro") &&
-                (this.CurrentClosestDistance = 800, true) &&
-                GetUnitsInTargetArea(out var FriendlyUnits, this.Self, this.SelfPosition, 800, AffectFriends,AffectHeroes,AlwaysSelf) &&
-                (this.ValueChanged = false, true) &&
-                IterateOverAllDecorator(out var unit, FriendlyUnits) &&
-                this.ValueChanged == true &&
+                SetVarFloat(out this.CurrentClosestDistance, 800) &&
+                GetUnitsInTargetArea(out FriendlyUnits, this.Self, this.SelfPosition, 800, AffectFriends|AffectHeroes|AlwaysSelf) &&
+                SetVarBool(out this.ValueChanged, false) &&
+                IterateOverAllDecorator(out unit, FriendlyUnits, async () => (
+                    TestUnitUnderAttack(unit) &&
+                    GetUnitAIAttackers(out this.TargetCollection, unit) &&
+                    GarenFindClosestVisibleTarget() &&
+                    EqualBool(this.ValueChanged, true) &&
+                    SetUnitAIAssistTarget(this.Self) &&
+                    SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
+                    EqualUnit(unit, this.Self) &&
+                    SetVarVector(out this.AssistPosition, this.SelfPosition)
+                )) &&
+                EqualBool(this.ValueChanged, true) &&
                 await DebugAction(0, SUCCESS, "+++ Acquired Ally under attack +++")
             ) ||
             (
                 await DebugAction(0, SUCCESS, "??? EnableDisableAcquire New Target ???") &&
-                (this.CurrentClosestDistance = 800, true) &&
-                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectBuildings,AffectEnemies,AffectHeroes,AffectMinions,AffectTurrets) &&
+                SetVarFloat(out this.CurrentClosestDistance, 800) &&
+                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectBuildings|AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
                 (
-                    GetCollectionCount(out var Count, this.TargetCollection) &&
-                    Count > 0 &&
-                    (this.ValueChanged = false, true) &&
-                    IterateOverAllDecorator(out var unit, this.TargetCollection)
+                    GetCollectionCount(out Count, this.TargetCollection) &&
+                    GreaterInt(Count, 0) &&
+                    SetVarBool(out this.ValueChanged, false) &&
+                    IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
+                        DistanceBetweenObjectAndPoint(out Distance, unit, this.SelfPosition) &&
+                        LessFloat(Distance, this.CurrentClosestDistance) &&
+                        TestUnitIsVisible(this.Self, unit) &&
+                        (
+                            (
+                                EqualBool(this.LostAggro, true) &&
+                                GetUnitAIAttackTarget(out this.AggroTarget) &&
+                                NotEqualUnit(this.AggroTarget, unit)
+                            ) ||
+                            EqualBool(this.LostAggro, false)
+                        ) &&
+                        SetVarFloat(out this.CurrentClosestDistance, Distance) &&
+                        SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
+                        SetVarBool(out this.ValueChanged, true)
+                    ))
                 ) &&
-                this.ValueChanged == true &&
+                EqualBool(this.ValueChanged, true) &&
                 SetUnitAIAssistTarget(this.Self) &&
                 SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                (this.AssistPosition = this.SelfPosition, true) &&
+                SetVarVector(out this.AssistPosition, this.SelfPosition) &&
                 await DebugAction(0, SUCCESS, "+++ AcquiredNewTarget +++")
             )
         );
@@ -1699,23 +2202,30 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenAttackTarget()
     {
+        AttackableUnit Target;
+        TeamID SelfTeam;
+        TeamID TargetTeam;
+        UnitType UnitType;
+        float currentHealth;
+        float MaxHealth;
+        float HP_Ratio;
         return
         (
-            GetUnitAIAttackTarget(out var Target) &&
-            GetUnitTeam(out var SelfTeam, this.Self) &&
-            GetUnitTeam(out var TargetTeam, Target) &&
-            SelfTeam != TargetTeam &&
+            GetUnitAIAttackTarget(out Target) &&
+            GetUnitTeam(out SelfTeam, this.Self) &&
+            GetUnitTeam(out TargetTeam, Target) &&
+            NotEqualUnitTeam(SelfTeam, TargetTeam) &&
             (
                 (
-                    GetUnitType(out var UnitType, Target) &&
-                    UnitType == MINION_UNIT &&
-                    GetUnitCurrentHealth(out var currentHealth, Target) &&
-                    GetUnitMaxHealth(out var MaxHealth, Target) &&
-                    (HP_Ratio = currentHealth / MaxHealth, true) &&
-                    HP_Ratio < 0.2 &&
+                    GetUnitType(out UnitType, Target) &&
+                    EqualUnitType(UnitType, MINION_UNIT) &&
+                    GetUnitCurrentHealth(out currentHealth, Target) &&
+                    GetUnitMaxHealth(out MaxHealth, Target) &&
+                    DivideFloat(out HP_Ratio, currentHealth, MaxHealth) &&
+                    LessFloat(HP_Ratio, 0.2f) &&
                     (
                         (
-                            this.StrengthRatioOverTime > 2 &&
+                            GreaterFloat(this.StrengthRatioOverTime, 2) &&
                             GarenCanCastAbility2() &&
                             SetUnitAIAttackTarget(this.Self) &&
                             await GarenCastAbility2()
@@ -1728,8 +2238,8 @@ class UnnamedBehaviourTree
                     )
                 ) ||
                 (
-                    GetUnitType(out var UnitType, Target) &&
-                    UnitType == HERO_UNIT &&
+                    GetUnitType(out UnitType, Target) &&
+                    EqualUnitType(UnitType, HERO_UNIT) &&
                     (
                         (
                             GarenCanCastAbility0() &&
@@ -1750,25 +2260,32 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenReturnToBase()
     {
+        Vector3 BaseLocation;
+        float Distance;
+        float MaxHealth;
+        float Health;
+        float Health_Ratio;
+        Vector3 TeleportPosition;
+        float DistanceToTeleportPosition;
         return
         (
-            GetUnitAIBasePosition(out var BaseLocation, this.Self) &&
-            DistanceBetweenObjectAndPoint(out var Distance, this.Self, BaseLocation) &&
-            Distance > 300 &&
+            GetUnitAIBasePosition(out BaseLocation, this.Self) &&
+            DistanceBetweenObjectAndPoint(out Distance, this.Self, BaseLocation) &&
+            GreaterFloat(Distance, 300) &&
             (
                 (
-                    GetUnitMaxHealth(out var MaxHealth, this.Self) &&
-                    GetUnitCurrentHealth(out var Health, this.Self) &&
-                    (Health_Ratio = Health / MaxHealth, true) &&
+                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
+                    GetUnitCurrentHealth(out Health, this.Self) &&
+                    DivideFloat(out Health_Ratio, Health, MaxHealth) &&
                     (
                         (
-                            this.TeleportHome == true &&
-                            Health_Ratio <= 0.35
+                            EqualBool(this.TeleportHome, true) &&
+                            LessEqualFloat(Health_Ratio, 0.35f)
                         ) ||
                         (
-                            this.TeleportHome == false &&
-                            Health_Ratio <= 0.25 &&
-                            (this.TeleportHome = true, true)
+                            EqualBool(this.TeleportHome, false) &&
+                            LessEqualFloat(Health_Ratio, 0.25f) &&
+                            SetVarBool(out this.TeleportHome, true)
                         )
                     )
                 ) ||
@@ -1778,20 +2295,20 @@ class UnnamedBehaviourTree
             ) &&
             (
                 (
-                    (this.CurrentClosestDistance = 30000, true) &&
-                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 30000, AffectFriends,AffectTurrets) &&
+                    SetVarFloat(out this.CurrentClosestDistance, 30000) &&
+                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 30000, AffectFriends|AffectTurrets) &&
                     GarenFindClosestTarget() &&
-                    this.ValueChanged == true &&
+                    EqualBool(this.ValueChanged, true) &&
                     (
                         (
-                            GetDistanceBetweenUnits(out var Distance, this.CurrentClosestTarget, this.Self) &&
-                            Distance < 125 &&
+                            GetDistanceBetweenUnits(out Distance, this.CurrentClosestTarget, this.Self) &&
+                            LessFloat(Distance, 125) &&
                             (
                                 (
                                     TestUnitAISpellPositionValid() &&
-                                    GetUnitAISpellPosition(out var TeleportPosition) &&
-                                    DistanceBetweenObjectAndPoint(out var DistanceToTeleportPosition, this.Self, TeleportPosition) &&
-                                    DistanceToTeleportPosition < 50
+                                    GetUnitAISpellPosition(out TeleportPosition) &&
+                                    DistanceBetweenObjectAndPoint(out DistanceToTeleportPosition, this.Self, TeleportPosition) &&
+                                    LessFloat(DistanceToTeleportPosition, 50)
                                 ) ||
                                 !TestUnitAISpellPositionValid()
                             ) &&
@@ -1807,14 +2324,14 @@ class UnnamedBehaviourTree
                                 ) ||
                                 TestUnitAISpellPositionValid()
                             ) &&
-                            GetUnitAISpellPosition(out var TeleportPosition) &&
+                            GetUnitAISpellPosition(out TeleportPosition) &&
                             IssueMoveToPositionOrder(TeleportPosition) &&
                             await DebugAction(0, SUCCESS, "Yo")
                         )
                     )
                 ) ||
                 (
-                    GetUnitAIBasePosition(out var BaseLocation, this.Self) &&
+                    GetUnitAIBasePosition(out BaseLocation, this.Self) &&
                     IssueMoveToPositionOrder(BaseLocation)
                 )
             ) &&
@@ -1824,30 +2341,35 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenHighThreatManagement()
     {
+        bool SuperHighThreat;
+        float MaxHealth;
+        float Health;
+        float Health_Ratio;
+        float Damage_Ratio;
         return
         (
             (
                 (
-                    (SuperHighThreat = false, true) &&
+                    SetVarBool(out SuperHighThreat, false) &&
                     TestUnitUnderAttack(this.Self) &&
-                    GetUnitMaxHealth(out var MaxHealth, this.Self) &&
-                    GetUnitCurrentHealth(out var Health, this.Self) &&
-                    (Health_Ratio = Health / MaxHealth, true) &&
-                    Health_Ratio <= 0.25 &&
+                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
+                    GetUnitCurrentHealth(out Health, this.Self) &&
+                    DivideFloat(out Health_Ratio, Health, MaxHealth) &&
+                    LessEqualFloat(Health_Ratio, 0.25f) &&
                     await DebugAction(0, SUCCESS, "+++ LowHealthUnderAttack +++") &&
-                    (SuperHighThreat = true, true)
+                    SetVarBool(out SuperHighThreat, true)
                 ) ||
                 (
-                    GetUnitMaxHealth(out var MaxHealth, this.Self) &&
-                    (Damage_Ratio = this.AccumulatedDamage / MaxHealth, true) &&
+                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
+                    DivideFloat(out Damage_Ratio, this.AccumulatedDamage, MaxHealth) &&
                     (
                         (
-                            this.AggressiveKillMode == true &&
-                            Damage_Ratio > 0.15
+                            EqualBool(this.AggressiveKillMode, true) &&
+                            GreaterFloat(Damage_Ratio, 0.15f)
                         ) ||
                         (
-                            this.AggressiveKillMode == false &&
-                            Damage_Ratio > 0.02
+                            EqualBool(this.AggressiveKillMode, false) &&
+                            GreaterFloat(Damage_Ratio, 0.02f)
                         )
                     ) &&
                     await DebugAction(0, SUCCESS, "+++ BurstDamage +++")
@@ -1857,13 +2379,13 @@ class UnnamedBehaviourTree
             ClearUnitAIAttackTarget() &&
             (
                 (
-                    SuperHighThreat == true &&
+                    EqualBool(SuperHighThreat, true) &&
                     GarenCanCastAbility1() &&
                     SetUnitAIAttackTarget(this.Self) &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1)
                 ) ||
                 (
-                    SuperHighThreat == true &&
+                    EqualBool(SuperHighThreat, true) &&
                     GarenCanCastAbility0() &&
                     SetUnitAIAttackTarget(this.Self) &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
@@ -1876,20 +2398,21 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenLowThreatManagement()
     {
+        
         return
         (
             (
                 (
-                    this.StrengthRatioOverTime > 6 &&
+                    GreaterFloat(this.StrengthRatioOverTime, 6) &&
                     ClearUnitAIAttackTarget() &&
-                    (this.LowThreatMode = true, true)
+                    SetVarBool(out this.LowThreatMode, true)
                 ) ||
                 (
-                    this.LowThreatMode == true &&
-                    (this.LowThreatMode = false, true) &&
-                    this.StrengthRatioOverTime > 4 &&
+                    EqualBool(this.LowThreatMode, true) &&
+                    SetVarBool(out this.LowThreatMode, false) &&
+                    GreaterFloat(this.StrengthRatioOverTime, 4) &&
                     ClearUnitAIAttackTarget() &&
-                    (this.LowThreatMode = true, true)
+                    SetVarBool(out this.LowThreatMode, true)
                 ) ||
                 (
                     ClearUnitAISafePosition() &&
@@ -1903,39 +2426,65 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenKillChampion()
     {
+        float CurrentLowestHealthRatio;
+        AttackableUnit unit;
+        float CurrentHealth;
+        float MaxHealth;
+        float HP_Ratio;
+        bool Aggressive;
+        float MyHealthRatio;
+        AttackableUnit ;
         return
         (
-            (this.AggressiveKillMode = false, true) &&
+            SetVarBool(out this.AggressiveKillMode, false) &&
             (
                 (
-                    this.StrengthRatioOverTime < 3 &&
-                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies,AffectHeroes) &&
-                    (CurrentLowestHealthRatio = 0.8, true) &&
-                    (this.ValueChanged = false, true) &&
-                    IterateOverAllDecorator(out var unit, this.TargetCollection) &&
-                    this.ValueChanged == true &&
+                    LessFloat(this.StrengthRatioOverTime, 3) &&
+                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies|AffectHeroes) &&
+                    SetVarFloat(out CurrentLowestHealthRatio, 0.8f) &&
+                    SetVarBool(out this.ValueChanged, false) &&
+                    IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
+                        GetUnitCurrentHealth(out CurrentHealth, unit) &&
+                        GetUnitMaxHealth(out MaxHealth, unit) &&
+                        DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
+                        LessFloat(HP_Ratio, CurrentLowestHealthRatio) &&
+                        TestUnitIsVisible(this.Self, unit) &&
+                        SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
+                        SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
+                        SetVarBool(out this.ValueChanged, true)
+                    )) &&
+                    EqualBool(this.ValueChanged, true) &&
                     SetUnitAIAssistTarget(this.Self) &&
                     SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                    (this.AssistPosition = this.SelfPosition, true) &&
-                    (Aggressive = false, true) &&
+                    SetVarVector(out this.AssistPosition, this.SelfPosition) &&
+                    SetVarBool(out Aggressive, false) &&
                     await DebugAction(0, SUCCESS, "PassiveKillChampion")
                 ) ||
                 (
-                    this.StrengthRatioOverTime < 5.1 &&
-                    GetUnitMaxHealth(out var MaxHealth, this.Self) &&
-                    GetUnitCurrentHealth(out var CurrentHealth, this.Self) &&
-                    (MyHealthRatio = CurrentHealth / MaxHealth, true) &&
-                    MyHealthRatio > 0.5 &&
-                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 1000, AffectEnemies,AffectHeroes) &&
-                    (CurrentLowestHealthRatio = 0.4, true) &&
-                    (this.ValueChanged = false, true) &&
-                    IterateOverAllDecorator(out var unit, this.TargetCollection) &&
-                    this.ValueChanged == true &&
+                    LessFloat(this.StrengthRatioOverTime, 5.1f) &&
+                    GetUnitMaxHealth(out MaxHealth, this.Self) &&
+                    GetUnitCurrentHealth(out CurrentHealth, this.Self) &&
+                    DivideFloat(out MyHealthRatio, CurrentHealth, MaxHealth) &&
+                    GreaterFloat(MyHealthRatio, 0.5f) &&
+                    GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 1000, AffectEnemies|AffectHeroes) &&
+                    SetVarFloat(out CurrentLowestHealthRatio, 0.4f) &&
+                    SetVarBool(out this.ValueChanged, false) &&
+                    IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
+                        GetUnitCurrentHealth(out CurrentHealth, unit) &&
+                        GetUnitMaxHealth(out MaxHealth, unit) &&
+                        DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
+                        LessFloat(HP_Ratio, CurrentLowestHealthRatio) &&
+                        TestUnitIsVisible(this.Self, unit) &&
+                        SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
+                        SetVarAttackableUnit(out this.CurrentClosestTarget, unit) &&
+                        SetVarBool(out this.ValueChanged, true)
+                    )) &&
+                    EqualBool(this.ValueChanged, true) &&
                     SetUnitAIAssistTarget(this.Self) &&
                     SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                    (this.AssistPosition = this.SelfPosition, true) &&
-                    (Aggressive = true, true) &&
-                    (this.AggressiveKillMode = true, true) &&
+                    SetVarVector(out this.AssistPosition, this.SelfPosition) &&
+                    SetVarBool(out Aggressive, true) &&
+                    SetVarBool(out this.AggressiveKillMode, true) &&
                     await DebugAction(0, SUCCESS, "+++ AggressiveMode +++")
                 )
             ) &&
@@ -1945,13 +2494,13 @@ class UnnamedBehaviourTree
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0)
                 ) ||
                 (
-                    Aggressive == true &&
+                    EqualBool(Aggressive, true) &&
                     GarenCanCastAbility3() &&
                     await GarenCastAbility3() &&
                     await DebugAction(0, SUCCESS, "+++ Use Ultiamte +++")
                 ) ||
                 (
-                    !TestUnitHasBuff(this.Self, Tree., "GarenBladestorm") &&
+                    !TestUnitHasBuff(this.Self, , "GarenBladestorm") &&
                     GarenCanCastAbility2() &&
                     await GarenCastAbility2()
                 ) ||
@@ -1964,18 +2513,32 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenLastHitMinion()
     {
+        float CurrentLowestHealthRatio;
+        AttackableUnit unit;
+        float CurrentHealth;
+        float MaxHealth;
+        float HP_Ratio;
+         Target;
         return
         (
             (
-                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 800, AffectEnemies,AffectMinions) &&
-                (CurrentLowestHealthRatio = 0.3, true) &&
-                (this.ValueChanged = false, true) &&
-                IterateOverAllDecorator(out var unit, this.TargetCollection) &&
-                this.ValueChanged == true &&
+                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 800, AffectEnemies|AffectMinions) &&
+                SetVarFloat(out CurrentLowestHealthRatio, 0.3f) &&
+                SetVarBool(out this.ValueChanged, false) &&
+                IterateOverAllDecorator(out unit, this.TargetCollection, async () => (
+                    GetUnitCurrentHealth(out CurrentHealth, unit) &&
+                    GetUnitMaxHealth(out MaxHealth, unit) &&
+                    DivideFloat(out HP_Ratio, CurrentHealth, MaxHealth) &&
+                    LessFloat(HP_Ratio, CurrentLowestHealthRatio) &&
+                    SetVarBool(out this.ValueChanged, true) &&
+                    SetVarFloat(out CurrentLowestHealthRatio, HP_Ratio) &&
+                    SetVarAttackableUnit(out this.CurrentClosestTarget, unit)
+                )) &&
+                EqualBool(this.ValueChanged, true) &&
                 SetUnitAIAssistTarget(this.Self) &&
                 SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                (this.AssistPosition = this.SelfPosition, true) &&
-                (Target = this.CurrentClosestTarget, true)
+                SetVarVector(out this.AssistPosition, this.SelfPosition) &&
+                SetVarAttackableUnit(out Target, this.CurrentClosestTarget)
             ) &&
             GarenAutoAttackTarget() &&
             await DebugAction(0, SUCCESS, "+++++++ Last Hit ++++++++")
@@ -1984,15 +2547,17 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenMicroRetreat()
     {
+        Vector3 SafePosition;
+        float Distance;
         return
         (
             (
                 TestUnitAISafePositionValid() &&
-                GetUnitAISafePosition(out var SafePosition) &&
+                GetUnitAISafePosition(out SafePosition) &&
                 (
                     (
-                        DistanceBetweenObjectAndPoint(out var Distance, this.Self, SafePosition) &&
-                        Distance < 50 &&
+                        DistanceBetweenObjectAndPoint(out Distance, this.Self, SafePosition) &&
+                        LessFloat(Distance, 50) &&
                         ComputeUnitAISafePosition(800, false, false) &&
                         await DebugAction(0, SUCCESS, "------- At location computed new position --------------")
                     ) ||
@@ -2008,16 +2573,19 @@ class UnnamedBehaviourTree
     
     bool GarenAutoAttackTarget()
     {
+        AttackableUnit Target;
+        float Distance;
+        float AttackRange;
         return
         (
-            GetUnitAIAttackTarget(out var Target) &&
+            GetUnitAIAttackTarget(out Target) &&
             TestUnitAIAttackTargetValid() &&
             (
                 (
-                    GetDistanceBetweenUnits(out var Distance, Target, this.Self) &&
-                    GetUnitAttackRange(out var AttackRange, this.Self) &&
-                    (AttackRange = AttackRange * 0.9, true) &&
-                    Distance <= AttackRange &&
+                    GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
+                    GetUnitAttackRange(out AttackRange, this.Self) &&
+                    MultiplyFloat(out AttackRange, AttackRange, 0.9f) &&
+                    LessEqualFloat(Distance, AttackRange) &&
                     ClearUnitAIAttackTarget() &&
                     SetUnitAIAttackTarget(Target) &&
                     IssueAttackOrder()
@@ -2029,57 +2597,64 @@ class UnnamedBehaviourTree
     
     bool GarenCanCastAbility0()
     {
+        float Cooldown;
         return
         (
-            GetSpellSlotCooldown(out var Cooldown, this.Self, SPELLBOOK_CHAMPION, 0) &&
-            Cooldown <= 0 &&
+            GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 0) &&
+            LessEqualFloat(Cooldown, 0) &&
             TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 0)
         );
     }
     
     bool GarenCanCastAbility1()
     {
+        float Cooldown;
         return
         (
-            GetSpellSlotCooldown(out var Cooldown, this.Self, SPELLBOOK_CHAMPION, 1) &&
-            Cooldown <= 0 &&
+            GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 1) &&
+            LessEqualFloat(Cooldown, 0) &&
             TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 1)
         );
     }
     
     bool GarenCanCastAbility2()
     {
+        float Cooldown;
         return
         (
-            GetSpellSlotCooldown(out var Cooldown, this.Self, SPELLBOOK_CHAMPION, 2) &&
-            Cooldown <= 0 &&
+            GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 2) &&
+            LessEqualFloat(Cooldown, 0) &&
             TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 2)
         );
     }
     
     bool GarenCanCastAbility3()
     {
+        float Cooldown;
         return
         (
-            GetSpellSlotCooldown(out var Cooldown, this.Self, SPELLBOOK_CHAMPION, 0) &&
-            Cooldown <= 0 &&
+            GetSpellSlotCooldown(out Cooldown, this.Self, SPELLBOOK_CHAMPION, 0) &&
+            LessEqualFloat(Cooldown, 0) &&
             TestCanCastSpell(this.Self, SPELLBOOK_CHAMPION, 3)
         );
     }
     
     async Task<bool> GarenCastAbility0()
     {
+        float Range;
+        AttackableUnit Target;
+        float Distance;
         return
         (
             await DebugAction(0, SUCCESS, "CastSubTree") &&
-            GetUnitSpellCastRange(out var Range, this.Self, SPELLBOOK_CHAMPION, 0) &&
-            GetUnitAIAttackTarget(out var Target) &&
+            GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 0) &&
+            GetUnitAIAttackTarget(out Target) &&
             (
                 (
                     await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
-                    GetDistanceBetweenUnits(out var Distance, Target, this.Self) &&
+                    GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                     await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    Distance <= Range &&
+                    LessEqualFloat(Distance, Range) &&
                     await DebugAction(0, SUCCESS, "Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 0) &&
                     await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
@@ -2095,17 +2670,20 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenCastAbility1()
     {
+        float Range;
+        AttackableUnit Target;
+        float Distance;
         return
         (
             await DebugAction(0, SUCCESS, "CastSubTree") &&
-            GetUnitSpellCastRange(out var Range, this.Self, SPELLBOOK_CHAMPION, 1) &&
-            GetUnitAIAttackTarget(out var Target) &&
+            GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 1) &&
+            GetUnitAIAttackTarget(out Target) &&
             (
                 (
                     await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
-                    GetDistanceBetweenUnits(out var Distance, Target, this.Self) &&
+                    GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                     await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    Distance <= Range &&
+                    LessEqualFloat(Distance, Range) &&
                     await DebugAction(0, SUCCESS, "Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 1) &&
                     await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
@@ -2121,24 +2699,28 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenCastAbility2()
     {
+        AttackableUnit Target;
+        AttackableUnit ;
+        float Range;
+        float Distance;
         return
         (
             await DebugAction(0, SUCCESS, "CastSubTree") &&
-            GetUnitAIAttackTarget(out var Target) &&
+            GetUnitAIAttackTarget(out Target) &&
             (
                 (
-                    TestUnitHasBuff(this.Self, Tree., "GarenBladestorm") &&
+                    TestUnitHasBuff(this.Self, , "GarenBladestorm") &&
                     IssueMoveToUnitOrder(Target)
                 ) ||
                 (
-                    GetUnitSpellCastRange(out var Range, this.Self, SPELLBOOK_CHAMPION, 2) &&
-                    (Range = 200, true) &&
+                    GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 2) &&
+                    SetVarFloat(out Range, 200) &&
                     (
                         (
                             await DebugAction(0, SUCCESS, "Pareparing to cast ability 2") &&
-                            GetDistanceBetweenUnits(out var Distance, Target, this.Self) &&
+                            GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                             await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                            Distance <= Range &&
+                            LessEqualFloat(Distance, Range) &&
                             await DebugAction(0, SUCCESS, "Range Check Succses") &&
                             CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 2) &&
                             await DebugAction(0, SUCCESS, "Ability 2 Success ----------------")
@@ -2156,17 +2738,20 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenCastAbility3()
     {
+        float Range;
+        AttackableUnit Target;
+        float Distance;
         return
         (
             await DebugAction(0, SUCCESS, "CastSubTree") &&
-            GetUnitSpellCastRange(out var Range, this.Self, SPELLBOOK_CHAMPION, 3) &&
-            GetUnitAIAttackTarget(out var Target) &&
+            GetUnitSpellCastRange(out Range, this.Self, SPELLBOOK_CHAMPION, 3) &&
+            GetUnitAIAttackTarget(out Target) &&
             (
                 (
                     await DebugAction(0, SUCCESS, "Pareparing to cast ability 1") &&
-                    GetDistanceBetweenUnits(out var Distance, Target, this.Self) &&
+                    GetDistanceBetweenUnits(out Distance, Target, this.Self) &&
                     await DebugAction(0, SUCCESS, "GoingToRangeCheck") &&
-                    Distance <= Range &&
+                    LessEqualFloat(Distance, Range) &&
                     await DebugAction(0, SUCCESS, "Range Check Succses") &&
                     CastUnitSpell(this.Self, SPELLBOOK_CHAMPION, 3) &&
                     await DebugAction(0, SUCCESS, "Ability 1 Success ----------------")
@@ -2182,6 +2767,7 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenPushLane()
     {
+        
         return
         (
             ClearUnitAIAttackTarget() &&
@@ -2192,61 +2778,81 @@ class UnnamedBehaviourTree
     
     async Task<bool> GarenMisc()
     {
+        TeamID SelfTeam;
+        TeamID UnitTeam;
+        AttackableUnit Assist;
+        float Distance;
+         AssistPosition;
+        int Count;
+        AttackableUnit Attacker;
         return
         (
             (
                 await DebugAction(0, FAILURE, "??? EnableOrDisablePreviousTarget ???") &&
                 TestUnitAIAttackTargetValid() &&
-                (this.LostAggro = false, true) &&
+                SetVarBool(out this.LostAggro, false) &&
                 GetUnitAIAttackTarget(out this.PreviousTarget) &&
-                GetUnitTeam(out var SelfTeam, this.Self) &&
-                GetUnitTeam(out var UnitTeam, this.PreviousTarget) &&
-                UnitTeam != SelfTeam &&
-                GetUnitAIAssistTarget(out var Assist) &&
+                GetUnitTeam(out SelfTeam, this.Self) &&
+                GetUnitTeam(out UnitTeam, this.PreviousTarget) &&
+                NotEqualUnitTeam(UnitTeam, SelfTeam) &&
+                GetUnitAIAssistTarget(out Assist) &&
                 (
                     (
-                        Assist == this.Self &&
-                        DistanceBetweenObjectAndPoint(out var Distance, this.Self, this.AssistPosition) &&
-                        ((
-                            Distance >= this.DeaggroDistance &&
+                        EqualUnit(Assist, this.Self) &&
+                        DistanceBetweenObjectAndPoint(out Distance, this.Self, this.AssistPosition) &&
+                        await MaskFailure(async () => (
+                            GreaterEqualFloat(Distance, this.DeaggroDistance) &&
                             ClearUnitAIAttackTarget() &&
-                            (this.LostAggro = true, true) &&
+                            SetVarBool(out this.LostAggro, true) &&
                             await DebugAction(0, SUCCESS, "+++ Lost Aggro +++")
-                        ), true) &&
-                        Distance < this.DeaggroDistance &&
+                        )) &&
+                        LessFloat(Distance, this.DeaggroDistance) &&
                         await DebugAction(0, SUCCESS, "+++ In Aggro Range, Use Previous")
                     ) ||
                     (
-                        this.Self != Assist &&
-                        GetUnitPosition(out var AssistPosition, Assist) &&
-                        DistanceBetweenObjectAndPoint(out var Distance, this.PreviousTarget, this.SelfPosition) &&
-                        ((
-                            Distance >= 1000 &&
+                        NotEqualUnit(this.Self, Assist) &&
+                        GetUnitPosition(out AssistPosition, Assist) &&
+                        DistanceBetweenObjectAndPoint(out Distance, this.PreviousTarget, this.SelfPosition) &&
+                        await MaskFailure(async () => (
+                            GreaterEqualFloat(Distance, 1000) &&
                             ClearUnitAIAttackTarget() &&
-                            (this.LostAggro = true, true) &&
+                            SetVarBool(out this.LostAggro, true) &&
                             await DebugAction(0, SUCCESS, "------- Losing aggro from assist ----------")
-                        ), true) &&
-                        Distance < 1000 &&
+                        )) &&
+                        LessFloat(Distance, 1000) &&
                         await DebugAction(0, SUCCESS, "============= Use Previous Target: Still close to assist -----------")
                     )
                 ) &&
-                (this.LostAggro = false, true) &&
+                SetVarBool(out this.LostAggro, false) &&
                 await DebugAction(0, SUCCESS, "++ Use Previous Target ++")
             ) &&
             (
                 await DebugAction(0, SUCCESS, "??? EnableDisableAcquire New Target ???") &&
-                (this.CurrentClosestDistance = 800, true) &&
-                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies,AffectHeroes,AffectMinions,AffectTurrets) &&
+                SetVarFloat(out this.CurrentClosestDistance, 800) &&
+                GetUnitsInTargetArea(out this.TargetCollection, this.Self, this.SelfPosition, 900, AffectEnemies|AffectHeroes|AffectMinions|AffectTurrets) &&
                 (
-                    GetCollectionCount(out var Count, this.TargetCollection) &&
-                    Count > 0 &&
-                    (this.ValueChanged = false, true) &&
-                    IterateOverAllDecorator(out var Attacker, this.TargetCollection)
+                    GetCollectionCount(out Count, this.TargetCollection) &&
+                    GreaterInt(Count, 0) &&
+                    SetVarBool(out this.ValueChanged, false) &&
+                    IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
+                        (
+                            (
+                                EqualBool(this.LostAggro, true) &&
+                                NotEqualUnit(Attacker, this.PreviousTarget)
+                            ) ||
+                            EqualBool(this.LostAggro, false)
+                        ) &&
+                        DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
+                        LessFloat(Distance, this.CurrentClosestDistance) &&
+                        SetVarFloat(out this.CurrentClosestDistance, Distance) &&
+                        SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&
+                        SetVarBool(out this.ValueChanged, true)
+                    ))
                 ) &&
-                this.ValueChanged == true &&
+                EqualBool(this.ValueChanged, true) &&
                 SetUnitAIAssistTarget(this.Self) &&
                 SetUnitAIAttackTarget(this.CurrentClosestTarget) &&
-                (this.AssistPosition = this.SelfPosition, true) &&
+                SetVarVector(out this.AssistPosition, this.SelfPosition) &&
                 await DebugAction(0, SUCCESS, "+++ AcquiredNewTarget +++")
             )
         );
@@ -2254,13 +2860,16 @@ class UnnamedBehaviourTree
     
     bool GarenHeal()
     {
+        float Health;
+        float MaxHealth;
+        float HP_Ratio;
         return
         (
-            GetUnitCurrentHealth(out var Health, this.Self) &&
-            GetUnitMaxHealth(out var MaxHealth, this.Self) &&
-            (HP_Ratio = Health / MaxHealth, true) &&
+            GetUnitCurrentHealth(out Health, this.Self) &&
+            GetUnitMaxHealth(out MaxHealth, this.Self) &&
+            DivideFloat(out HP_Ratio, Health, MaxHealth) &&
             (
-                HP_Ratio < 0.5 &&
+                LessFloat(HP_Ratio, 0.5f) &&
                 TestUnitAICanUseItem(2003) &&
                 IssueUseItemOrder(2003)
             )
@@ -2269,11 +2878,13 @@ class UnnamedBehaviourTree
     
     bool ReduceDamageTaken()
     {
+        float MaxHealth;
+        float Damage_Ratio;
         return
         (
-            GetUnitMaxHealth(out var MaxHealth, this.Self) &&
-            (Damage_Ratio = this.AccumulatedDamage / MaxHealth, true) &&
-            Damage_Ratio >= 0.1 &&
+            GetUnitMaxHealth(out MaxHealth, this.Self) &&
+            DivideFloat(out Damage_Ratio, this.AccumulatedDamage, MaxHealth) &&
+            GreaterEqualFloat(Damage_Ratio, 0.1f) &&
             (
                 (
                     GarenCanCastAbility1() &&
@@ -2291,10 +2902,19 @@ class UnnamedBehaviourTree
     
     bool GarenFindClosestVisibleTarget()
     {
+        AttackableUnit Attacker;
+        float Distance;
         return
         (
-            (this.ValueChanged = false, true) &&
-            IterateOverAllDecorator(out var Attacker, this.TargetCollection)
+            SetVarBool(out this.ValueChanged, false) &&
+            IterateOverAllDecorator(out Attacker, this.TargetCollection, async () => (
+                DistanceBetweenObjectAndPoint(out Distance, Attacker, this.SelfPosition) &&
+                LessFloat(Distance, this.CurrentClosestDistance) &&
+                TestUnitIsVisible(this.Self, Attacker) &&
+                SetVarFloat(out this.CurrentClosestDistance, Distance) &&
+                SetVarAttackableUnit(out this.CurrentClosestTarget, Attacker) &&
+                SetVarBool(out this.ValueChanged, true)
+            ))
         );
     }
 }

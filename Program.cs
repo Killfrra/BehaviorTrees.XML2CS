@@ -28,6 +28,7 @@ class BlockDefinitions
         return
         "using static SBL;\n" +
         "using System.Numerics;\n" +
+        "using static AllEnumMembers;\n" +
         "public static class SBL\n" +
         "{\n" +
             (string.Join("\n", Definitions.FindAll(
@@ -91,10 +92,18 @@ class BlockDefinition
         {
             ret += $"/// <param name=\"{param.Name}\">{param.Description}</param>\n";
         }
+        var paramStrings = OutParameters.Concat(filteredParameters).Select(
+            param => param.ToCSharp()
+        );
+        if(CanHaveChildren && NumberOfChildren > 0)
+        {
+            paramStrings = paramStrings.Concat(
+                Enumerable.Range(0, NumberOfChildren)
+                    .Select(i => $"Func<Task<bool>>? Child{i} = null")
+            );
+        }
         ret += $"public extern static {(IsAsync ? "Task<bool>" : "bool")} {Name}(" +
-            string.Join(", ", OutParameters.Concat(filteredParameters).Select(
-                param => param.ToCSharp()
-            )) +
+            string.Join(", ", paramStrings) +
         ");";
         return ret;
     }
@@ -120,60 +129,63 @@ class BlockDefinitionParam
 
     public string ToCSharp()
     {
-        var _type = Type;
-        var _name = Name;
-        var _def = Default;
-        if(_type == "String")
+        return VarDeclFromXMLtoCS(Out, Type, Name, Default);
+    }
+
+    //TODO: Move
+    public static string VarDeclFromXMLtoCS(bool _out, string type, string name, string? def)
+    {
+        if(type == "String")
         {
-            _type = "string";
-            _def = '"' + _def + '"';
+            type = "string";
+            def = '"' + def + '"';
         }
-        else if(_type == "Int")
+        else if(type == "Int")
         {
-            _type = "int";
+            type = "int";
         }
-        else if(_type == "UnsignedInt")
+        else if(type == "UnsignedInt")
         {
-            _type = "uint";
+            type = "uint";
         }
-        else if(_type == "Float")
+        else if(type == "Float")
         {
-            _type = "float";
+            type = "float";
         }
-        else if(_type == "Bool")
+        else if(type == "Bool")
         {
-            _type = "bool";
-            _def = _def?.ToLower();
+            type = "bool";
+            def = def?.ToLower();
         }
-        else if(_type == "Vector")
+        else if(type == "Vector")
         {
-            _type = "Vector3";
-            if(_def != null)
+            type = "Vector3";
+            if(def != null)
             {
                 var opts = StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries;
-                var t = _def.Split(';', opts);
-                _def = (t[0] == "0" && t[1] == "0" && t[2] == "0") ?
+                var t = def.Split(';', opts);
+                def = (t[0] == "0" && t[1] == "0" && t[2] == "0") ?
                     "Vector3.Zero" :
                     $"new Vector3({t[0]}f, {t[1]}f, {t[2]}f)";
             }
         }
-        else if(_type == "AttackableUnitCollection")
+        else if(type == "AttackableUnitCollection")
         {
-            _type = "IEnumerable<AttackableUnit>";
+            type = "IEnumerable<AttackableUnit>";
         }
-        else if(_type == "Obj_AI_HeroCollection")
+        else if(type == "Obj_AI_HeroCollection")
         {
-            _type = "IEnumerable<Champion>";
+            type = "IEnumerable<Champion>";
         }
-        else if(_type == "Obj_AI_TurretCollection")
+        else if(type == "Obj_AI_TurretCollection")
         {
-            _type = "IEnumerable<Turret>";
+            type = "IEnumerable<Turret>";
         }
-        else if(_type == "TeamEnum")
+        else if(type == "TeamEnum")
         {
-            _type = "TeamID";
+            type = "TeamID";
         }
-        return Out ? $"out {_type} {_name}" : ($"{_type} {_name}" + ((_def != "") ? $" = {_def}" : ""));
+        return _out ? $"out {type} {name}" : ($"{type} {name}" + ((def != null && def != "") ? $" = {def}" : ""));
     }
 }
 
@@ -197,7 +209,19 @@ class BehaviorTrees
 
     public string ToCSharp()
     {
-        return $"class UnnamedBehaviourTree\n" + "{\n" + string.Join("\n\n", Trees.Select(tree => tree.ToCSharp())).Indent() + "\n}";
+        Vars vars = new();
+        foreach(var tree in Trees)
+        {
+            vars.MergeWith(tree.Root.GetVariables().Global);
+        }
+        return $"class UnnamedBehaviourTree\n" + "{\n" +
+            (
+                vars.ToCSharp() + "\n\n" +
+                string.Join("\n\n", Trees.Select(
+                    tree => tree.ToCSharp()
+                ))
+            ).Indent() +
+        "\n}";
     }
 }
 
@@ -218,8 +242,64 @@ class BehaviorTree
     public string? ToCSharp()
     {
         return $"{(IsAsync ? "async Task<bool>" : "bool")} {Name}()\n" + "{\n" +
-            ("return\n" + Root.ToCSharp() + ";").Indent() +
+            (
+                Root.GetVariables().Tree.ToCSharp() + "\n" +
+                "return\n" + Root.ToCSharp() + ";"
+            ).Indent() +
         "\n}";
+    }
+}
+
+class Vars
+{
+    public Dictionary<string, string?> Dict = new();
+    public void MergeWith(Vars vars)
+    {
+        foreach(var kv in vars.Dict)
+        {
+            Add(kv.Key, kv.Value);
+        }
+    }
+    public void Add(string name, string? type)
+    {
+        string? existing;
+        if(Dict.TryGetValue(name, out existing))
+        {
+            if(existing == null)
+            {
+                Dict[name] = type;
+            }
+            else if(existing != type && type != null)
+            {
+                Console.WriteLine($"Incompatible types {existing} and {type} for {name}");
+            }
+        }
+        else
+        {
+            Dict[name] = type;
+        }
+    }
+    public string ToCSharp()
+    {
+        return string.Join("\n", Dict.Select(kv => BlockDefinitionParam.VarDeclFromXMLtoCS(false, kv.Value, kv.Key, null) + ";"));
+    }
+}
+
+class GlobalAndTreeVars
+{
+    public Vars Global = new();
+    public Vars Tree = new();
+    public void MergeWith(GlobalAndTreeVars vars)
+    {
+        Global.MergeWith(vars.Global);
+        Tree.MergeWith(vars.Tree);
+    }
+    public void Add(string Scope, string name, string? type)
+    {
+        var scopeVars = Global;
+        if(Scope == "Tree")
+            scopeVars = Tree;
+        scopeVars.Add(name, type);
     }
 }
 
@@ -233,7 +313,7 @@ class BehaviorTreeNode
     bool? isAsync = null;
     public static string[] AsyncBlockNames =
     {
-        "DebugAction", "DelayNSecondsBlocking", "PanCameraFromCurrentPositionToPoint", "PlayVOAudioEvent"
+        "MaskFailure", "DebugAction", "DelayNSecondsBlocking", "PanCameraFromCurrentPositionToPoint", "PlayVOAudioEvent"
     };
     public bool IsAsync =>
         isAsync ?? (bool)(isAsync = 
@@ -288,6 +368,7 @@ class BehaviorTreeNode
         public string Sequence = "Sequence";
         public string Selector = "Selector";
         public string SubTree = "SubTree";
+        /*
         public string MaskFailure = "MaskFailure";
         public string[] Setters =
         {
@@ -315,12 +396,15 @@ class BehaviorTreeNode
             "EqualString", "NotEqualString",
 
         };
+        */
         public List<string> All = new();
         public ReplacableClass()
         {
-            All.AddRange(new string[]{ Sequence, Selector, SubTree, MaskFailure });
+            All.AddRange(new string[]{ Sequence, Selector, SubTree, /*MaskFailure*/ });
+            /*
             All.AddRange(Setters);
             All.AddRange(Comparers);
+            */
         }
     }
     public string ToCSharp()
@@ -340,16 +424,19 @@ class BehaviorTreeNode
             ret += treeName + "()";
             return ret;
         }
+        /*
         else if(Type == Replacable.MaskFailure)
         {
             Debug.Assert(Children.Count == 1);
             return "(" + Children[0].ToCSharp() + ", true)";
         }
+        */
         else
         {
             bool invert = Parameters.Find(
                 param => param.Name == "ReturnSuccessIf" && param.Value == "false"
             ) != null;
+            /*
             if(Replacable.Setters.Contains(Type))
             {
                 var isStr = Type.Contains("String");
@@ -357,7 +444,7 @@ class BehaviorTreeNode
                 var ret = input;
                 
                 var param = OutParameters[0];
-                return $"({param.Scope}.{param.Value} = {ret}, true)";
+                return $"({param.ScopeDotValue()} = {ret}, true)";
             }
             else if(Replacable.Comparers.Contains(Type))
             {
@@ -385,12 +472,13 @@ class BehaviorTreeNode
                 if(OutParameters.Count >= 1)
                 {
                     var param = OutParameters[0];
-                    return $"({param.Scope}.{param.Value} = {ret}, true)";
+                    return $"({param.ScopeDotValue()} = {ret}, true)";
                 }
                 else
                     return ret;
             }
             else
+            */
             {
                 BlockDefinitions.TryGetTarget(out var blockDefinitions);
                 Debug.Assert(blockDefinitions != null);
@@ -422,11 +510,39 @@ class BehaviorTreeNode
                 if(invert) ret += "!";
                 if(IsAsync) ret += "await ";
                 ret += Type + "(" +
-                    string.Join(", ", allParametersSorted.Select((tuple) => tuple.Item1.ToCSharp(includeParameterNames, tuple.Item2))) +
-                ")";
+                    string.Join(", ", allParametersSorted.Select(
+                        (tuple) => tuple.Item1.ToCSharp(includeParameterNames, tuple.Item2)
+                    ).Concat(Children.Select(
+                        child => $"async () => {child.ToCSharp()}"
+                    )));
+                ret += ")";
                 return ret;
             }
         }
+    }
+
+    GlobalAndTreeVars? vars = null;
+    public GlobalAndTreeVars GetVariables()
+    {
+        if(vars != null)
+            return vars;
+        vars = new();
+        foreach(var param in Parameters)
+        {
+            if(param.VariableType == "Reference")
+            {
+                vars.Add(param.Scope, param.Value, param.ReferenceType);
+            }
+        }
+        foreach(var param in OutParameters)
+        {
+            vars.Add(param.Scope, param.Value, null);
+        }
+        foreach(var child in Children)
+        {
+            vars.MergeWith(child.GetVariables());
+        }
+        return vars;
     }
 }
 
@@ -449,16 +565,25 @@ class BehaviorTreeNodeParameter
         ReferenceType = node.Attribute("ReferenceType")?.Value;
     }
 
+    public string ScopeDotValue()
+    {
+        var _scope = Scope;
+        if(_scope == "Global")
+            return $"this.{Value}";
+        else //if(_scope == "Tree")
+            return Value;
+    }
+
     public string ToCSharp(bool includeName, bool isString)
     {
         string ret;
         if(Out)
         {
-            ret = $"out {Scope}.{Value}";
+            ret = $"out {ScopeDotValue()}";
         }
         else if(VariableType == "Reference")
         {
-            ret = $"{Scope}.{Value}";
+            ret = $"{ScopeDotValue()}";
         }
         else
         {
